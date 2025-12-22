@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARA≠DOX // 觀測終端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <!-- 新增條碼字型 -->
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==================== 核心樣式 ==================== */
+        :root {
+            --bg-color: #020204;
+            --sidebar-bg: #0a0a0f;
+            --text-main: #e0e0e0;
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-green: #39ff14;
+            --cyan-color: #00f3ff; /* 新增變數以符合新樣式 */
+            --font-stack: 'Fira Code', monospace;
+            --neon-red: #ff3333;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            width: 100vw; height: 100vh;
+            overflow: hidden;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ==================== 1. 動態特效 (FX) ==================== */
+
+        /* A. CRT 掃描線 + 移動刷新條 */
+        .crt-scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none; z-index: 9998; opacity: 0.6;
+        }
+        
+        /* 新增：移動的掃描條 (模擬螢幕刷新) */
+        .crt-scanlines::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            z-index: 2;
+            pointer-events: none;
+            /* 掃描條動畫 */
+            animation: scanline 8s linear infinite;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px; 
+        }
+        
+        /* 真正的發光掃描棒 */
+        .scan-bar {
+            width: 100%;
+            height: 5px;
+            background: #fff;
+            opacity: 0.1;
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            animation: scan-move 6s linear infinite;
+        }
+
+        @keyframes scan-move {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+        
+        @keyframes scanline {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 0% 100%; }
+        }
+
+        /* B. 文字 RGB 色散干擾 (Glitch Text) */
+        .glitch-text {
+            position: relative;
+            color: #fff;
+        }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--sidebar-bg);
+        }
+        .glitch-text::before {
+            left: 2px; text-shadow: -1px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch-text::after {
+            left: -2px; text-shadow: -1px 0 #00fff9; clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(13px, 9999px, 81px, 0); }
+            5% { clip: rect(78px, 9999px, 94px, 0); }
+            10% { clip: rect(8px, 9999px, 20px, 0); }
+            15% { clip: rect(0px, 0px, 0px, 0); } /* 暫停 */
+            100% { clip: rect(0px, 0px, 0px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 19px, 0); }
+            5% { clip: rect(2px, 9999px, 83px, 0); }
+            10% { clip: rect(54px, 9999px, 42px, 0); }
+            15% { clip: rect(0px, 0px, 0px, 0); } /* 暫停 */
+            100% { clip: rect(0px, 0px, 0px, 0); }
+        }
+
+        /* C. 游標閃爍 */
+        .cursor-blink {
+            display: inline-block;
+            width: 8px; height: 15px;
+            background: var(--neon-green);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* ==================== 佈局與其他樣式 ==================== */
+        #intro-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease;
+        }
+        .intro-log p {
+            color: var(--neon-green); margin: 5px 0; font-size: 1.1rem;
+            text-shadow: 0 0 5px var(--neon-green);
+        }
+        .connect-btn {
+            margin-top: 30px; padding: 15px 40px;
+            background: transparent; border: 2px solid var(--neon-blue);
+            color: var(--neon-blue); font-size: 1.2rem; font-family: var(--font-stack);
+            cursor: pointer; box-shadow: 0 0 15px var(--neon-blue); transition: 0.3s;
+            display: none;
+        }
+        .connect-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 30px var(--neon-blue); }
+
+        #main-interface {
+            display: flex; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease;
+        }
+        #main-interface.visible { opacity: 1; }
+
+        .sidebar {
+            width: 280px; height: 100%; background-color: var(--sidebar-bg);
+            border-right: 1px solid #333; padding: 30px 20px;
+            display: flex; flex-direction: column; flex-shrink: 0; z-index: 100;
+        }
+        .brand-title {
+            font-size: 2rem; font-weight: bold; color: #fff; margin-bottom: 5px;
+            /* 應用 Glitch 效果 */
+            text-shadow: 2px 2px 0 var(--neon-purple);
+        }
+        .brand-sub { font-size: 0.8rem; color: #666; margin-bottom: 40px; }
+        .nav-menu { display: flex; flex-direction: column; gap: 10px; }
+        .nav-btn {
+            background: transparent; border: none; color: #888; padding: 15px;
+            text-align: left; font-size: 1rem; font-family: var(--font-stack); cursor: pointer;
+            border-left: 3px solid transparent; transition: 0.3s;
+        }
+        .nav-btn:hover { color: var(--neon-blue); background: rgba(0, 243, 255, 0.05); }
+        .nav-btn.active {
+            color: var(--neon-blue); border-left-color: var(--neon-blue);
+            background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent);
+        }
+        .nav-btn.special { color: var(--neon-green); display: none; }
+        .nav-btn.special.unlocked { display: block; animation: pulse 2s infinite; }
+        .status-footer { margin-top: auto; font-size: 0.75rem; color: #555; line-height: 1.5; }
+
+        .content-area {
+            flex-grow: 1; height: 100%; overflow-y: auto; padding: 50px; position: relative;
+            background: radial-gradient(circle at center, #050505 0%, #000 100%);
+        }
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
+        h2 { border-bottom: 1px dashed var(--neon-blue); padding-bottom: 15px; color: var(--neon-blue); margin-top: 0; }
+
+        /* --- 終端機視窗升級 (Terminal Upgrade) --- */
+        .terminal-window {
+            background: rgba(10, 15, 20, 0.85); /* 半透明深色底 */
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.05), inset 0 0 50px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px); /* 毛玻璃效果 */
+            padding: 40px 20px 20px 20px; /* Top padding for header */
+            height: 450px;
+            overflow-y: auto;
+            font-family: 'Fira Code', monospace;
+            position: relative;
+            margin-bottom: 20px;
+            
+            /* 網格背景 */
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            
+            /* 角落裝飾 */
+            clip-path: polygon(
+                0 0, 100% 0, 
+                100% calc(100% - 20px), calc(100% - 20px) 100%, 
+                0 100%
+            );
+        }
+
+        /* 視窗頂部狀態列 */
+        .terminal-window::before {
+            content: "TERMINAL_V2.0 // CONNECTED // PORT:8080";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+            background: rgba(0, 20, 30, 0.9);
+            color: var(--neon-blue);
+            font-size: 0.7rem;
+            padding: 5px 10px;
+            z-index: 2;
+            letter-spacing: 1px;
+        }
+
+        /* 捲軸美化 */
+        .terminal-window::-webkit-scrollbar { width: 6px; }
+        .terminal-window::-webkit-scrollbar-track { background: #020204; }
+        .terminal-window::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 3px; }
+
+        /* 訊息樣式優化 */
+        .term-line {
+            margin-bottom: 8px;
+            padding-left: 10px;
+            border-left: 2px solid transparent; /* 預留左側線條空間 */
+            text-shadow: 0 0 2px currentColor;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .term-line.user-cmd {
+            border-left-color: var(--neon-green);
+            color: #fff;
+            background: linear-gradient(90deg, rgba(57, 255, 20, 0.1), transparent);
+        }
+
+        .term-line.system { color: #888; font-style: italic; }
+        .term-line.error { color: #ff3333; animation: shake 0.3s; }
+        .term-line.success { color: var(--neon-blue); }
+        .term-line.default { color: #ccc; }
+
+        /* 輸入框區域升級 */
+        .input-wrapper {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-green);
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.1);
+        }
+
+        .input-wrapper::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--neon-green);
+            animation: blink 1s infinite;
+        }
+
+        .prompt {
+            color: var(--neon-green);
+            font-weight: bold;
+            margin-right: 10px;
+            text-shadow: 0 0 5px var(--neon-green);
+            white-space: nowrap;
+        }
+
+        #cmd-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            width: 100%;
+            outline: none;
+            text-shadow: 0 0 2px #fff;
+        }
+
+        .star-box {
+            position: relative; width: 100%; height: 400px; border: 1px solid #333;
+            background: radial-gradient(circle at center, #0a0a10 0%, #000 100%);
+            overflow: hidden;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .star-node {
+            position: absolute; transform: translate(-50%, -50%); width: 12px; height: 12px;
+            border-radius: 50%; transition: all 0.3s ease; z-index: 10;
+        }
+        .star-node.active {
+            background-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue);
+            cursor: pointer; border: 1px solid #fff; animation: pulse-node 2s infinite;
+        }
+        .star-node.active:hover { transform: translate(-50%, -50%) scale(1.5); background-color: #fff; box-shadow: 0 0 20px var(--neon-blue); }
+        .star-node.locked { background-color: #333; border: 1px solid #555; cursor: not-allowed; }
+        
+        .node-tooltip {
+            position: absolute; bottom: 150%; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--neon-blue);
+            padding: 10px; width: 180px; pointer-events: none; opacity: 0;
+            transition: opacity 0.3s; visibility: hidden; z-index: 20; text-align: center;
+        }
+        .node-tooltip h4 { margin: 0 0 5px 0; color: var(--neon-blue); font-size: 0.9rem; }
+        .node-tooltip p { margin: 0; color: #aaa; font-size: 0.8rem; }
+        .star-node.locked .node-tooltip { border-color: #555; }
+        .star-node.locked .node-tooltip h4 { color: #777; }
+        .star-node:hover .node-tooltip { opacity: 1; visibility: visible; }
+
+        /* ==================== ID Card Style ==================== */
+        .id-card {
+            border: 3px solid var(--cyan-color);
+            background: rgba(0, 20, 30, 0.8);
+            padding: 25px;
+            max-width: 550px;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            font-family: 'Fira Code', monospace;
+            color: #fff;
+            margin-top: 20px;
+        }
+        .id-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(transparent 50%, rgba(0, 243, 255, 0.05) 50%);
+            background-size: 100% 4px; pointer-events: none; z-index: 1;
+        }
+        .id-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px dashed var(--cyan-color); padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .id-title { font-size: 1.4rem; font-weight: bold; color: #fff; text-shadow: 0 0 5px var(--cyan-color); }
+        .id-title span { color: var(--cyan-color); }
+        .id-main-info { display: flex; gap: 30px; margin-bottom: 25px; }
+        .id-logo-box {
+            width: 120px; height: 120px; border: 3px solid var(--neon-purple);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2rem; color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);
+        }
+        .id-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .id-label { font-size: 0.9rem; color: var(--cyan-color); margin-bottom: 5px; letter-spacing: 1px; }
+        .id-val { font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; z-index: 2; position: relative; }
+        .id-val.highlight { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); }
+        .id-mission { margin-bottom: 25px; }
+        .mission-text { font-size: 0.95rem; line-height: 1.4; color: #ddd; }
+        .mission-text::before { content: '> '; color: var(--neon-green); }
+        .sync-rate-container { display: flex; align-items: center; gap: 15px; }
+        .sync-bar { flex: 1; height: 12px; background: rgba(0, 243, 255, 0.1); border: 1px solid var(--cyan-color); position: relative; }
+        .sync-progress { width: 42%; height: 100%; background: var(--cyan-color); box-shadow: 0 0 10px var(--cyan-color); }
+        .id-footer {
+            border-top: 2px dashed var(--cyan-color); padding-top: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.8rem; color: var(--cyan-color); opacity: 0.8;
+        }
+        .barcode { font-family: 'Libre Barcode 39 Text', cursive; font-size: 1.8rem; transform: scaleY(0.8); }
+
+        /* ==================== 監控儀表板 (Monitor Dashboard) ==================== */
+        .monitor-dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .monitor-dashboard { grid-template-columns: 1fr; }
+        }
+
+        .monitor-card {
+            border: 1px solid #333;
+            background: rgba(0, 10, 20, 0.6);
+            padding: 20px;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+        /* Corner decorations */
+        .monitor-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px;
+            border-top: 2px solid var(--neon-blue); border-left: 2px solid var(--neon-blue);
+        }
+        .monitor-card::after {
+            content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px;
+            border-bottom: 2px solid var(--neon-blue); border-right: 2px solid var(--neon-blue);
+        }
+        .monitor-card.large-card {
+            grid-column: span 1;
+        }
+        .monitor-card.wide-card {
+            grid-column: span 2;
+        }
+        @media (max-width: 768px) {
+            .monitor-card.wide-card { grid-column: span 1; }
+        }
+
+        .card-label {
+            font-size: 0.8rem; color: var(--neon-blue); margin-bottom: 10px;
+            border-bottom: 1px dashed #444; padding-bottom: 5px;
+            font-weight: bold; letter-spacing: 1px;
+        }
+        .card-subtext { font-size: 0.7rem; color: #666; margin-top: 10px; font-family: var(--font-stack); }
+
+        /* Countdown */
+        .countdown-display {
+            font-size: 2rem; font-weight: bold; color: #fff;
+            text-shadow: 0 0 10px var(--neon-blue);
+            font-family: var(--font-stack);
+            margin: 10px 0;
+        }
+        @media (min-width: 768px) {
+            .countdown-display { font-size: 2.5rem; }
+        }
+
+        /* Active Observers */
+        .live-counter { font-size: 2rem; color: var(--neon-green); display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
+        .live-dot { font-size: 1rem; color: var(--neon-red); animation: blink 1s infinite; }
+
+        /* Waveform */
+        .waveform-container {
+            display: flex; align-items: flex-end; gap: 4px; height: 60px;
+            border-bottom: 1px solid #333; padding-bottom: 5px;
+            margin-top: 10px;
+        }
+        .wave-bar {
+            flex: 1; background: var(--neon-purple);
+            opacity: 0.7;
+            animation: wave-bounce 1s infinite ease-in-out;
+        }
+        @keyframes wave-bounce {
+            0%, 100% { height: 10%; }
+            50% { height: 90%; }
+        }
+
+        /* Diagnostics */
+        .diag-grid { display: flex; flex-direction: column; gap: 10px; }
+        .diag-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: #ccc; }
+        .diag-item span { width: 80px; }
+        .progress-bar { flex: 1; height: 6px; background: #222; margin-left: 10px; position: relative; }
+        .fill { height: 100%; background: var(--neon-blue); box-shadow: 0 0 5px var(--neon-blue); position: relative; }
+        @keyframes pulse-width { 0% { width: 40%; } 50% { width: 55%; } 100% { width: 40%; } }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes pulse-node { 0% { box-shadow: 0 0 5px var(--neon-blue); } 50% { box-shadow: 0 0 15px var(--neon-blue); } 100% { box-shadow: 0 0 5px var(--neon-blue); } }
+        @keyframes shake { 0% { transform: translate(-50%, -50%) translateX(0); } 25% { transform: translate(-50%, -50%) translateX(-5px); } 50% { transform: translate(-50%, -50%) translateX(5px); } 75% { transform: translate(-50%, -50%) translateX(-5px); } 100% { transform: translate(-50%, -50%) translateX(0); } }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+</head>
+<body>
+
+    <div class="crt-scanlines"></div>
+    <div class="scan-bar"></div> 
+    
+    <div id="intro-screen">
+        <div class="intro-log" id="intro-text-container"></div>
+        <button id="connect-btn" class="connect-btn">[ 建立觀測鏈路 / CONNECT ]</button>
+    </div>
+
+    <div id="main-interface" class="hidden">
+        
+        <aside class="sidebar">
+            <div>
+                <div class="brand-title glitch-text" data-text="PARA≠DOX">PARA≠DOX</div>
+                <div class="brand-sub">OBSERVATION TERMINAL v2.0</div>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-btn active" onclick="switchTab('home', this)">>_ 終端首頁</button>
+                <button class="nav-btn" onclick="switchTab('stars', this)">外部星圖</button>
+                <button class="nav-btn" onclick="switchTab('monitor', this)">同步監控</button>
+                <button class="nav-btn" onclick="switchTab('logs', this)">系統日誌</button>
+                <button id="nav-id-btn" class="nav-btn special" onclick="switchTab('idcard', this)">[ 研究員 ID ]</button>
+            </nav>
+
+            <div class="status-footer">
+                <p>STATUS: CONNECTED</p>
+                <p>PING: 14ms</p>
+                <p>&copy; 2026 PARADOX SYSTEMS</p>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            
+            <section id="section-home" class="section active">
+                <h2 class="glitch-text" data-text=">_ CORE_SYSTEM_ACCESS">>_ CORE_SYSTEM_ACCESS</h2>
+                
+                <div class="terminal-window" id="terminal-out">
+                    </div>
+
+                <div class="input-wrapper">
+                    <span class="prompt">USER@PARADOX:~#</span>
+                    <input type="text" id="cmd-input" placeholder="Awaiting command..." autocomplete="off">
+                </div>
+            </section>
+
+            <section id="section-stars" class="section">
+                <h2>* STAR MAP VISUALIZATION</h2>
+                <div class="star-box" id="star-box">
+                    </div>
+            </section>
+
+            <section id="section-monitor" class="section">
+                <h2>> SYNCHRONIZATION_MONITOR // 全域觀測監控</h2>
+                
+                <div class="monitor-dashboard">
+                    
+                    <div class="monitor-card large-card">
+                        <div class="card-label">TIMELINE_COLLAPSE_ETA // 觀測倒數</div>
+                        <div class="countdown-display" id="countdown-timer">
+                            00:00:00:000
+                        </div>
+                        <div class="card-subtext">> TARGET: 2026.01.01</div>
+                    </div>
+
+                    <div class="monitor-card">
+                        <div class="card-label">ACTIVE_OBSERVERS // 觀測人數</div>
+                        <div class="live-counter">
+                            <span id="observer-count">8,964</span>
+                            <span class="live-dot">●</span>
+                        </div>
+                        <div class="card-subtext" style="color:var(--neon-green)">> CONNECTION STABLE</div>
+                    </div>
+
+                    <div class="monitor-card">
+                        <div class="card-label">SYNC_WAVEFORM // 同步波動</div>
+                        <div class="waveform-container" id="waveform-box">
+                            </div>
+                        <div class="card-subtext">CURRENT RATE: <span id="sync-rate-val">42%</span></div>
+                    </div>
+
+                    <div class="monitor-card wide-card">
+                        <div class="card-label">SYSTEM_DIAGNOSTICS // 系統狀態</div>
+                        <div class="diag-grid">
+                            <div class="diag-item">
+                                <span>CPU_LOAD</span>
+                                <div class="progress-bar"><div class="fill" style="width: 45%; animation: pulse-width 2s infinite"></div></div>
+                            </div>
+                            <div class="diag-item">
+                                <span>MEMORY</span>
+                                <div class="progress-bar"><div class="fill" style="width: 78%;"></div></div>
+                            </div>
+                            <div class="diag-item">
+                                <span>ENTROPY</span>
+                                <div class="progress-bar"><div class="fill" style="width: 12%; background: var(--neon-red);"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="section-logs" class="section">
+                <h2># SYSTEM DATA LOGS</h2>
+                <div id="logs-container">
+                    <div class="term-line" style="color: #777;">> [2026.11.23] No new anomalies detected.</div>
+                </div>
+            </section>
+
+            <section id="section-idcard" class="section">
+                <h2>@ 研究員身份憑證</h2>
+                <div class="id-card">
+                    <div class="id-header">
+                        <div class="id-title">PARA≠DOX // <span>觀測者識別證</span></div>
+                    </div>
+                    <div class="id-main-info">
+                        <div class="id-logo-box">P≠D</div>
+                        <div class="id-details">
+                            <div>
+                                <div class="id-label">識別編號</div>
+                                <div class="id-val highlight" id="display-id">讀取中...</div>
+                            </div>
+                            <div>
+                                <div class="id-label">階級 // 職別</div>
+                                <div class="id-val">見習觀測員</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="id-mission">
+                        <div class="id-label">任務目標</div>
+                        <div class="mission-text">觀測時空裂縫，收集散落的異常訊號代碼。</div>
+                    </div>
+                    <div class="sync-rate-container">
+                        <div class="id-label" style="margin-bottom:0">同步率:</div>
+                        <div class="sync-bar">
+                            <div class="sync-progress"></div>
+                        </div>
+                        <div class="id-val" style="margin-bottom:0; font-size:1rem;">42%</div>
+                    </div>
+                    <div class="id-footer">
+                        <div class="barcode" id="id-barcode">*NOT-ASSIGNED*</div>
+                        <div>適用於 ALPHA-001 時間線</div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const introScreen = document.getElementById('intro-screen');
+        const connectBtn = document.getElementById('connect-btn');
+        const mainInterface = document.getElementById('main-interface');
+        const terminalOut = document.getElementById('terminal-out');
+        const cmdInput = document.getElementById('cmd-input');
+        const navIdBtn = document.getElementById('nav-id-btn');
+        const displayId = document.getElementById('display-id');
+        const idBarcode = document.getElementById('id-barcode');
+
+        // 1. Intro 啟動邏輯 (純文字輸入，無閃爍游標)
+        const bootTexts = [
+            "> 啟動程序初始化 ...",
+            "> 正在掃描時間異常 ...",
+            "> 警告：偵測到不穩定的悖論。",
+            "> 來源：未知的未來時間線。",
+            "> 準備好連線了嗎？"
+        ];
+        
+        let introIdx = 0;
+        function playIntro() {
+            if (introIdx < bootTexts.length) {
+                const p = document.createElement('p');
+                p.textContent = bootTexts[introIdx];
+                document.getElementById('intro-text-container').appendChild(p);
+                introIdx++;
+                setTimeout(playIntro, 500);
+            } else {
+                connectBtn.style.display = 'block';
+            }
+        }
+        window.addEventListener('load', () => {
+            playIntro();
+            initCountdown();
+            initLiveCounter();
+            initWaveform();
+        });
+
+        connectBtn.addEventListener('click', () => {
+            introScreen.style.opacity = '0';
+            setTimeout(() => {
+                introScreen.classList.add('hidden');
+                mainInterface.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    mainInterface.classList.add('visible');
+                    // 進入主畫面後，播放終端機打字效果
+                    initTerminalMessages();
+                });
+            }, 800);
+        });
+
+        // 2. 切換分頁
+        window.switchTab = function(tabName, btn) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('section-' + tabName).classList.add('active');
+            btn.classList.add('active');
+        };
+
+        // 3. 終端機邏輯 (升級版：支援打字機效果)
+        
+        // 核心打字機函數
+        function typeWriterEffect(element, text, speed = 20, callback) {
+            let i = 0;
+            const cursor = document.createElement('span');
+            cursor.className = 'cursor-blink';
+            element.appendChild(cursor); // 加入游標
+
+            function type() {
+                if (i < text.length) {
+                    // 插入文字到游標之前
+                    cursor.before(text.charAt(i));
+                    i++;
+                    // 隨機速度增加真實感
+                    const randomSpeed = speed + (Math.random() * 20 - 10);
+                    setTimeout(type, randomSpeed);
+                } else {
+                    // 打字結束，移除游標 (或保留，看需求，這裡移除)
+                    cursor.remove();
+                    if (callback) callback();
+                }
+            }
+            type();
+        }
+
+        // 修改後的 printLog，支援樣式類別 (System, User, Error, Success)
+        // type: 'default', 'user-cmd', 'system', 'error', 'success'
+        function printLog(msg, type = 'default', animate = true) {
+            const div = document.createElement('div');
+            
+            // 如果傳入的是舊的 hex color code (相容性處理)，就強制轉為 default
+            if(type.startsWith('#') || type.startsWith('var')) {
+                div.style.color = type; // 舊的處理方式
+                div.className = 'term-line';
+            } else {
+                div.className = 'term-line ' + type;
+            }
+            
+            terminalOut.appendChild(div);
+
+            if (animate) {
+                typeWriterEffect(div, msg, 15, () => {
+                    terminalOut.scrollTop = terminalOut.scrollHeight;
+                });
+            } else {
+                div.textContent = msg;
+                terminalOut.scrollTop = terminalOut.scrollHeight;
+            }
+        }
+
+        function initTerminalMessages() {
+            // 模擬開機訊息序列
+            const msgs = [
+                { text: "> Para≠dox 終端 v2.0 初始化完成。", type: "default" },
+                { text: "> 連線安全。時間線穩定。", type: "default" },
+                { text: "> 系統：請驗證身份 (Email) 或輸入指令代碼。", type: "system" },
+                { text: "----------------------------------------", type: "system" }
+            ];
+
+            let delay = 0;
+            msgs.forEach((m, index) => {
+                setTimeout(() => {
+                    printLog(m.text, m.type, true);
+                }, delay);
+                delay += (m.text.length * 20) + 300; // 計算下一句的延遲時間
+            });
+        }
+
+        cmdInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const val = cmdInput.value.trim();
+                if(!val) return;
+
+                // 輸入指令時不使用動畫，直接顯示，反應較快
+                printLog(val, 'user-cmd', false); 
+
+                if (val.includes('@')) {
+                    const fakeId = 'RSCH-' + Math.floor(Math.random() * 9999).toString().padStart(4, '0');
+                    localStorage.setItem('paradox_id', fakeId);
+                    
+                    setTimeout(() => printLog(`> 身份確認成功。`, 'success'), 200);
+                    setTimeout(() => printLog(`> 已分配識別碼: ${fakeId}`, 'default'), 800);
+                    setTimeout(() => {
+                        printLog(`> 權限等級：研究員 已解鎖。`, 'success');
+                        unlockResearcher(fakeId);
+                    }, 1600);
+                } 
+                else if (val.toUpperCase() === 'HELP') {
+                    printLog(`> 可用指令: LOGIN (Email), HELLO, STATUS`, 'system');
+                }
+                else {
+                    printLog(`> 錯誤：未知指令 '${val}'`, 'error');
+                }
+                cmdInput.value = '';
+            }
+        });
+
+        function unlockResearcher(id) {
+            navIdBtn.classList.add('unlocked');
+            navIdBtn.classList.remove('special');
+            displayId.textContent = id;
+            if(idBarcode) {
+                // 更新條碼，前後加星號是 Code39 的標準
+                idBarcode.textContent = `*${id}*`;
+            }
+        }
+
+        const savedId = localStorage.getItem('paradox_id');
+        if (savedId) {
+            unlockResearcher(savedId);
+        }
+
+        // 4. 星圖邏輯
+        const starBox = document.getElementById('star-box');
+        const starNodes = [
+            { id: 1, x: 20, y: 30, status: 'active', title: '【初次觀測 PV】', desc: '點擊前往 YouTube', url: 'https://youtube.com' },
+            { id: 2, x: 50, y: 50, status: 'active', title: '【官方 Twitter】', desc: '追蹤動態', url: 'https://twitter.com' },
+            { id: 3, x: 80, y: 20, status: 'locked', title: '？？？', desc: '權限不足', url: '#' },
+            { id: 4, x: 30, y: 75, status: 'locked', title: '加密檔案', desc: '等待解碼', url: '#' },
+            { id: 5, x: 75, y: 65, status: 'active', title: '【Discord】', desc: '加入社群', url: 'https://discord.com' }
+        ];
+
+        function renderStarMap() {
+            starBox.innerHTML = ''; 
+            for(let i=0; i<30; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'absolute';
+                star.style.width = Math.random() * 2 + 'px';
+                star.style.height = star.style.width;
+                star.style.background = '#fff';
+                star.style.opacity = Math.random() * 0.5;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.borderRadius = '50%';
+                starBox.appendChild(star);
+            }
+
+            starNodes.forEach(node => {
+                const el = document.createElement('div');
+                el.className = `star-node ${node.status}`;
+                el.style.left = node.x + '%';
+                el.style.top = node.y + '%';
+
+                const tooltip = document.createElement('div');
+                tooltip.className = 'node-tooltip';
+                let statusText = node.status === 'active' ? 
+                    '<span class="status" style="color:var(--neon-green)">● SIGNAL ACTIVE</span>' : 
+                    '<span class="status" style="color:#777">● SIGNAL LOCKED</span>';
+
+                tooltip.innerHTML = `${statusText}<h4>${node.title}</h4><p>${node.desc}</p>`;
+                el.appendChild(tooltip);
+
+                el.addEventListener('click', () => {
+                    if (node.status === 'active') {
+                        printLog(`> 正在跳轉至座標 [${node.x}, ${node.y}]...`, 'success');
+                        setTimeout(() => window.open(node.url, '_blank'), 500);
+                    } else {
+                        printLog(`> 錯誤：節點 [${node.title}] 已鎖定。`, 'error');
+                        el.style.animation = 'none';
+                        el.offsetHeight; 
+                        el.style.animation = 'shake 0.3s';
+                    }
+                });
+                starBox.appendChild(el);
+            });
+        }
+        
+        // 加入 Shake Animation
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `@keyframes shake { 0% { transform: translate(-50%, -50%) translateX(0); } 25% { transform: translate(-50%, -50%) translateX(-5px); } 50% { transform: translate(-50%, -50%) translateX(5px); } 75% { transform: translate(-50%, -50%) translateX(-5px); } 100% { transform: translate(-50%, -50%) translateX(0); } }`;
+        document.head.appendChild(styleSheet);
+
+        renderStarMap();
+
+        // --- 5. 監控頁面邏輯 ---
+
+        // 5.1 啟動倒數計時
+        function initCountdown() {
+            const targetDate = new Date('2026-01-01T00:00:00').getTime();
+            const timerEl = document.getElementById('countdown-timer');
+            
+            setInterval(() => {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+                
+                if (distance < 0) {
+                    timerEl.innerHTML = "SYSTEM_SYNC_COMPLETE";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                const ms = Math.floor((distance % 1000) / 10); // 只取兩位
+
+                // 格式化數字補零
+                const f = (n) => n.toString().padStart(2, '0');
+                timerEl.innerHTML = `${days}d ${f(hours)}:${f(minutes)}:${f(seconds)}:${f(ms)}`;
+            }, 50); // 每 50ms 更新一次，增加急迫感
+        }
+
+        // 5.2 模擬活躍人數浮動 (Fake Live Data)
+        function initLiveCounter() {
+            const countEl = document.getElementById('observer-count');
+            let currentCount = 8964;
+
+            setInterval(() => {
+                // 隨機增減 -5 到 +8 人
+                const change = Math.floor(Math.random() * 14) - 5;
+                currentCount += change;
+                countEl.innerText = currentCount.toLocaleString();
+            }, 2000);
+        }
+
+        // 5.3 生成波形圖動畫
+        function initWaveform() {
+            const container = document.getElementById('waveform-box');
+            const barCount = 40; // 產生 40 條 Bar
+
+            for(let i=0; i<barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                // 隨機高度與動畫延遲，讓波形看起來不規律
+                bar.style.height = Math.floor(Math.random() * 80 + 10) + '%';
+                bar.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+                container.appendChild(bar);
+            }
+        }
+
+    </script>
+</body>
+</html>
