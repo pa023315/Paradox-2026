@@ -73,7 +73,7 @@
         .term-line.success { color: var(--neon-blue); }
         .term-line.system { color: #888; }
 
-        /* ==================== Researcher ID (HOLOGRAPHIC BADGE) ==================== */
+        /* ==================== Researcher ID ==================== */
         #section-idcard.active {
             display: flex;
             flex-direction: column;
@@ -306,7 +306,7 @@
         .status-active-txt { color: var(--neon-green); }
         .status-locked-txt { color: var(--neon-red); }
 
-        /* ==================== UPDATED: System Logs Section ==================== */
+        /* ==================== System Logs Section ==================== */
         #logs-container {
             height: 520px;
             overflow-y: auto;
@@ -611,22 +611,14 @@
             let hash1 = 0;
             let hash2 = 0;
             const str = email.trim().toLowerCase();
-            
-            // Simple string hashing
             for (let i = 0; i < str.length; i++) {
                 const char = str.charCodeAt(i);
-                // First block hash
                 hash1 = ((hash1 << 5) - hash1) + char;
-                hash1 |= 0; // Convert to 32bit integer
-                
-                // Second block hash (variant)
+                hash1 |= 0;
                 hash2 = (hash2 + (char << (i % 8))) | 0;
             }
-            
-            // Generate two 4-digit blocks from the hashes
             const block1 = Math.abs(hash1 % 10000).toString().padStart(4, '0');
             const block2 = Math.abs(hash2 % 10000).toString().padStart(4, '0');
-            
             return `RSCH-${block1}-${block2}`;
         }
 
@@ -653,7 +645,13 @@
             starNodesData.forEach(node => {
                 const el = document.createElement('div');
                 el.className = `star-node ${node.status || 'locked'}`;
-                el.style.left = node.x || '0%'; el.style.top = node.y || '0%';
+                
+                // 修正座標單位缺失導致的 (0,0) 坍塌問題
+                const posX = (node.x !== undefined && node.x !== null) ? node.x : 0;
+                const posY = (node.y !== undefined && node.y !== null) ? node.y : 0;
+                el.style.left = String(posX).includes('%') ? posX : posX + '%';
+                el.style.top = String(posY).includes('%') ? posY : posY + '%';
+
                 el.id = node.id || `node-${Math.random()}`;
                 el.addEventListener('mouseenter', (e) => {
                     document.getElementById('tt-title').textContent = node.title || 'UNKNOWN_NODE';
@@ -701,10 +699,8 @@
         function initTerminalSequence() {
             if (isTerminalInitialized) return;
             isTerminalInitialized = true;
-
             const savedEmail = localStorage.getItem('user_email');
             const savedId = localStorage.getItem('user_id');
-
             const initLines = [
                 { text: "> 正在掃描時間線變動 ...", type: "system", delay: 400 },
                 { text: "> 偵測到量子糾靈反應。", type: "system", delay: 1000 },
@@ -712,15 +708,11 @@
                 { text: "> 來源識別：未知 (UNKNOWN)", type: "system", delay: 2600 },
                 { text: "> 正在解密來自未來的封包 ...", type: "system", delay: 3400 }
             ];
-
             initLines.forEach(line => {
                 setTimeout(() => printLog(line.text, line.type), line.delay);
             });
-
-            // Logic for Persistence and Identity Recognition
             setTimeout(() => {
                 if (savedEmail && savedId) {
-                    // Update UI immediately for saved user
                     updateIdentityUI(savedId);
                     printLog(`> 檢測到已存取的身份訊號... 歡迎回來，觀測者 ${savedId}。`, 'success');
                 } else {
@@ -740,16 +732,13 @@
                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); const s = Math.floor((diff % (1000 * 60)) / 1000); const ms = Math.floor(diff % 1000);
                 syncCountdown.innerHTML = `${String(d).padStart(2, '0')}:${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.<small style="font-size:0.5em">${String(ms).padStart(3, '0')}</small>`;
             }, 37);
-
             let baseObservers = 1240;
             setInterval(() => { if (!observerCountEl) return; baseObservers += Math.floor(Math.random() * 7) - 3; observerCountEl.textContent = baseObservers.toLocaleString(); }, 2000);
-
             if (syncBarsContainer) {
                 syncBarsContainer.innerHTML = '';
                 for (let i = 0; i < 60; i++) { const bar = document.createElement('div'); bar.className = 'sync-bar'; bar.style.height = `${Math.random() * 80 + 10}%`; syncBarsContainer.appendChild(bar); }
                 setInterval(() => { document.querySelectorAll('.sync-bar').forEach(b => b.style.height = `${Math.random() * 80 + 10}%`); }, 500);
             }
-
             setInterval(() => {
                 if (!diagContainer) return;
                 const line = document.createElement('div'); line.className = 'diag-line'; line.innerHTML = `[${new Date().toLocaleTimeString('zh-TW', {hour12:false})}] <span>>></span> STABILITY: ${Math.random().toFixed(4)}`;
@@ -785,35 +774,24 @@
             logsContainer.scrollTop = logsContainer.scrollHeight;
         }
 
-        /**
-         * 打印終端日誌。
-         * 如果訊息包含 HTML 標籤（如連結），則立即渲染。
-         * 如果是純文字，則使用打字機效果呈現。
-         */
         function printLog(msg, type = 'default') {
             if (!terminalOut) return;
             const div = document.createElement('div');
             div.className = 'term-line ' + type;
             terminalOut.appendChild(div);
-
-            // 檢查是否包含 HTML 標籤 (以 < 判定)
             if (msg.includes('<')) {
-                // 含有 HTML 標籤時立即渲染，並添加淡入效果
                 div.innerHTML = msg;
                 div.style.opacity = '0';
                 div.style.animation = 'fadeIn 0.3s ease-out forwards';
                 terminalOut.scrollTop = terminalOut.scrollHeight;
             } else {
-                // 純文字則執行打字機效果
                 let i = 0;
-                const speed = 30; // 每個字元 30ms
-                div.textContent = ''; // 先清空內容
-                
+                const speed = 30;
+                div.textContent = '';
                 function type() {
                     if (i < msg.length) {
                         div.textContent += msg.charAt(i);
                         i++;
-                        // 在打字過程中持續保持滾動到最下方
                         terminalOut.scrollTop = terminalOut.scrollHeight;
                         setTimeout(type, speed);
                     }
@@ -855,10 +833,7 @@
                 if (e.key === 'Enter') {
                     const val = cmdInput.value.trim(); if(!val) return;
                     printLog(val, 'user-cmd');
-                    
                     const lowerVal = val.toLowerCase();
-
-                    // Logic for Logout command
                     if (lowerVal === 'logout') {
                         localStorage.removeItem('user_email');
                         localStorage.removeItem('user_id');
@@ -867,28 +842,16 @@
                         cmdInput.value = '';
                         return;
                     }
-
                     const match = dynamicCommands.find(c => String(c.command).toLowerCase() === lowerVal);
-                    if (match) { 
-                        setTimeout(() => printLog(`> ${match.response}`, 'success'), 200); 
-                    }
+                    if (match) { setTimeout(() => printLog(`> ${match.response}`, 'success'), 200); }
                     else if (val.includes('@')) {
-                        // Deterministic ID generation based on Email (same email = same ID)
                         const generatedId = generateIdFromEmail(val);
-                        
-                        // Persistence: Save to localStorage
                         localStorage.setItem('user_email', val);
                         localStorage.setItem('user_id', generatedId);
-                        
-                        // UI Updates
                         updateIdentityUI(generatedId);
-                        
                         printLog(`> 登入成功：觀測者 ${generatedId}`, 'success');
                         printLog(`> 已保存本地憑證。歡迎加入 Para≠dox 觀測站。`, 'system');
-                        printLog(`> 請點擊左側 [ 研究員 ID ] 檢視全息認證卡。`, 'system');
-                    } else { 
-                        printLog(`> 錯誤：未知指令 '${val}'`, 'error'); 
-                    }
+                    } else { printLog(`> 錯誤：未知指令 '${val}'`, 'error'); }
                     cmdInput.value = '';
                 }
             };
