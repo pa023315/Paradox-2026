@@ -1,2 +1,2 @@
-// This file is intentionally left blank.
-// The application logic has been moved to index.html to satisfy the "Single HTML File" requirement.
+// 應用程序目前恢復為 index.html 中的 Vanilla JS 單一文件模式。
+// 此文件目前保持空白以避免衝突。

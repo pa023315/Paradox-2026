@@ -2,7 +2,8 @@ export enum View {
   TERMINAL = 'TERMINAL',
   STAR_MAP = 'STAR_MAP',
   SYSTEM_LOGS = 'SYSTEM_LOGS',
-  RESEARCHER = 'RESEARCHER'
+  RESEARCHER = 'RESEARCHER',
+  MONITOR = 'MONITOR'
 }
 
 export interface LogEntry {

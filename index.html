@@ -427,18 +427,275 @@
         .stat-bar-bg { height: 4px; background: rgba(255,255,255,0.05); width: 100%; margin-top: 4px; }
         .stat-bar-fill { height: 100%; background: var(--neon-purple); box-shadow: 0 0 8px var(--neon-purple); transition: width 1s ease; }
 
-        .monitor-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); grid-auto-rows: min-content; gap: 20px; padding-bottom: 50px; }
-        @media (min-width: 1200px) { .monitor-dashboard { grid-template-columns: 2fr 1fr; grid-template-rows: auto auto 1fr; } .countdown-container { grid-column: 1; grid-row: 1; } .nodes-container { grid-column: 2; grid-row: 2; } .diagnostics-box { grid-column: 2; grid-row: 1; } .wave-container { grid-column: 1; grid-row: 2; } }
-        .monitor-panel { background: rgba(10, 15, 25, 0.8); border: 1px solid rgba(0, 243, 255, 0.2); padding: 20px; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.05); min-height: 180px; }
-        .panel-label { position: absolute; top: 0; left: 0; background: var(--neon-blue); color: #000; font-size: 0.65rem; padding: 2px 10px; font-weight: bold; letter-spacing: 1px; z-index: 5; }
-        .countdown-timer { font-size: clamp(2rem, 6vw, 4rem); font-weight: bold; color: var(--neon-purple); text-shadow: 0 0 20px rgba(188, 19, 254, 0.5); font-family: 'Fira Code', monospace; margin: 15px 0; line-height: 1; white-space: nowrap; }
-        .node-count { font-size: clamp(2.5rem, 5vw, 3.5rem); color: var(--neon-green); text-shadow: 0 0 15px rgba(57, 255, 20, 0.4); font-weight: bold; }
-        .sync-visualizer { height: 140px; display: flex; align-items: flex-end; justify-content: space-between; gap: 2px; padding-top: 30px; }
-        .sync-bar { flex: 1; background: linear-gradient(to top, var(--neon-blue), transparent); transition: height 0.4s ease; position: relative; min-width: 3px; }
-        .diagnostics-box { display: flex; flex-direction: column; gap: 8px; font-size: 0.75rem; font-family: 'Fira Code', monospace; max-height: 300px; overflow-y: hidden; padding-top: 35px; }
-        .diag-line { color: #555; border-bottom: 1px solid rgba(255,255,255,0.02); padding: 4px 0; white-space: nowrap; }
-        .diag-line span { color: var(--neon-blue); }
+        /* ==================== Monitor Section Specific Styles ==================== */
+        .monitor-dashboard { 
+            display: grid; 
+            grid-template-columns: 1fr; /* Mobile default */
+            grid-auto-rows: min-content; 
+            gap: 20px; 
+            padding-bottom: 50px; 
+            height: 100%; /* Fill parent height */
+            align-content: start; /* Align content to the start */
+        }
+        @media (min-width: 768px) { /* Tablet/small desktop */
+            .monitor-dashboard {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: auto auto 1fr; /* Countdown, observers, then radar/entropy */
+            }
+            .countdown-container { grid-column: span 2; grid-row: 1; }
+            .observers-container { grid-column: 1; grid-row: 2; }
+            .entropy-stream-container { grid-column: 2; grid-row: 2; }
+            .radar-container { grid-column: span 2; grid-row: 3; min-height: 350px; }
+        }
+        @media (min-width: 1200px) { /* Large desktop */
+            .monitor-dashboard { 
+                grid-template-columns: 2fr 1fr; /* Countdown/Radar on left, Observers/Entropy on right */
+                grid-template-rows: auto 1fr; /* Countdown row, then 1fr for the rest */
+            } 
+            .countdown-container { grid-column: 1; grid-row: 1; } 
+            .observers-container { grid-column: 2; grid-row: 1; } 
+            .radar-container { grid-column: 1; grid-row: 2; } 
+            .entropy-stream-container { grid-column: 2; grid-row: 2; }
+        }
 
+        .monitor-panel { 
+            background: rgba(10, 15, 25, 0.8); 
+            border: 1px solid var(--neon-blue); /* Glowing border effect */
+            padding: 20px; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0, 243, 255, 0.1); /* Subtle inner/outer glow */
+            min-height: 180px; 
+            display: flex; /* Use flex to align content */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-stack);
+            background-image: linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
+            background-size: 25px 25px; /* Subtle grid texture */
+            transition: all 0.3s ease;
+        }
+        .monitor-panel:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px var(--neon-blue), inset 0 0 25px var(--neon-blue);
+        }
+
+        .panel-label { 
+            position: absolute; 
+            top: 0; left: 0; 
+            background: var(--neon-blue); 
+            color: #000; 
+            font-size: 0.65rem; 
+            padding: 2px 10px; 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+            z-index: 5; 
+        }
+
+        /* Countdown Timer Specifics */
+        .countdown-timer { 
+            font-size: clamp(2rem, 6vw, 4.5rem); /* Make it larger and responsive */
+            font-weight: bold; 
+            color: var(--neon-purple); 
+            text-shadow: 0 0 25px var(--neon-purple); /* Stronger glow */
+            font-family: 'Fira Code', monospace; /* Ensure monospaced numbers */
+            margin: 15px 0; 
+            line-height: 1; 
+            white-space: nowrap; 
+            display: flex;
+            align-items: baseline;
+            position: relative; /* For glitch effect */
+            letter-spacing: -2px; /* Tighten up */
+        }
+        .countdown-timer .countdown-ms {
+            font-size: 0.5em; /* Smaller milliseconds */
+            margin-left: 0.5rem;
+            color: var(--neon-blue);
+            opacity: 0.8;
+            position: relative;
+            animation: pulse-ms 1s infinite alternate; /* Milliseconds pulse */
+        }
+        @keyframes pulse-ms {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+
+        /* Glitch effect for timer (randomly applied) */
+        .countdown-timer.glitch-active::before,
+        .countdown-timer.glitch-active::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .countdown-timer.glitch-active::before {
+            left: 1px;
+            text-shadow: -2px 0 var(--neon-red);
+            clip: rect(var(--clip-top-1, 0), 9999px, var(--clip-bottom-1, 0), 0);
+            animation: timer-glitch-anim 0.2s infinite alternate-reverse;
+        }
+        .countdown-timer.glitch-active::after {
+            left: -1px;
+            text-shadow: 2px 0 var(--neon-blue);
+            clip: rect(var(--clip-top-2, 0), 9999px, var(--clip-bottom-2, 0), 0);
+            animation: timer-glitch-anim2 0.2s infinite alternate-reverse;
+        }
+        /* These random values will be set by JS */
+        @keyframes timer-glitch-anim {
+            0% { clip: rect(calc(var(--rand-1, 0) * 1px), 9999px, calc(var(--rand-2, 0) * 1px), 0); }
+            100% { clip: rect(calc(var(--rand-3, 0) * 1px), 9999px, calc(var(--rand-4, 0) * 1px), 0); }
+        }
+        @keyframes timer-glitch-anim2 {
+            0% { clip: rect(calc(var(--rand-5, 0) * 1px), 9999px, calc(var(--rand-6, 0) * 1px), 0); }
+            100% { clip: rect(calc(var(--rand-7, 0) * 1px), 9999px, calc(var(--rand-8, 0) * 1px), 0); }
+        }
+
+        /* Observers Count */
+        .observers-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .node-count { 
+            font-size: clamp(2.5rem, 5vw, 3.5rem); 
+            color: var(--neon-green); 
+            text-shadow: 0 0 20px rgba(57, 255, 20, 0.6); /* Stronger glow */
+            font-weight: bold; 
+            transition: all 0.2s ease;
+        }
+        .node-count.pulse-anim {
+            animation: count-pulse 0.5s ease-out forwards;
+        }
+        @keyframes count-pulse {
+            0% { transform: scale(1); text-shadow: 0 0 10px rgba(57, 255, 20, 0.4); }
+            50% { transform: scale(1.05); text-shadow: 0 0 30px rgba(57, 255, 20, 0.8); }
+            100% { transform: scale(1); text-shadow: 0 0 20px rgba(57, 255, 20, 0.6); }
+        }
+
+        /* Radar Section */
+        .radar-container {
+            min-height: 350px; /* Ensure enough space */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .radar-display {
+            flex-grow: 1; /* Allow it to take available space */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .radar-circle {
+            width: clamp(150px, 60%, 300px); /* Responsive size, max 300px */
+            height: clamp(150px, 60%, 300px);
+            border-radius: 50%;
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 25px rgba(0, 243, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(0, 243, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+            flex-shrink: 0; /* Prevent shrinking on small screens */
+        }
+        .radar-circle::before, .radar-circle::after { /* Crosshairs */
+            content: '';
+            position: absolute;
+            background: var(--neon-blue);
+            opacity: 0.3;
+        }
+        .radar-circle::before { width: 100%; height: 1px; top: 50%; left: 0; transform: translateY(-50%); }
+        .radar-circle::after { width: 1px; height: 100%; left: 50%; top: 0; transform: translateX(-50%); }
+
+        .radar-sweep {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%; /* Covers the circle */
+            height: 100%; /* Covers the circle */
+            background: linear-gradient(90deg, rgba(0, 243, 255, 0.4) 0%, transparent 80%);
+            transform-origin: 0% 50%; /* Rotate around center of the radar-circle */
+            animation: radar-sweep 4s linear infinite;
+            z-index: 2;
+            mix-blend-mode: screen;
+        }
+        @keyframes radar-sweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #radar-anomalies {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+        }
+        .anomaly-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--neon-red);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red);
+            animation: anomaly-pulse 1.5s infinite alternate;
+        }
+        @keyframes anomaly-pulse {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+
+        /* Entropy Stream Section (formerly diagnostics-box) */
+        .entropy-stream-container {
+            min-height: 350px;
+            justify-content: flex-start; /* Align content to top */
+            align-items: flex-start; /* Align content to left */
+        }
+        .diagnostics-box {
+            width: 100%;
+            height: 100%; /* Take full height of its panel */
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3); /* Darker background for logs */
+            border: 1px dashed rgba(188, 19, 254, 0.3);
+            padding: 10px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: #ccc;
+            line-height: 1.5;
+            flex-grow: 1;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-purple) transparent;
+        }
+        .diagnostics-box::-webkit-scrollbar { width: 4px; }
+        .diagnostics-box::-webkit-scrollbar-track { background: transparent; }
+        .diagnostics-box::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 2px; }
+
+        .diag-line {
+            display: flex;
+            gap: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            animation: fadeInLog 0.3s ease-out; /* Reuse existing log fade-in */
+        }
+        .diag-line .timestamp { color: #666; flex-shrink: 0; }
+        .diag-line .level { font-weight: bold; flex-shrink: 0; }
+        .diag-line .message { color: #bbb; }
+
+        .diag-line.INFO .level { color: var(--neon-blue); }
+        .diag-line.WARN .level { color: var(--neon-warn); }
+        .diag-line.ERROR .level { color: var(--neon-red); animation: text-pulse 1s infinite alternate; }
+        .diag-line.CRIT .level { color: var(--neon-red); animation: text-pulse 0.5s infinite alternate; text-shadow: 0 0 5px var(--neon-red); }
+        .diag-line.SYSTEM .level { color: var(--neon-purple); }
+        .diag-line.DEBUG .level { color: var(--neon-green); opacity: 0.7; } /* DEBUG changed to green */
+
+        /* Input wrapper from terminal */
         .input-wrapper { margin-top: 15px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--neon-green); display: flex; align-items: center; padding: 10px; position: relative; }
         #cmd-input { flex: 1; background: transparent; border: none; color: #fff; font-family: 'Fira Code', monospace; font-size: 1.1rem; outline: none; }
         
@@ -526,19 +783,31 @@
                 <h2>> 同步監控儀表板 // SYNCHRONIZATION_MONITOR</h2>
                 <div class="monitor-dashboard">
                     <div class="monitor-panel countdown-container">
-                        <div class="panel-label">TIMELINE_COLLAPSE</div>
-                        <div class="countdown-timer" id="sync-countdown">00:00:00:00.000</div>
+                        <div class="panel-label">TIMELINE_COLLAPSE_SEQUENCE // STABLE</div>
+                        <div class="countdown-timer" id="sync-countdown" data-text="00:00:00:00.000">00:00:00:00<span class="countdown-ms">.000</span></div>
                     </div>
-                    <div class="monitor-panel diagnostics-box" id="diag-container">
-                        <div class="panel-label">SYSTEM_DIAGNOSTICS</div>
-                    </div>
-                    <div class="monitor-panel nodes-container">
-                        <div class="panel-label">ACTIVE_NODES</div>
+
+                    <div class="monitor-panel observers-container">
+                        <div class="panel-label">ACTIVE_OBSERVERS // LIVE</div>
                         <div class="node-count" id="observer-count">1,240</div>
+                        <div class="text-xs text-gray-600 mt-2 tracking-widest uppercase">QUANTUM NODE CONNECTIONS</div>
                     </div>
-                    <div class="monitor-panel wave-container">
-                        <div class="panel-label">SYNCHRONIZATION_WAVE</div>
-                        <div class="sync-visualizer" id="sync-bars-container"></div>
+
+                    <div class="monitor-panel radar-container" id="radar-section">
+                        <div class="panel-label">QUANTUM_STABILITY_RADAR // SCANNING</div>
+                        <div class="radar-display">
+                            <div class="radar-circle">
+                                <div class="radar-sweep"></div>
+                                <div id="radar-anomalies"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="monitor-panel entropy-stream-container">
+                        <div class="panel-label">ENTROPY_MONITOR_STREAM // HIGH_FREQ</div>
+                        <div class="diagnostics-box" id="entropy-stream-output">
+                            <!-- Diagnostic lines will be appended here -->
+                        </div>
                     </div>
                 </div>
             </section>
@@ -601,10 +870,12 @@
         const logsContainer = document.getElementById('logs-container');
         const subjectGridContainer = document.getElementById('subject-grid-container');
         const cmdInput = document.getElementById('cmd-input');
+        
+        // Monitor Section elements
         const syncCountdown = document.getElementById('sync-countdown');
         const observerCountEl = document.getElementById('observer-count');
-        const syncBarsContainer = document.getElementById('sync-bars-container');
-        const diagContainer = document.getElementById('diag-container');
+        const radarAnomaliesContainer = document.getElementById('radar-anomalies'); 
+        const entropyStreamOutput = document.getElementById('entropy-stream-output'); 
 
         // ==================== Deterministic ID Generator ====================
         function generateIdFromEmail(email) {
@@ -722,28 +993,140 @@
             }, 4200);
         }
 
+        // ==================== Monitor Logic (Enhanced) ====================
         function initMonitor() {
+            // --- Countdown Timer Logic (Optimized for glitch and milliseconds) ---
             const targetDate = new Date("2026-01-01T00:00:00").getTime();
             setInterval(() => {
                 if (!syncCountdown) return;
-                const now = new Date().getTime(); const diff = targetDate - now;
-                if (diff < 0) { syncCountdown.innerHTML = "00:00:00:00.000"; return; }
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24)); const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); const s = Math.floor((diff % (1000 * 60)) / 1000); const ms = Math.floor(diff % 1000);
-                syncCountdown.innerHTML = `${String(d).padStart(2, '0')}:${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.<small style="font-size:0.5em">${String(ms).padStart(3, '0')}</small>`;
-            }, 37);
-            let baseObservers = 1240;
-            setInterval(() => { if (!observerCountEl) return; baseObservers += Math.floor(Math.random() * 7) - 3; observerCountEl.textContent = baseObservers.toLocaleString(); }, 2000);
-            if (syncBarsContainer) {
-                syncBarsContainer.innerHTML = '';
-                for (let i = 0; i < 60; i++) { const bar = document.createElement('div'); bar.className = 'sync-bar'; bar.style.height = `${Math.random() * 80 + 10}%`; syncBarsContainer.appendChild(bar); }
-                setInterval(() => { document.querySelectorAll('.sync-bar').forEach(b => b.style.height = `${Math.random() * 80 + 10}%`); }, 500);
-            }
+                const now = new Date().getTime();
+                const diff = Math.max(0, targetDate - now);
+                
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                const ms = diff % 1000; // Milliseconds without Math.floor for smooth update
+
+                const mainTime = `${String(d).padStart(2, '0')}:${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                const msTime = `.${String(ms).padStart(3, '0')}`;
+                
+                syncCountdown.innerHTML = `${mainTime}<span class="countdown-ms">${msTime}</span>`;
+                syncCountdown.setAttribute('data-text', mainTime + msTime); // Update data-text for glitch
+            }, 37); // Update frequently for smooth milliseconds
+
+            // Glitch effect for countdown timer
             setInterval(() => {
-                if (!diagContainer) return;
-                const line = document.createElement('div'); line.className = 'diag-line'; line.innerHTML = `[${new Date().toLocaleTimeString('zh-TW', {hour12:false})}] <span>>></span> STABILITY: ${Math.random().toFixed(4)}`;
-                diagContainer.prepend(line); if (diagContainer.children.length > 10) diagContainer.lastChild.remove();
-            }, 1500);
+                if (!syncCountdown) return;
+                const shouldGlitch = Math.random() < 0.2; // 20% chance to glitch
+                if (shouldGlitch) {
+                    syncCountdown.classList.add('glitch-active');
+                    // Randomize clip values for the glitch effect
+                    syncCountdown.style.setProperty('--rand-1', Math.random() * 100);
+                    syncCountdown.style.setProperty('--rand-2', Math.random() * 100);
+                    syncCountdown.style.setProperty('--rand-3', Math.random() * 100);
+                    syncCountdown.style.setProperty('--rand-4', Math.random() * 100);
+                    syncCountdown.style.setProperty('--rand-5', Math.random() * 100);
+                    syncCountdown.style.setProperty('--rand-6', Math.random() * 100);
+                    syncCountdown.style.setProperty('--rand-7', Math.random() * 100);
+                    syncCountdown.style.setProperty('--rand-8', Math.random() * 100);
+
+                    setTimeout(() => {
+                        syncCountdown.classList.remove('glitch-active');
+                    }, Math.random() * 300 + 100); // Glitch duration 100-400ms
+                }
+            }, 1000); // Check every second for glitch
+
+            // --- Observers Count Logic (Dynamic Fluctuation + Pulse) ---
+            let baseObservers = 1240;
+            setInterval(() => {
+                if (!observerCountEl) return;
+                const oldObservers = baseObservers;
+                baseObservers += Math.floor(Math.random() * 5) - 2; // +/- 2 people
+                // Ensure observers don't go too low or high for realism
+                baseObservers = Math.max(1000, Math.min(1500, baseObservers)); 
+
+                if (baseObservers !== oldObservers) { // Only update if value changed
+                    observerCountEl.textContent = baseObservers.toLocaleString();
+                    observerCountEl.classList.add('pulse-anim'); // Add pulse class
+                    setTimeout(() => {
+                        observerCountEl.classList.remove('pulse-anim'); // Remove after animation
+                    }, 500); // Match animation duration
+                }
+            }, 3000); // Update every 3 seconds
+
+            // --- Radar Anomalies Logic ---
+            if (radarAnomaliesContainer) {
+                const activeAnomalies = new Set();
+                setInterval(() => {
+                    if (activeAnomalies.size < 5 && Math.random() < 0.6) { // Max 5 anomalies, 60% chance to add new one
+                        const id = Date.now().toString();
+                        activeAnomalies.add(id);
+
+                        const anomalyDot = document.createElement('div');
+                        anomalyDot.className = 'anomaly-dot';
+                        // Position within the radar-circle (relative to its size)
+                        const radarCircle = radarAnomaliesContainer.parentElement; // Get the radar-circle
+                        if (radarCircle) {
+                            const rect = radarCircle.getBoundingClientRect();
+                            // Ensure anomaly is within the circle, slightly offset from center
+                            const radius = rect.width / 2;
+                            const angle = Math.random() * 2 * Math.PI;
+                            const dist = Math.random() * radius * 0.8; // Max 80% of radius from center
+                            const x = radius + dist * Math.cos(angle);
+                            const y = radius + dist * Math.sin(angle);
+                            anomalyDot.style.left = `${x}px`;
+                            anomalyDot.style.top = `${y}px`;
+                            anomalyDot.style.transform = `translate(-50%, -50%)`; // Center the dot
+                        } else { // Fallback if parent not found
+                            anomalyDot.style.left = `${Math.random() * 80 + 10}%`;
+                            anomalyDot.style.top = `${Math.random() * 80 + 10}%`;
+                        }
+                        
+                        anomalyDot.id = `anomaly-${id}`;
+                        radarAnomaliesContainer.appendChild(anomalyDot);
+
+                        setTimeout(() => {
+                            const dotToRemove = document.getElementById(`anomaly-${id}`);
+                            if (dotToRemove) dotToRemove.remove();
+                            activeAnomalies.delete(id);
+                        }, Math.random() * 4000 + 2000); // Anomaly lasts 2-6 seconds
+                    }
+                }, 1000); // Check every second
+            }
+
+            // --- Entropy Stream Logic ---
+            if (entropyStreamOutput) {
+                const entropyLogs = [
+                    { level: 'INFO', msg: 'PACKET_RECV from NODE-ALPHA' },
+                    { level: 'WARN', msg: 'QUANTUM_FLUX_DETECTED in SECTOR-BETA' },
+                    { level: 'CRIT', msg: 'NODE_LOCKDOWN_INITIATED on GAMMA-7' },
+                    { level: 'SYNC', msg: 'CORRELATION_SYNC_COMPLETE' },
+                    { level: 'DEBUG', msg: 'BUFFER_OVERFLOW_WARNING (Minor)' },
+                    { level: 'INFO', msg: 'HEARTBEAT_SIGNAL_CONFIRMED' },
+                    { level: 'ERROR', msg: 'INTEGRITY_CHECK_FAILED: TIMELINE_DELTA' },
+                    { level: 'SYNC', msg: 'OBSERVATION_STREAM_ADJUSTED' },
+                    { level: 'WARN', msg: 'UNIDENTIFIED_SIGNAL_SPIKE' },
+                ];
+                
+                setInterval(() => {
+                    const randomLog = entropyLogs[Math.floor(Math.random() * entropyLogs.length)];
+                    const line = document.createElement('div');
+                    line.className = `diag-line ${randomLog.level}`;
+                    line.innerHTML = `
+                        <span class="timestamp">[${new Date().toLocaleTimeString('zh-TW', {hour12:false})}]</span>
+                        <span class="level">[${randomLog.level}]</span>
+                        <span class="message">${randomLog.msg}</span>
+                    `;
+                    entropyStreamOutput.appendChild(line); // Append to bottom
+
+                    if (entropyStreamOutput.children.length > 15) { // Keep last 15 lines
+                        entropyStreamOutput.firstChild.remove();
+                    }
+                    // Auto-scroll to show latest log
+                    entropyStreamOutput.scrollTop = entropyStreamOutput.scrollHeight;
+                }, 800); // Faster update for entropy stream
+            }
         }
 
         function renderSubjectCards() {

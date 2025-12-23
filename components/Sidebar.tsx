@@ -11,6 +11,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, researcher
   const navItems = [
     { id: View.TERMINAL, label: 'TERMINAL', icon: '>' },
     { id: View.STAR_MAP, label: 'STAR MAP', icon: '*' },
+    { id: View.MONITOR, label: 'SYNC MONITOR', icon: '~' },
     { id: View.SYSTEM_LOGS, label: 'SYSTEM LOGS', icon: '#' },
   ];
 

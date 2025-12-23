@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import CRTOverlay from './components/CRTOverlay';
-import BootScreen from './components/BootScreen';
 import Sidebar from './components/Sidebar';
 import Terminal from './components/Terminal';
 import StarMap from './components/StarMap';
 import SystemLogs from './components/SystemLogs';
+import SyncMonitor from './components/SyncMonitor';
+import BootScreen from './components/BootScreen';
 import { View } from './types';
 
 const App: React.FC = () => {
@@ -13,7 +13,6 @@ const App: React.FC = () => {
   const [researcherId, setResearcherId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check local storage for persistent session
     const savedId = localStorage.getItem('PARA_DOX_ID');
     if (savedId) {
       setResearcherId(savedId);
@@ -26,9 +25,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-screen bg-cyber-bg text-cyber-blue font-mono overflow-hidden flex flex-col md:flex-row">
-      <CRTOverlay />
-      
+    <div className="flex flex-col md:flex-row h-screen w-screen bg-cyber-bg text-cyber-blue overflow-hidden relative font-mono">
       {!booted && <BootScreen onComplete={() => setBooted(true)} />}
 
       <Sidebar 
@@ -37,7 +34,7 @@ const App: React.FC = () => {
         researcherId={researcherId}
       />
 
-      <main className="flex-1 relative overflow-hidden bg-cyber-bg/50 z-10">
+      <main className="flex-1 relative overflow-hidden z-10 bg-black/20">
         {currentView === View.TERMINAL && (
           <Terminal onLogin={handleLogin} />
         )}
@@ -46,30 +43,39 @@ const App: React.FC = () => {
           <StarMap />
         )}
 
+        {currentView === View.MONITOR && (
+          <SyncMonitor />
+        )}
+
         {currentView === View.SYSTEM_LOGS && (
           <SystemLogs />
         )}
 
         {currentView === View.RESEARCHER && (
-          <div className="h-full w-full flex items-center justify-center p-8 text-center flex-col">
-            <h2 className="text-3xl text-cyber-green mb-4 glitch-text">ACCESS GRANTED</h2>
-            <div className="border border-cyber-green p-6 max-w-md bg-black/50 backdrop-blur">
-              <p className="mb-4">RESEARCHER PROFILE: <span className="text-white font-bold">{researcherId}</span></p>
-              <p className="text-sm text-gray-400">Clearance Level: 4 (Omni)</p>
-              <p className="text-sm text-gray-400 mt-2">
-                "The timelines are converging. Maintain observation protocols."
+          <div className="h-full w-full flex items-center justify-center p-8 text-center flex-col animate-in fade-in duration-700">
+            <h2 className="text-4xl text-cyber-green mb-6 font-bold tracking-tighter glitch-text" data-text="ACCESS GRANTED">ACCESS GRANTED</h2>
+            <div className="border border-cyber-green p-8 max-w-md bg-black/80 backdrop-blur-md shadow-[0_0_30px_rgba(57,255,20,0.2)]">
+              <p className="text-xl mb-4 font-bold text-white uppercase tracking-widest">
+                ID: <span className="text-cyber-green">{researcherId}</span>
+              </p>
+              <div className="h-px bg-cyber-green/30 w-full my-4"></div>
+              <p className="text-sm text-gray-400 font-mono">
+                CLEARANCE LEVEL: 04 // OMNI-ACCESS
+              </p>
+              <p className="text-xs text-cyber-purple mt-6 italic opacity-80">
+                "The singularity is approaching. All observation streams must remain active."
               </p>
             </div>
           </div>
         )}
       </main>
 
-      {/* Decorative Corner overlay */}
-      <div className="absolute top-0 right-0 p-4 pointer-events-none z-20 opacity-50 hidden md:block">
-         <div className="w-20 h-20 border-t-2 border-r-2 border-cyber-purple"></div>
+      {/* Decorative Overlays */}
+      <div className="absolute top-0 right-0 p-6 pointer-events-none z-20 opacity-30 hidden md:block">
+         <div className="w-24 h-24 border-t-2 border-r-2 border-cyber-purple"></div>
       </div>
-      <div className="absolute bottom-0 left-0 p-4 pointer-events-none z-20 opacity-50 hidden md:block">
-         <div className="w-20 h-20 border-b-2 border-l-2 border-cyber-purple"></div>
+      <div className="absolute bottom-0 left-0 p-6 pointer-events-none z-20 opacity-30 hidden md:block">
+         <div className="w-24 h-24 border-b-2 border-l-2 border-cyber-purple"></div>
       </div>
     </div>
   );
