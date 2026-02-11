@@ -789,7 +789,7 @@
 
                     <div class="monitor-panel observers-container">
                         <div class="panel-label">ACTIVE_OBSERVERS // LIVE</div>
-                        <div class="node-count" id="observer-count">1,240</div>
+                        <div class="node-count" id="observer-count">---</div>
                         <div class="text-xs text-gray-600 mt-2 tracking-widest uppercase">QUANTUM NODE CONNECTIONS</div>
                     </div>
 
@@ -860,7 +860,7 @@
 
     <script>
         const GOOGLE_API_URL = 'https://script.google.com/macros/s/AKfycby4LN-2erL38PXW4lPOFpU8N-03AiRVL-Y5LxOtVuJ8BbLZJTUR13r4yZxT6uonmg-_/exec';
-        let dynamicCommands = [];
+        
         let systemLogs = [];
         let subjectData = []; 
         let starNodesData = []; 
@@ -876,22 +876,6 @@
         const observerCountEl = document.getElementById('observer-count');
         const radarAnomaliesContainer = document.getElementById('radar-anomalies'); 
         const entropyStreamOutput = document.getElementById('entropy-stream-output'); 
-
-        // ==================== Deterministic ID Generator ====================
-        function generateIdFromEmail(email) {
-            let hash1 = 0;
-            let hash2 = 0;
-            const str = email.trim().toLowerCase();
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash1 = ((hash1 << 5) - hash1) + char;
-                hash1 |= 0;
-                hash2 = (hash2 + (char << (i % 8))) | 0;
-            }
-            const block1 = Math.abs(hash1 % 10000).toString().padStart(4, '0');
-            const block2 = Math.abs(hash2 % 10000).toString().padStart(4, '0');
-            return `RSCH-${block1}-${block2}`;
-        }
 
         function updateIdentityUI(id) {
             const idDisplay = document.getElementById('researcher-id-display');
@@ -957,14 +941,32 @@
 
         async function loadGoogleCommands() {
             try {
+                // Fetch public data from Google Sheets (GET)
                 const response = await fetch(GOOGLE_API_URL);
                 const data = await response.json();
-                dynamicCommands = data.commands || [];
+                
+                // Debugging: Log the fetched keys to help the user troubleshoot Excel headers
+                if (data.logs && data.logs.length > 0) console.log('Logs Keys:', Object.keys(data.logs[0]));
+                if (data.subjects && data.subjects.length > 0) console.log('Subjects Keys:', Object.keys(data.subjects[0]));
+                
+                // Update Global Data Stores
                 systemLogs = data.logs || [];
                 subjectData = data.subjects || []; 
                 starNodesData = data.nodes || []; 
-                renderSystemLogs(); renderSubjectCards(); renderStarMap();
-            } catch (error) { console.error('Fetch failed:', error); }
+                
+                // Render Sections
+                renderSystemLogs(); 
+                renderSubjectCards(); 
+                renderStarMap();
+                
+                // Initialize Monitor with Real Data if available
+                initMonitor(data); 
+
+                console.log("System Data Synced Successfully");
+            } catch (error) { 
+                console.error('Fetch failed:', error); 
+                printLog('> [ERROR] 無法同步外部數據庫。請檢查網絡連線或 API 端點。', 'error');
+            }
         }
 
         function initTerminalSequence() {
@@ -993,9 +995,9 @@
             }, 4200);
         }
 
-        // ==================== Monitor Logic (Enhanced) ====================
-        function initMonitor() {
-            // --- Countdown Timer Logic (Optimized for glitch and milliseconds) ---
+        // ==================== Monitor Logic (Corrected to use Fetch Data) ====================
+        function initMonitor(fetchedData) {
+            // --- Countdown Timer Logic ---
             const targetDate = new Date("2026-01-01T00:00:00").getTime();
             setInterval(() => {
                 if (!syncCountdown) return;
@@ -1006,81 +1008,79 @@
                 const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((diff % (1000 * 60)) / 1000);
-                const ms = diff % 1000; // Milliseconds without Math.floor for smooth update
+                const ms = diff % 1000;
 
                 const mainTime = `${String(d).padStart(2, '0')}:${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
                 const msTime = `.${String(ms).padStart(3, '0')}`;
                 
                 syncCountdown.innerHTML = `${mainTime}<span class="countdown-ms">${msTime}</span>`;
-                syncCountdown.setAttribute('data-text', mainTime + msTime); // Update data-text for glitch
-            }, 37); // Update frequently for smooth milliseconds
+                syncCountdown.setAttribute('data-text', mainTime + msTime);
+            }, 37);
 
-            // Glitch effect for countdown timer
-            setInterval(() => {
-                if (!syncCountdown) return;
-                const shouldGlitch = Math.random() < 0.2; // 20% chance to glitch
-                if (shouldGlitch) {
-                    syncCountdown.classList.add('glitch-active');
-                    // Randomize clip values for the glitch effect
-                    syncCountdown.style.setProperty('--rand-1', Math.random() * 100);
-                    syncCountdown.style.setProperty('--rand-2', Math.random() * 100);
-                    syncCountdown.style.setProperty('--rand-3', Math.random() * 100);
-                    syncCountdown.style.setProperty('--rand-4', Math.random() * 100);
-                    syncCountdown.style.setProperty('--rand-5', Math.random() * 100);
-                    syncCountdown.style.setProperty('--rand-6', Math.random() * 100);
-                    syncCountdown.style.setProperty('--rand-7', Math.random() * 100);
-                    syncCountdown.style.setProperty('--rand-8', Math.random() * 100);
-
-                    setTimeout(() => {
-                        syncCountdown.classList.remove('glitch-active');
-                    }, Math.random() * 300 + 100); // Glitch duration 100-400ms
-                }
-            }, 1000); // Check every second for glitch
-
-            // --- Observers Count Logic (Dynamic Fluctuation + Pulse) ---
+            // --- Observers Count Logic ---
+            // Try to find 'observers' in the monitor object (case insensitive check)
             let baseObservers = 1240;
+            if (fetchedData && fetchedData.monitor) {
+                 if (fetchedData.monitor.observers) baseObservers = parseInt(fetchedData.monitor.observers);
+            }
+                                
+            if (observerCountEl) observerCountEl.textContent = baseObservers.toLocaleString();
+
+            // Minimal fluctuation for liveness
             setInterval(() => {
                 if (!observerCountEl) return;
-                const oldObservers = baseObservers;
-                baseObservers += Math.floor(Math.random() * 5) - 2; // +/- 2 people
-                // Ensure observers don't go too low or high for realism
-                baseObservers = Math.max(1000, Math.min(1500, baseObservers)); 
+                const fluctuation = Math.floor(Math.random() * 5) - 2; 
+                let current = parseInt(observerCountEl.textContent.replace(/,/g, '')) || baseObservers;
+                let newValue = current + fluctuation;
+                
+                // Keep it close to base
+                if (Math.abs(newValue - baseObservers) > 50) newValue = baseObservers;
 
-                if (baseObservers !== oldObservers) { // Only update if value changed
-                    observerCountEl.textContent = baseObservers.toLocaleString();
-                    observerCountEl.classList.add('pulse-anim'); // Add pulse class
-                    setTimeout(() => {
-                        observerCountEl.classList.remove('pulse-anim'); // Remove after animation
-                    }, 500); // Match animation duration
+                if (newValue !== current) {
+                    observerCountEl.textContent = newValue.toLocaleString();
+                    observerCountEl.classList.add('pulse-anim');
+                    setTimeout(() => observerCountEl.classList.remove('pulse-anim'), 500);
                 }
-            }, 3000); // Update every 3 seconds
+            }, 3000);
 
-            // --- Radar Anomalies Logic ---
+            // --- Entropy Stream Logic (Populate from System Logs) ---
+            if (entropyStreamOutput && systemLogs.length > 0) {
+                // Populate initial logs from fetched systemLogs
+                entropyStreamOutput.innerHTML = '';
+                const recentLogs = systemLogs.slice(-10); // Last 10 logs
+                recentLogs.forEach(log => {
+                    const line = document.createElement('div');
+                    line.className = `diag-line ${log.level}`;
+                    line.innerHTML = `
+                        <span class="timestamp">[${log.time || '00:00'}]</span>
+                        <span class="level">[${log.level}]</span>
+                        <span class="message">${log.message}</span>
+                    `;
+                    entropyStreamOutput.appendChild(line);
+                });
+            }
+
+            // Radar Anomalies (Visual effect only, keep random)
             if (radarAnomaliesContainer) {
                 const activeAnomalies = new Set();
                 setInterval(() => {
-                    if (activeAnomalies.size < 5 && Math.random() < 0.6) { // Max 5 anomalies, 60% chance to add new one
+                    if (activeAnomalies.size < 5 && Math.random() < 0.6) {
                         const id = Date.now().toString();
                         activeAnomalies.add(id);
 
                         const anomalyDot = document.createElement('div');
                         anomalyDot.className = 'anomaly-dot';
-                        // Position within the radar-circle (relative to its size)
-                        const radarCircle = radarAnomaliesContainer.parentElement; // Get the radar-circle
+                        const radarCircle = radarAnomaliesContainer.parentElement;
                         if (radarCircle) {
                             const rect = radarCircle.getBoundingClientRect();
-                            // Ensure anomaly is within the circle, slightly offset from center
                             const radius = rect.width / 2;
                             const angle = Math.random() * 2 * Math.PI;
-                            const dist = Math.random() * radius * 0.8; // Max 80% of radius from center
+                            const dist = Math.random() * radius * 0.8;
                             const x = radius + dist * Math.cos(angle);
                             const y = radius + dist * Math.sin(angle);
                             anomalyDot.style.left = `${x}px`;
                             anomalyDot.style.top = `${y}px`;
-                            anomalyDot.style.transform = `translate(-50%, -50%)`; // Center the dot
-                        } else { // Fallback if parent not found
-                            anomalyDot.style.left = `${Math.random() * 80 + 10}%`;
-                            anomalyDot.style.top = `${Math.random() * 80 + 10}%`;
+                            anomalyDot.style.transform = `translate(-50%, -50%)`;
                         }
                         
                         anomalyDot.id = `anomaly-${id}`;
@@ -1090,42 +1090,9 @@
                             const dotToRemove = document.getElementById(`anomaly-${id}`);
                             if (dotToRemove) dotToRemove.remove();
                             activeAnomalies.delete(id);
-                        }, Math.random() * 4000 + 2000); // Anomaly lasts 2-6 seconds
+                        }, Math.random() * 4000 + 2000);
                     }
-                }, 1000); // Check every second
-            }
-
-            // --- Entropy Stream Logic ---
-            if (entropyStreamOutput) {
-                const entropyLogs = [
-                    { level: 'INFO', msg: 'PACKET_RECV from NODE-ALPHA' },
-                    { level: 'WARN', msg: 'QUANTUM_FLUX_DETECTED in SECTOR-BETA' },
-                    { level: 'CRIT', msg: 'NODE_LOCKDOWN_INITIATED on GAMMA-7' },
-                    { level: 'SYNC', msg: 'CORRELATION_SYNC_COMPLETE' },
-                    { level: 'DEBUG', msg: 'BUFFER_OVERFLOW_WARNING (Minor)' },
-                    { level: 'INFO', msg: 'HEARTBEAT_SIGNAL_CONFIRMED' },
-                    { level: 'ERROR', msg: 'INTEGRITY_CHECK_FAILED: TIMELINE_DELTA' },
-                    { level: 'SYNC', msg: 'OBSERVATION_STREAM_ADJUSTED' },
-                    { level: 'WARN', msg: 'UNIDENTIFIED_SIGNAL_SPIKE' },
-                ];
-                
-                setInterval(() => {
-                    const randomLog = entropyLogs[Math.floor(Math.random() * entropyLogs.length)];
-                    const line = document.createElement('div');
-                    line.className = `diag-line ${randomLog.level}`;
-                    line.innerHTML = `
-                        <span class="timestamp">[${new Date().toLocaleTimeString('zh-TW', {hour12:false})}]</span>
-                        <span class="level">[${randomLog.level}]</span>
-                        <span class="message">${randomLog.msg}</span>
-                    `;
-                    entropyStreamOutput.appendChild(line); // Append to bottom
-
-                    if (entropyStreamOutput.children.length > 15) { // Keep last 15 lines
-                        entropyStreamOutput.firstChild.remove();
-                    }
-                    // Auto-scroll to show latest log
-                    entropyStreamOutput.scrollTop = entropyStreamOutput.scrollHeight;
-                }, 800); // Faster update for entropy stream
+                }, 1000);
             }
         }
 
@@ -1133,9 +1100,18 @@
             if (!subjectGridContainer) return; subjectGridContainer.innerHTML = '';
             subjectData.forEach(sub => {
                 const card = document.createElement('div'); card.className = 'dossier-card';
-                const statusClass = sub.status === 'ACTIVE' ? 'status-active' : 'status-lost';
-                const fallbackImg = 'https://placehold.co/400x250/00141e/00f3ff?text=SIGNAL_LOST';
-                card.innerHTML = `<div class="dossier-header"><span class="dossier-code">${sub.code_name || 'SUB-XXX'}</span><span class="dossier-status ${statusClass}">${sub.status}</span></div><div class="dossier-image"><img src="${sub.image_url || fallbackImg}" alt="${sub.name}" onerror="this.src='${fallbackImg}'"></div><div class="dossier-body"><div class="dossier-name">${sub.name}</div><div class="dossier-desc">${sub.desc || '檔案毀損或尚未同步。'}</div><div class="dossier-stats"><div class="stat-row"><span>同步穩定度 (SYNC)</span><span>${sub.param_sync}%</span></div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${sub.param_sync}%"></div></div></div></div>`;
+                // Backend keys are normalized to snake_case (e.g. Code Name -> code_name)
+                // We use || to support both just in case, but snake_case is primary from GAS.
+                const code = sub.code_name || sub.code || 'SUB-XXX';
+                const status = sub.status || 'UNKNOWN';
+                const name = sub.name || 'Unknown Subject';
+                const desc = sub.desc || sub.description || '檔案毀損或尚未同步。';
+                const sync = sub.param_sync || sub.sync || 0;
+                const img = sub.image_url || sub.image || 'https://placehold.co/400x250/00141e/00f3ff?text=SIGNAL_LOST';
+                
+                const statusClass = status === 'ACTIVE' ? 'status-active' : 'status-lost';
+                
+                card.innerHTML = `<div class="dossier-header"><span class="dossier-code">${code}</span><span class="dossier-status ${statusClass}">${status}</span></div><div class="dossier-image"><img src="${img}" alt="${name}" onerror="this.src='https://placehold.co/400x250/00141e/00f3ff?text=SIGNAL_LOST'"></div><div class="dossier-body"><div class="dossier-name">${name}</div><div class="dossier-desc">${desc}</div><div class="dossier-stats"><div class="stat-row"><span>同步穩定度 (SYNC)</span><span>${sync}%</span></div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${sync}%"></div></div></div></div>`;
                 subjectGridContainer.appendChild(card);
             });
         }
@@ -1207,35 +1183,62 @@
             setTimeout(() => {
                 if (intro) intro.classList.add('hidden');
                 const main = document.getElementById('main-interface'); if (main) { main.classList.remove('hidden'); main.classList.add('visible'); }
-                loadGoogleCommands(); initMonitor(); initTerminalSequence(); renderStarMap();
+                loadGoogleCommands(); 
+                initTerminalSequence(); 
             }, 800);
         };
 
         if (cmdInput) {
-            cmdInput.onkeydown = (e) => {
+            cmdInput.onkeydown = async (e) => {
                 if (e.key === 'Enter') {
                     const val = cmdInput.value.trim(); if(!val) return;
                     printLog(val, 'user-cmd');
+                    cmdInput.value = '';
+                    
                     const lowerVal = val.toLowerCase();
                     if (lowerVal === 'logout') {
                         localStorage.removeItem('user_email');
                         localStorage.removeItem('user_id');
                         printLog("> 正在清除存取憑證... 系統即將重啟。", 'error');
                         setTimeout(() => location.reload(), 1000);
-                        cmdInput.value = '';
                         return;
                     }
-                    const match = dynamicCommands.find(c => String(c.command).toLowerCase() === lowerVal);
-                    if (match) { setTimeout(() => printLog(`> ${match.response}`, 'success'), 200); }
-                    else if (val.includes('@')) {
-                        const generatedId = generateIdFromEmail(val);
-                        localStorage.setItem('user_email', val);
-                        localStorage.setItem('user_id', generatedId);
-                        updateIdentityUI(generatedId);
-                        printLog(`> 登入成功：觀測者 ${generatedId}`, 'success');
-                        printLog(`> 已保存本地憑證。歡迎加入 Para≠dox 觀測站。`, 'system');
-                    } else { printLog(`> 錯誤：未知指令 '${val}'`, 'error'); }
-                    cmdInput.value = '';
+                    if (lowerVal === 'clear') {
+                        terminalOut.innerHTML = '';
+                        return;
+                    }
+
+                    // --- Server-side Validation ---
+                    printLog('> [UPLINK] 正在建立加密通道... 驗證封包中...', 'system');
+                    
+                    try {
+                        const params = new URLSearchParams();
+                        params.append('command', val);
+                        params.append('action', 'validate_command');
+
+                        const response = await fetch(GOOGLE_API_URL, {
+                            method: 'POST',
+                            body: params 
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.status === 'success' || data.type === 'success') {
+                            if (data.userId || data.authId) {
+                                const newId = data.userId || data.authId;
+                                localStorage.setItem('user_email', val);
+                                localStorage.setItem('user_id', newId);
+                                updateIdentityUI(newId);
+                            }
+                            printLog(`> ${data.message || data.response}`, 'success');
+                        } else {
+                            printLog(`> [ERROR] ${data.message || '指令無效或權限不足'}`, 'error');
+                        }
+
+                    } catch (err) {
+                        console.error(err);
+                        printLog('> [CONNECTION_LOST] 無法連接至核心伺服器 (Status: 503)。請重試。', 'error');
+                    }
                 }
             };
         }
