@@ -329,12 +329,80 @@
             z-index: 5;
         }
 
-        .star-node { width: 16px; height: 16px; border-radius: 50%; position: absolute; transform: translate(-50%, -50%); transition: all 0.3s ease; z-index: 10; }
-        .star-node.active { background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue); cursor: pointer; animation: pulse-node 2.5s infinite alternate; }
-        .star-node.locked { background: rgba(255, 51, 51, 0.4); border: 1px solid var(--neon-red); cursor: not-allowed; opacity: 0.6; }
-        .star-node:hover { transform: translate(-50%, -50%) scale(1.5); z-index: 100; }
+        /* Updated Star Node Styles for Quantum Anchor Look */
+        .star-node { 
+            width: 30px; 
+            height: 30px; 
+            position: absolute; 
+            transform: translate(-50%, -50%); 
+            z-index: 10; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease; 
+        }
+
+        .node-core {
+            width: 6px; height: 6px;
+            background: currentColor;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+            z-index: 2;
+        }
+
+        .node-ring-inner {
+            position: absolute;
+            width: 16px; height: 16px;
+            border: 1px solid currentColor;
+            border-radius: 50%;
+            opacity: 0.6;
+            box-shadow: 0 0 5px currentColor;
+        }
+
+        .node-ring-outer {
+            position: absolute;
+            width: 28px; height: 28px;
+            border: 1px dashed currentColor;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: spin-node 8s linear infinite;
+        }
         
-        @keyframes pulse-node { 0% { box-shadow: 0 0 5px var(--neon-blue); } 100% { box-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue); } }
+        @keyframes spin-node { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Status: Active */
+        .star-node.active { color: var(--neon-blue); cursor: pointer; }
+        .star-node.active .node-core { box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue); }
+        .star-node.active .node-ring-outer { animation: spin-node 4s linear infinite; border-style: solid; border-width: 1px; border-color: rgba(0, 243, 255, 0.3); border-top-color: transparent; border-bottom-color: transparent; }
+
+        /* Quantum Pulse Animation for Active Nodes */
+        .star-node.active::before, .star-node.active::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px solid var(--neon-blue);
+            opacity: 0;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+        
+        .star-node.active::before { animation: quantum-pulse 2s infinite ease-out; }
+        .star-node.active::after { animation: quantum-pulse 2s infinite ease-out 0.6s; }
+
+        @keyframes quantum-pulse {
+            0% { width: 100%; height: 100%; opacity: 0.8; border-width: 1px; }
+            100% { width: 250%; height: 250%; opacity: 0; border-width: 0; }
+        }
+
+        /* Status: Locked */
+        .star-node.locked { color: var(--neon-red); cursor: not-allowed; opacity: 0.7; }
+        .star-node.locked .node-core { background: var(--neon-red); box-shadow: 0 0 5px var(--neon-red); }
+        
+        .star-node:hover { transform: translate(-50%, -50%) scale(1.2); z-index: 100; }
+        
+        /* Shake Animation Reuse */
         @keyframes shake-node { 0% { transform: translate(-50%, -50%) translateX(0); } 25% { transform: translate(-50%, -50%) translateX(-5px); } 50% { transform: translate(-50%, -50%) translateX(5px); } 75% { transform: translate(-50%, -50%) translateX(-5px); } 100% { transform: translate(-50%, -50%) translateX(0); } }
         .shake-anim { animation: shake-node 0.4s ease-in-out; }
         
@@ -945,6 +1013,13 @@
             starNodesData.forEach(node => {
                 const el = document.createElement('div');
                 el.className = `star-node ${node.status || 'locked'}`;
+                
+                // Add internal structure for Quantum Anchor visual
+                el.innerHTML = `
+                    <div class="node-ring-outer"></div>
+                    <div class="node-ring-inner"></div>
+                    <div class="node-core"></div>
+                `;
                 
                 // 修正座標單位缺失導致的 (0,0) 坍塌問題
                 const posX = (node.x !== undefined && node.x !== null) ? node.x : 0;
