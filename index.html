@@ -229,6 +229,26 @@
             97% { opacity: 0.95; }
         }
 
+        /* Share Buttons Styles */
+        .share-controls { margin-top: 30px; display: flex; gap: 20px; z-index: 10; }
+        .share-btn { 
+            background: rgba(0, 0, 0, 0.6); 
+            border: 1px solid var(--neon-blue); 
+            color: var(--neon-blue); 
+            padding: 10px 25px; 
+            font-family: var(--font-stack); 
+            font-size: 0.85rem; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .share-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); transform: translateY(-2px); }
+        .share-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s; }
+        .share-btn:hover::before { left: 100%; }
+
         /* ==================== Star Map Styles ==================== */
         #star-box { 
             width: 100%; 
@@ -875,6 +895,10 @@
                         <div class="id-validity">適用時間線<br>ALPHA-001</div>
                     </div>
                 </div>
+                <!-- 新增分享按鈕 -->
+                <div class="share-controls">
+                    <button class="share-btn" onclick="shareIdentity('x')">SHARE // X</button>
+                </div>
             </section>
         </main>
     </div>
@@ -1263,6 +1287,16 @@
                 }
             };
         }
+        
+        function shareIdentity(platform) {
+            const id = localStorage.getItem('user_id') || 'UNKNOWN';
+            
+            if (platform === 'x') {
+                const text = `一起參與PARA≠DOX 計劃觀測全新 VTUber ，我的編號是 ${id}\n前往觀測：https://paradox-sf.tw/`;
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+            }
+        }
+        
         window.onload = playIntro;
     </script>
 </body>
