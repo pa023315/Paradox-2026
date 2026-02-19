@@ -724,64 +724,17 @@
 
         .radar-sweep {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            animation: radar-spin 2s linear infinite;
+            top: 50%;
+            left: 50%;
+            width: 100%; /* Covers the circle */
+            height: 100%; /* Covers the circle */
+            background: linear-gradient(90deg, rgba(0, 243, 255, 0.4) 0%, transparent 80%);
+            transform-origin: 0% 50%; /* Rotate around center of the radar-circle */
+            animation: radar-sweep 4s linear infinite;
             z-index: 2;
-        }
-
-        /* Beam and Trail */
-        .radar-sweep::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: conic-gradient(
-                from 0deg,
-                transparent 0deg,
-                transparent 240deg,
-                rgba(0, 243, 255, 0.1) 280deg,
-                rgba(0, 243, 255, 0.5) 320deg,
-                rgba(0, 243, 255, 0.9) 350deg,
-                rgba(255, 255, 255, 1) 360deg
-            );
-            filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.8));
             mix-blend-mode: screen;
         }
-
-        /* Digital Noise / Particles */
-        .radar-sweep::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            /* Creating a noise pattern */
-            background-image: 
-                radial-gradient(circle, rgba(0, 243, 255, 0.8) 1px, transparent 1px),
-                radial-gradient(circle, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
-            background-size: 4px 4px, 8px 8px;
-            mask: conic-gradient(
-                from 0deg,
-                transparent 0deg,
-                transparent 280deg,
-                rgba(0,0,0,0.2) 300deg,
-                black 360deg
-            );
-            -webkit-mask: conic-gradient(
-                from 0deg,
-                transparent 0deg,
-                transparent 280deg,
-                rgba(0,0,0,0.2) 300deg,
-                black 360deg
-            );
-            mix-blend-mode: overlay;
-            opacity: 1;
-        }
-
-        @keyframes radar-spin {
+        @keyframes radar-sweep {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
@@ -1165,7 +1118,7 @@
         // ==================== Monitor Logic (Corrected to use Fetch Data) ====================
         function initMonitor(fetchedData) {
             // --- Countdown Timer Logic ---
-            const targetDate = new Date("2026-05-31T23:59:59").getTime();
+            const targetDate = new Date("2026-01-01T00:00:00").getTime();
             setInterval(() => {
                 if (!syncCountdown) return;
                 const now = new Date().getTime();
