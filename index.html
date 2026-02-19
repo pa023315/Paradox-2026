@@ -1118,7 +1118,7 @@
         // ==================== Monitor Logic (Corrected to use Fetch Data) ====================
         function initMonitor(fetchedData) {
             // --- Countdown Timer Logic ---
-            const targetDate = new Date("2026-01-01T00:00:00").getTime();
+            const targetDate = new Date("2026-05-31T23:59:59").getTime();
             setInterval(() => {
                 if (!syncCountdown) return;
                 const now = new Date().getTime();
