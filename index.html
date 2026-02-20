@@ -924,6 +924,12 @@
             .share-controls { flex-direction: column; width: 100%; }
             .share-btn { width: 100%; text-align: center; }
             
+            /* System Logs Responsive */
+            .log-entry { flex-direction: column; align-items: flex-start; gap: 5px; }
+            .log-time { min-width: auto; font-size: 0.7rem; color: #888; }
+            .log-level { font-size: 0.7rem; padding: 1px 4px; align-self: flex-start; }
+            .log-msg { font-size: 0.85rem; width: 100%; }
+            
             /* Hide footer on mobile to save space */
             .status-footer { display: none; }
         }
@@ -960,7 +966,8 @@
                 <button class="nav-btn" onclick="switchTab('stars', this)">外部星圖</button>
                 <button class="nav-btn" onclick="switchTab('monitor', this)">同步監控</button>
                 <button class="nav-btn" onclick="switchTab('logs', this)">系統日誌</button>
-                <button id="nav-id-btn" class="nav-btn special" onclick="switchTab('idcard', this)">[ 研究員 ID ]</button>
+                <button class="nav-btn" onclick="switchTab('manual', this)">操作手冊</button>
+                <button id="nav-id-btn" class="nav-btn special" onclick="switchTab('idcard', this)">[ 觀測員 ID ]</button>>
             </nav>
             <div class="status-footer">
                 <p>STATUS: CONNECTED</p>
@@ -1050,9 +1057,44 @@
                 <div id="logs-container"></div>
             </section>
 
+            <!-- Manual Section -->
+            <section id="section-manual" class="section">
+                <h2>? 操作手冊 // OPERATION_MANUAL</h2>
+                <div class="manual-container" style="color: #ccc; font-family: 'Fira Code', monospace; line-height: 1.6; background: rgba(10, 15, 20, 0.85); border: 1px solid rgba(0, 243, 255, 0.3); padding: 30px; position: relative;">
+                    <div style="font-size: 1.2rem; color: var(--neon-blue); margin-bottom: 20px; font-weight: bold; border-bottom: 1px dashed var(--neon-blue); padding-bottom: 10px;">【 PARA≠DOX 觀測員手冊】</div>
+                    
+                    <p style="margin-bottom: 25px;">任務：作為觀測員，你的任務是在這片充滿雜訊與悖論的廢墟中，盡可能發掘並記錄下那些被隱藏的真實數據。</p>
+
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: var(--neon-green); font-size: 1rem; margin-bottom: 10px;">一、權限確認與保密協定</h3>
+                        <div style="background: rgba(0, 243, 255, 0.05); border-left: 3px solid var(--neon-blue); padding: 10px; font-size: 0.9rem;">
+                            <span style="color: var(--neon-blue); font-weight: bold;">[系統提示]</span> 授權級別確認：見習觀測員<br><br>
+                            「歡迎加入 PARA≠DOX 觀測中心。請記住，這份手冊並非遊戲指南，而是生存協議。你在本終端機輸入的每一行指令、每一次點擊，都會對當前時間線產生不可逆的『觀測干涉』。請謹慎操作，因為你所摧毀的平行宇宙，可能正是你昨天所在的那一個。」
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: var(--neon-red); font-size: 1rem; margin-bottom: 10px;">二. 認知危害免責聲明</h3>
+                        <div style="background: rgba(255, 51, 51, 0.05); border-left: 3px solid var(--neon-red); padding: 10px; font-size: 0.9rem;">
+                            <span style="color: var(--neon-red); font-weight: bold;">⚠ 認知穩定度警告</span><br><br>
+                            「在進行系統交互時，觀測員可能會經歷輕微的『悖論疊加』副作用。若在操作過程中發生以下情況：記憶出現多重版本、終端機顯示不存在的歷史紀錄、或是聽見來自未來的系統警告，皆屬正常量子現象。請保持冷靜並繼續完成指派任務，本中心對任何因時空錯亂導致的個人損失概不負責。」
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: var(--neon-purple); font-size: 1rem; margin-bottom: 10px;">【 秘技 】</h3>
+                        <p>終端核心可以輸入中文和英文，輸入密碼文字會出現對應的回覆，而且某些密碼還藏有特殊的獎勵，據說密碼藏在觀測體（VTuber) 的影片中。</p>
+                    </div>
+
+                    <div style="text-align: right; font-style: italic; color: #888; margin-top: 40px;">
+                        祝你好運，觀測者。願我們能在下一次系統重置時相見。
+                    </div>
+                </div>
+            </section>
+
             <!-- ID Card Section -->
             <section id="section-idcard" class="section">
-                <h2>@ 研究員身份認證 // RESEARCHER_ID_AUTH</h2>
+                <h2>@ 觀測員身份認證 // RESEARCHER_ID_AUTH</h2>
                 <div class="id-card">
                     <div class="id-header">
                         <div class="id-header-title">PARA≠DOX // 觀測者識別證</div>
@@ -1232,7 +1274,7 @@
                     updateIdentityUI(savedId);
                     printLog(`> 檢測到已存取的身份訊號... 歡迎回來，觀測者 ${savedId}。`, 'success');
                 } else {
-                    printLog("> 歡迎來到 Para≠dox 觀測站，請輸入你的 Email 登入系統", 'success');
+                    printLog("> 歡迎來到 Para≠dox 觀測站，請輸入你的 Email 登入系統，並建議觀測員先閱讀操作手冊", 'success');
                 }
                 if (cmdInput) cmdInput.focus();
             }, 4200);
@@ -1496,13 +1538,19 @@
                         const data = await response.json();
                         
                         if (data.status === 'success' || data.type === 'success') {
+                            let newId = null;
                             if (data.userId || data.authId) {
-                                const newId = data.userId || data.authId;
+                                newId = data.userId || data.authId;
                                 localStorage.setItem('user_email', val);
                                 localStorage.setItem('user_id', newId);
                                 updateIdentityUI(newId);
                             }
-                            printLog(`> ${data.message || data.response}`, 'success');
+                            
+                            let msg = data.message || data.response;
+                            if (msg && msg.includes('身份驗證通過')) {
+                                msg = `身份驗證通過。已同步觀測者資料，歡迎回來，觀測者 ${newId || 'ID'}`;
+                            }
+                            printLog(`> ${msg}`, 'success');
                         } else {
                             printLog(`> [ERROR] ${data.message || '指令無效或權限不足'}`, 'error');
                         }
