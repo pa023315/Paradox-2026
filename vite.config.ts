@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         main: 'index.html',
         entrovia2000pv: 'entrovia2000pv/index.html',
+        laphriaguitar: 'laphriaguitar/index.html',
       },
     },
   },
