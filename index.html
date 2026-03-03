@@ -1549,6 +1549,41 @@
                         return;
                     }
 
+                    // --- Email Login Logic ---
+                    const savedEmail = localStorage.getItem('user_email');
+                    if (!savedEmail) {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (emailRegex.test(val)) {
+                            // Generate ID
+                            const newId = 'RSCH-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000);
+                            
+                            // Save locally
+                            localStorage.setItem('user_email', val);
+                            localStorage.setItem('user_id', newId);
+                            
+                            // Update UI
+                            updateIdentityUI(newId);
+                            printLog(`> 身份確認。歡迎加入，觀察者 ${newId}。`, 'success');
+                            printLog(`> 系統初始化完成。請輸入指令或密碼...`, 'system');
+
+                            // Send to Google Sheets
+                            const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxf2jQ_QS3_ViUuJbLlwL7noGO_Whzr5GHY4j6Aj0UiDQcQtdfv1T1dBntSfR2c0ttf/exec';
+                            try {
+                                fetch(SHEET_URL, {
+                                    method: 'POST',
+                                    mode: 'no-cors',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email: val, userId: newId })
+                                });
+                            } catch (err) {
+                                console.error('Log email failed', err);
+                            }
+                        } else {
+                            printLog('> [ERROR] 格式錯誤。請輸入有效的 Email 地址以進行登入。', 'error');
+                        }
+                        return;
+                    }
+
                     // --- Client-side Cache Check (Option 1) ---
                     const cacheKey = `paradox_cmd_${lowerVal}`;
                     const cachedResponse = sessionStorage.getItem(cacheKey);
