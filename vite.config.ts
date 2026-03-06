@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -7,9 +8,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: 'index.html',
-        entrovia2000pv: 'entrovia2000pv/index.html',
-        laphriaguitar: 'laphriaguitar/index.html',
+        main: resolve(__dirname, 'index.html'),
+        entrovia2000pv: resolve(__dirname, 'entrovia2000pv/index.html'),
+        laphriaguitar: resolve(__dirname, 'laphriaguitar/index.html'),
       },
     },
   },

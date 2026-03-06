@@ -9,13 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "latest",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "@google/genai": "latest"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "vite": "latest",
+    "@types/node": "^25.3.5",
     "@vitejs/plugin-react": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "vite": "latest"
   }
 }
