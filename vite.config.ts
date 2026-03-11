@@ -11,6 +11,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         entrovia2000pv: resolve(__dirname, 'entrovia2000pv/index.html'),
         laphriaguitar: resolve(__dirname, 'laphriaguitar/index.html'),
+        laphria666: resolve(__dirname, 'laphria666/index.html'),
       },
     },
   },
