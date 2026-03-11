@@ -1714,8 +1714,8 @@
                 }
             }, 1000);
 
-            // Reset events
-            const resetEvents = ['mousemove', 'keypress', 'click', 'scroll', 'touchstart'];
+            // Reset events (removed mousemove as it's too sensitive and resets on micro-jitters)
+            const resetEvents = ['keydown', 'mousedown', 'scroll', 'touchstart'];
             resetEvents.forEach(event => {
                 window.addEventListener(event, resetIdleTimer, { passive: true });
             });
