@@ -1532,6 +1532,27 @@
             }, 800);
         };
 
+        // 根據 Email 產生唯一且固定的 ID
+        function generateObserverId(email) {
+            const str = email.trim().toLowerCase();
+            
+            // 使用 FNV-1a 雜湊演算法產生確定性的數字
+            let h1 = 0x811c9dc5;
+            let h2 = 0x811c9dc5;
+            for (let i = 0; i < str.length; i++) {
+                h1 ^= str.charCodeAt(i);
+                h1 = (h1 * 16777619) >>> 0;
+                
+                // 反向計算第二組數字，增加差異性
+                h2 ^= str.charCodeAt(str.length - 1 - i);
+                h2 = (h2 * 16777619) >>> 0;
+            }
+            
+            const p1 = (h1 % 9000) + 1000;
+            const p2 = (h2 % 9000) + 1000;
+            return `RSCH-${p1}-${p2}`;
+        }
+
         if (cmdInput) {
             cmdInput.onkeydown = async (e) => {
                 if (e.key === 'Enter') {
@@ -1557,8 +1578,8 @@
                     if (!savedEmail) {
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (emailRegex.test(val)) {
-                            // Generate ID
-                            const newId = 'RSCH-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000);
+                            // Generate ID deterministically based on email
+                            const newId = generateObserverId(val);
                             
                             // Save locally
                             localStorage.setItem('user_email', val);
@@ -1642,17 +1663,21 @@
                             // Save to Client Cache
                             sessionStorage.setItem(cacheKey, JSON.stringify(data));
 
-                            let newId = null;
-                            if (data.userId || data.authId) {
-                                newId = data.userId || data.authId;
-                                localStorage.setItem('user_email', val);
-                                localStorage.setItem('user_id', newId);
-                                updateIdentityUI(newId);
+                            // Do NOT overwrite the existing user_id with server response
+                            // unless the server is explicitly telling us to change identity.
+                            // The ID is generated once during email login.
+                            let currentId = localStorage.getItem('user_id');
+                            
+                            // If for some reason we don't have an ID but the server sent one, use it
+                            if (!currentId && (data.userId || data.authId)) {
+                                currentId = data.userId || data.authId;
+                                localStorage.setItem('user_id', currentId);
+                                updateIdentityUI(currentId);
                             }
                             
                             let msg = data.message || data.response;
                             if (msg && msg.includes('身份驗證通過')) {
-                                msg = `身份驗證通過。已同步觀察者資料，歡迎回來，觀察者 ${newId || 'ID'}`;
+                                msg = `身份驗證通過。已同步觀察者資料，歡迎回來，觀察者 ${currentId || 'ID'}`;
                             }
                             printLog(`> ${msg}`, 'success');
                         } else {
