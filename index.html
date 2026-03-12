@@ -1555,6 +1555,11 @@
 
         if (cmdInput) {
             cmdInput.onkeydown = async (e) => {
+                // 防止中文輸入法選字時按 Enter 觸發送出
+                if (e.isComposing || e.keyCode === 229) {
+                    return;
+                }
+                
                 if (e.key === 'Enter') {
                     const val = cmdInput.value.trim(); if(!val) return;
                     printLog(val, 'user-cmd');
