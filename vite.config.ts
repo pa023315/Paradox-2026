@@ -12,6 +12,7 @@ export default defineConfig({
         entrovia2000pv: resolve(__dirname, 'entrovia2000pv/index.html'),
         laphriaguitar: resolve(__dirname, 'laphriaguitar/index.html'),
         laphria666: resolve(__dirname, 'laphria666/index.html'),
+        sashimi: resolve(__dirname, 'Sashimi/index.html'),
       },
     },
   },
