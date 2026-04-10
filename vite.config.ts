@@ -14,6 +14,8 @@ export default defineConfig({
         laphria666: resolve(__dirname, 'laphria666/index.html'),
         sashimi: resolve(__dirname, 'Sashimi/index.html'),
         boss: resolve(__dirname, 'Boss/index.html'),
+        captain: resolve(__dirname, 'Captain/index.html'),
+        meow: resolve(__dirname, 'meow/index.html'),
       },
     },
   },
