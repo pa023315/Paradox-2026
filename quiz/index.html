@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4P2CZM5RLR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-4P2CZM5RLR');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARA≠DOX // 高維度實體共鳴測試</title>
+    <link rel="icon" href="https://i.meee.com.tw/UcseCSf.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020204;
+            --text-main: #e0e0e0;
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-green: #39ff14;
+            --font-stack: 'Fira Code', monospace;
+        }
+
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            font-family: var(--font-stack); 
+            width: 100%; 
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* CRT Scanline Effect */
+        .crt-scanlines { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); 
+            background-size: 100% 2px, 3px 100%; 
+            pointer-events: none; z-index: 9998; opacity: 0.4; 
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+            width: 100%;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Glitch Text Effect */
+        .glitch-text {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .desc-text {
+            color: #aaa;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-size: 1.2rem;
+            font-family: var(--font-stack);
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+
+        /* Quiz Specific Styles */
+        .progress-container {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .progress-text {
+            color: var(--neon-blue);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #222;
+            position: relative;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0; left: 0; height: 100%;
+            background: var(--neon-blue);
+            width: 0%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .question-box {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 30px;
+            min-height: 80px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            color: #fff;
+            line-height: 1.5;
+            border-left: 3px solid var(--neon-purple);
+            padding-left: 15px;
+        }
+
+        .options-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 18px 20px;
+            background: rgba(0, 243, 255, 0.05);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            color: #ddd;
+            font-family: var(--font-stack);
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn:hover {
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--neon-blue);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+            padding-left: 30px;
+        }
+
+        .option-btn::before {
+            content: '>';
+            position: absolute;
+            left: 10px;
+            opacity: 0;
+            color: var(--neon-blue);
+            transition: opacity 0.2s ease;
+        }
+
+        .option-btn:hover::before {
+            opacity: 1;
+        }
+
+        .option-btn.selected {
+            background: var(--neon-blue);
+            color: #000;
+            border-color: var(--neon-blue);
+        }
+
+        /* Loading Screen */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 243, 255, 0.3);
+            border-top-color: var(--neon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Result Screen */
+        .result-title {
+            color: var(--neon-purple);
+            text-shadow: 0 0 15px var(--neon-purple);
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+
+        .result-desc {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #ccc;
+            text-align: left;
+            background: rgba(188, 19, 254, 0.05);
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            padding: 25px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .result-image-container {
+            margin: 10px 0 20px 0;
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            padding: 5px;
+            background: rgba(10, 10, 15, 0.8);
+            max-width: 100%;
+        }
+
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Typing Cursor */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: var(--neon-blue);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .glitch-text { font-size: 1.4rem; }
+            .question-text { font-size: 1.1rem; }
+            .option-btn { font-size: 0.9rem; padding: 15px; }
+            .result-title { font-size: 1.5rem; }
+            .result-desc { font-size: 0.95rem; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-scanlines"></div>
+    
+    <div class="container">
+        <!-- 1. Welcome Screen -->
+        <div id="screen-welcome" class="screen active">
+            <h1 class="glitch-text">PARA≠DOX 觀察站：<br>高維度實體共鳴測試</h1>
+            
+            <div style="margin: 10px 0 30px 0; width: 100%; max-width: 500px;">
+                <img src="https://i.meee.com.tw/pBohaiJ.png" alt="PARA≠DOX 共鳴測試" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" referrerPolicy="no-referrer">
+            </div>
+
+            <p class="desc-text">系統初始化中...<br>請觀察者憑直覺進行同步測試，以確認您的共鳴頻段。</p>
+            <button class="btn" onclick="startQuiz()">[ 開始同步 / START ]</button>
+            <a href="/" style="color: #666; margin-top: 30px; text-decoration: none; font-size: 0.9rem; border-bottom: 1px dashed #666; padding-bottom: 2px;">返回終端核心</a>
+        </div>
+
+        <!-- 2. Quiz Screen -->
+        <div id="screen-quiz" class="screen">
+            <div class="progress-container">
+                <div class="progress-text">SYNC PROGRESS: <span id="progress-text-val">1/10</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill-val"></div>
+                </div>
+            </div>
+            
+            <div class="question-box">
+                <div class="question-text" id="question-text"></div>
+            </div>
+
+            <div class="options-container" id="options-container">
+                <!-- Options will be injected here by JS -->
+            </div>
+        </div>
+
+        <!-- 3. Loading Screen -->
+        <div id="screen-loading" class="screen">
+            <div class="loading-spinner"></div>
+            <h2 class="glitch-text" style="font-size: 1.2rem;">系統運算中...</h2>
+            <p class="desc-text">正在解析共鳴頻段與實體特徵</p>
+        </div>
+
+        <!-- 4. Result Screen -->
+        <div id="screen-result" class="screen">
+            <h2 style="color: #fff; margin-bottom: 5px; font-size: 1rem; letter-spacing: 2px;">同步完成 // 您的共鳴實體為：</h2>
+            <h1 class="result-title" id="result-title"></h1>
+            <div class="result-image-container">
+                <img id="result-image" class="result-image" src="" alt="Result Image" referrerPolicy="no-referrer">
+            </div>
+            <div class="result-desc" id="result-desc"></div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                <button class="btn" onclick="shareToX()" style="border-color: #1DA1F2; color: #1DA1F2; box-shadow: 0 0 15px rgba(29, 161, 242, 0.3);">[ 分享至 X / SHARE ]</button>
+                <button class="btn" onclick="restartQuiz()">[ 重新觀測 / RESTART ]</button>
+                <a href="/" class="btn" style="border-color: #666; color: #aaa; box-shadow: none;">[ 回到終端機 ]</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 資料結構 (Data Structure)
+        // ==========================================
+        
+        // 題目陣列 (10 題)
+        const quizData = [
+            {
+                question: "Q1. 早晨系統開機（起床）時，你的第一反應通常是：",
+                options: [
+                    { text: "A. 腦中瞬間排好今天所有行程的完美最佳化路徑。", value: "A" },
+                    { text: "B. 肚子好餓！立刻掃描半徑 5 公尺內可以吃的食物。", value: "B" },
+                    { text: "C. 坐在床沿發呆五分鐘。", value: "C" },
+                    { text: "D. 先把手遊的每日任務清空", value: "D" },
+                    { text: "E. 回到被窩中。", value: "E" }
+                ]
+            },
+            {
+                question: "Q2. 工作或日常中遇到無法解決的 Bug（突發困難），你會怎麼處理？",
+                options: [
+                    { text: "A. 冷靜分析底層邏輯，找出錯誤根源並進行修正。", value: "A" },
+                    { text: "B. 物理打擊處理法（拍打螢幕），雖然問題沒解決但製造了更多混亂。", value: "B" },
+                    { text: "C. 翻找以前的筆記，但發現筆記本不見了，最後跑去問同事。", value: "C" },
+                    { text: "D. 利用這個 Bug 找出系統漏洞，把它變成對自己有利的外掛。", value: "D" },
+                    { text: "E. 假裝沒看到。", value: "E" }
+                ]
+            },
+            {
+                question: "Q3. 如果觀察站配發一隻寵物給你，你希望是：",
+                options: [
+                    { text: "A. 無需餵食、絕對精準報時的完美 AI 電子寵物。", value: "A" },
+                    { text: "B. 體力無限、可以聽懂指令的超大型犬。", value: "B" },
+                    { text: "C. 會在你迷路時把你叼回家，還會幫你記密碼的導盲犬。", value: "C" },
+                    { text: "D. 能夠無視空間碰撞體積，隨意穿牆並陪你打 Game 的量子貓。", value: "D" },
+                    { text: "E. 一條只能活在浴缸裡的魚。", value: "E" }
+                ]
+            },
+            {
+                question: "Q4. 和一群人組隊玩遊戲或進行團隊報告時，你的定位是？",
+                options: [
+                    { text: "A. 氣氛製造機兼零食供應商，負責大吵大鬧跟不小心搞砸事情。", value: "A" },
+                    { text: "B. 負責統籌分配任務，如果隊友太笨，會直接把所有事做完。", value: "B" },
+                    { text: "C. 溫柔照顧大家的保母，但交報告前一秒會忘記檔案存去哪裡。", value: "C" },
+                    { text: "D. 絕對的 Carry 位，一邊用極限操作帶大家飛，一邊用毒舌瘋狂嘲諷隊友。", value: "D" },
+                    { text: "E. 戴著耳機一句話都不說，但總能在莫名其妙的地方打出神操作。", value: "E" }
+                ]
+            },
+            {
+                question: "Q5. 桌上放著一個寫著「請勿觸碰」的紅色緊急按鈕，你會：",
+                options: [
+                    { text: "A. 精算按下去後造成宇宙坍縮的機率，並在周圍設立防護網。", value: "A" },
+                    { text: "B. 沒有任何猶豫，一巴掌拍下去。", value: "B" },
+                    { text: "C. 本來想按，但轉個身就忘記按鈕的存在，跑去泡咖啡了。", value: "C" },
+                    { text: "D. 挑戰在 0.001 秒內連按 100 次，測試按鈕的硬體極限。", value: "D" },
+                    { text: "E. 盯著按鈕，反問「你怎麼知道它不是一個偽裝成按鈕的番茄？」", value: "E" }
+                ]
+            },
+            {
+                question: "Q6. 面對過去的黑歷史或犯下的錯誤，你的態度是：",
+                options: [
+                    { text: "A. 將其歸檔為錯誤樣本，保證未來在任何平行宇宙中都不再發生。", value: "A" },
+                    { text: "B. 大笑三聲，把它當成今晚直播的最佳笑料！", value: "B" },
+                    { text: "C. 什麼錯誤？昨天的事我今天就忘光了，我是個全新的我！", value: "C" },
+                    { text: "D. 我絕對不可能犯錯，那肯定是系統網路延遲，或者是隊友的錯。", value: "D" },
+                    { text: "E. 那是「另一個平行宇宙的我」做的事，跟現在的我毫無關聯。", value: "E" }
+                ]
+            },
+            {
+                question: "Q7. 你的房間（或電腦桌面）通常呈現什麼狀態？",
+                options: [
+                    { text: "A. 絕對的混沌。充滿洋芋片碎屑與不知名的發熱線材。", value: "A" },
+                    { text: "B. 絕對的秩序。資料夾分類到第四層，桌面一塵不染。", value: "B" },
+                    { text: "C. 一直在買新的收納盒，但永遠忘記東西收在哪個盒子裡。", value: "C" },
+                    { text: "D. 只有電競設備跟網路線是完美的，其他地方像被核彈炸過。", value: "D" },
+                    { text: "E. 用一個大紙箱把所有雜物蓋住。看不見就是乾淨。", value: "E" }
+                ]
+            },
+            {
+                question: "Q8. 觀察站明天要舉辦大型聚餐，你會怎麼準備？",
+                options: [
+                    { text: "A. 精確計算所有人的卡路里需求，規劃最有效率的點餐演算法。", value: "A" },
+                    { text: "B. 提議去吃最狂野的吃到飽！", value: "B" },
+                    { text: "C. 答應幫大家訂位，但隔天早上才發現自己忘了打電話。", value: "C" },
+                    { text: "D. 吐槽大家選的餐廳都很雷，但當天還是會準時出現並吃得最多。", value: "D" },
+                    { text: "E. 不告訴任何人你會不會去。當天可能以奇異的裝扮突然現身。", value: "E" }
+                ]
+            },
+            {
+                question: "Q9. 對於「時間」與「期限（Deadline）」，你的感覺是：",
+                options: [
+                    { text: "A. 時間是絕對的物理常數，一切都在我的計算之中。", value: "A" },
+                    { text: "B. 時間？那是什麼？只要我動得夠快，時間就追不上我！", value: "B" },
+                    { text: "C. 昨天、今天跟明天的界線有點模糊，總覺得日子一直在重置。", value: "C" },
+                    { text: "D. 期限是用來突破的。我喜歡把進度卡在最後 1% 挑戰極限心跳。", value: "D" },
+                    { text: "E. 時間只是人類為了掩飾虛無而發明的幻覺。", value: "E" }
+                ]
+            },
+            {
+                question: "Q10. 你的內心深處，最常思考哪一種哲學問題？",
+                options: [
+                    { text: "A. 「為什麼不能每天吃零食還能維持體脂率？」", value: "A" },
+                    { text: "B. 「宇宙中是否有一套絕對完美的秩序等著我去建立？」", value: "B" },
+                    { text: "C. 「如果我的習慣跟想法一直改變，那我還是原本的我嗎？」", value: "C" },
+                    { text: "D. 「世界上到底還有沒有能夠讓我用盡全力的挑戰？」", value: "D" },
+                    { text: "E. 「如果沒人看見我真實的樣子，那我的存在有意義嗎？」", value: "E" }
+                ]
+            }
+        ];
+
+        // 結果物件 (A, B, C, D, E)
+        const resultData = {
+            "A": {
+                name: "拉斐利婭",
+                title: "你的共鳴屬性：【 拉斐利婭 】",
+                image: "https://i.meee.com.tw/yKVqDdx.jpg",
+                description: "分析： 你是一個極定理性、講求效率的人。你受不了生活中的混亂與愚蠢，喜歡將一切掌控在手中。在團隊中你是可靠的大腦，但也常常因為別人跟不上你的邏輯而感到心累。偶爾放下強迫症，容許一點小誤差吧！"
+            },
+            "B": {
+                name: "安特羅迦",
+                title: "你的共鳴屬性：【 安特羅迦 】",
+                image: "https://i.meee.com.tw/xNCJiBv.jpg",
+                description: "分析： 你在人群中總是扮演著和事佬或溝通者的角色，擅長在各個部門或朋友的爭執間周旋。就像一隻馬克士威惡魔，你精準地過濾著周圍的情報，把大家哄得服服貼貼，卻在暗中把決策導向你自己想要的結果。"
+            },
+            "C": {
+                name: "蕾忒",
+                title: "你的共鳴屬性：【 蕾忒 】",
+                image: "https://i.meee.com.tw/u4fr7HO.png",
+                description: "分析： 你是個好脾氣、喜歡照顧人的好前輩，但你同時也是個極度健忘、經常陷入自我懷疑的迷糊蛋。你常常在不知不覺中改變了自己的習慣或喜好，甚至忘記初衷。沒關係的，不管零件怎麼換，你善良的本質依然沒有改變（只是拜託把密碼抄在不會丟的地方）。"
+            },
+            "D": {
+                name: "佐霏",
+                title: "你的共鳴屬性：【 佐霏 】",
+                image: "https://i.meee.com.tw/HjMnzOl.png",
+                description: "分析： 你擁有強烈的好勝心與叛逆精神。你看不起平庸，喜歡在邊緣試探極限。你的嘴巴很毒，常常用邏輯把別人嘴到無法反駁，但實際上你非常有責任感，是那種會一邊罵隊友一邊 Carry 全場的大姐頭。"
+            },
+            "E": {
+                name: "瑟思安",
+                title: "你的共鳴屬性：【 瑟思安 】",
+                image: "https://i.meee.com.tw/IBbpDM3.png",
+                description: "分析： 你是一個充滿神秘感、極度不按牌理出牌的個體。你喜歡隱藏自己的真實想法，在別人眼中，你既是個怪人也是個天才。你討厭被世俗的眼光定義，對你來說，逃避現實也是一種高維度的生存策略。只要不打開紙袋，你就永遠無懈可擊。"
+            }
+        };
+
+        // ==========================================
+        // 核心邏輯 (Core Logic)
+        // ==========================================
+        
+        let currentQuestionIndex = 0;
+        let scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+        let isTyping = false;
+        let currentResultName = "";
+
+        // DOM Elements
+        const screenWelcome = document.getElementById('screen-welcome');
+        const screenQuiz = document.getElementById('screen-quiz');
+        const screenLoading = document.getElementById('screen-loading');
+        const screenResult = document.getElementById('screen-result');
+        
+        const progressTextVal = document.getElementById('progress-text-val');
+        const progressFillVal = document.getElementById('progress-fill-val');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+
+        function switchScreen(screenElement) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            screenElement.classList.add('active');
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+            switchScreen(screenQuiz);
+            renderQuestion();
+        }
+
+        async function renderQuestion() {
+            const currentQ = quizData[currentQuestionIndex];
+            const totalQ = quizData.length;
+            
+            // Update Progress
+            progressTextVal.textContent = `${currentQuestionIndex + 1} / ${totalQ}`;
+            progressFillVal.style.width = `${((currentQuestionIndex + 1) / totalQ) * 100}%`;
+
+            // Clear options first
+            optionsContainer.innerHTML = '';
+            questionText.innerHTML = '';
+
+            // Typing Effect for Question
+            isTyping = true;
+            await typeWriterEffect(questionText, currentQ.question, 30);
+            isTyping = false;
+
+            // Render Options with slight delay for each
+            currentQ.options.forEach((opt, index) => {
+                setTimeout(() => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = opt.text;
+                    btn.onclick = () => selectOption(opt.value, btn);
+                    optionsContainer.appendChild(btn);
+                }, index * 100); // Staggered entrance
+            });
+        }
+
+        function typeWriterEffect(element, text, speed) {
+            return new Promise(resolve => {
+                let i = 0;
+                element.innerHTML = '<span class="cursor"></span>';
+                
+                const timer = setInterval(() => {
+                    if (i < text.length) {
+                        element.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
+                        i++;
+                    } else {
+                        clearInterval(timer);
+                        element.innerHTML = text; // Remove cursor at the end
+                        resolve();
+                    }
+                }, speed);
+            });
+        }
+
+        function selectOption(value, btnElement) {
+            if (isTyping) return; // Prevent clicking while typing
+
+            // Visual feedback
+            document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none'); // Disable all
+            btnElement.classList.add('selected');
+
+            // Record score
+            if (scores[value] !== undefined) {
+                scores[value]++;
+            }
+
+            // Next step
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizData.length) {
+                    // Glitch transition effect
+                    screenQuiz.style.opacity = '0.5';
+                    screenQuiz.style.transform = 'translateX(-10px)';
+                    setTimeout(() => {
+                        screenQuiz.style.opacity = '1';
+                        screenQuiz.style.transform = 'translateX(0)';
+                        renderQuestion();
+                    }, 150);
+                } else {
+                    calculateAndShowResult();
+                }
+            }, 500); // 0.5s delay as requested
+        }
+
+        function calculateAndShowResult() {
+            switchScreen(screenLoading);
+
+            setTimeout(() => {
+                // Find highest score
+                let maxScore = -1;
+                let topChoices = [];
+
+                for (const [key, value] of Object.entries(scores)) {
+                    if (value > maxScore) {
+                        maxScore = value;
+                        topChoices = [key];
+                    } else if (value === maxScore) {
+                        topChoices.push(key); // Tie
+                    }
+                }
+
+                // Randomly pick one if tie
+                const finalChoice = topChoices[Math.floor(Math.random() * topChoices.length)];
+                const result = resultData[finalChoice];
+                currentResultName = result.name;
+
+                // Render Result
+                document.getElementById('result-title').textContent = result.title;
+                document.getElementById('result-image').src = result.image;
+                document.getElementById('result-desc').innerHTML = result.description.replace(/\n/g, '<br><br>');
+
+                switchScreen(screenResult);
+            }, 2000); // 2 seconds fake loading
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        function shareToX() {
+            const text = `【 PARA≠DOX 】經過系統的高維度掃描，我的實體共鳴結果是：「 ${currentResultName} 」。看來我早就陷入了不可觀察的量子疊加態了……你的碳基大腦又會與哪個悖論產生共鳴？快來同步測試！`;
+            const url = window.location.href;
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+            window.open(twitterUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
