@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PARA≠DOX // 觀察終端</title>
     <meta property="og:title" content="PARA≠DOX // 觀察終端">
-    <meta property="og:description" content="PARA≠DOX 觀察者終端系統 - 登入以開始觀測任務">
+    <meta property="og:description" content="PARA≠DOX 觀察者終端系統 - 登入以開始觀察任務">
     <meta property="og:image" content="https://i.meee.com.tw/oOVFsGY.png">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
@@ -1207,8 +1207,8 @@
 
                     <div class="monitor-panel entropy-stream-container">
                         <div class="panel-label">ENTROPY_MONITOR_STREAM // HIGH_FREQ</div>
-                        <div class="diagnostics-box" id="entropy-stream-output">
-                            <!-- Diagnostic lines will be appended here -->
+                        <div class="diagnostics-box" style="display: flex; justify-content: center; align-items: center;">
+                            <a href="https://discord.gg/g45MMG9PHq" target="_blank" class="btn" style="border-color: var(--neon-purple); color: var(--neon-purple); box-shadow: 0 0 15px rgba(188, 19, 254, 0.3); text-decoration: none; font-size: 1.2rem; padding: 15px 30px; display: inline-block;">[ 前往觀察者 DC ]</a>
                         </div>
                     </div>
                 </div>
@@ -1232,7 +1232,7 @@
                         <h3 style="color: var(--neon-green); font-size: 1rem; margin-bottom: 10px;">一、權限確認與保密協定</h3>
                         <div style="background: rgba(0, 243, 255, 0.05); border-left: 3px solid var(--neon-blue); padding: 10px; font-size: 0.9rem;">
                             <span style="color: var(--neon-blue); font-weight: bold;">[系統提示]</span> 授權級別確認：實習觀察者<br><br>
-                            「歡迎加入 PARA≠DOX 實驗所。請記住，這份手冊並非遊戲指南，而是生存協議。你在本終端機輸入的每一行指令、每一次點擊，都會對當前時間線產生不可逆的『觀測干涉』。請謹慎操作，因為你所摧毀的平行宇宙，可能正是你昨天所在的那一個。」
+                            「歡迎加入 PARA≠DOX 實驗所。請記住，這份手冊並非遊戲指南，而是生存協議。你在本終端機輸入的每一行指令、每一次點擊，都會對當前時間線產生不可逆的『觀察干涉』。請謹慎操作，因為你所摧毀的平行宇宙，可能正是你昨天所在的那一個。」
                         </div>
                     </div>
 
@@ -1426,7 +1426,7 @@
             const initLines = [
                 { text: "> 正在掃描時間線變動 ...", type: "system", delay: 400 },
                 { text: "> 偵測到量子糾靈反應。", type: "system", delay: 1000 },
-                { text: "> 警告：觀測行為可能導致現實坍塌", type: "error", delay: 1800 },
+                { text: "> 警告：觀察行為可能導致現實坍塌", type: "error", delay: 1800 },
                 { text: "> 來源識別：未知 (UNKNOWN)", type: "system", delay: 2600 },
                 { text: "> 正在解密來自未來的封包 ...", type: "system", delay: 3400 }
             ];
@@ -1914,7 +1914,7 @@
         const idleThresholds = {
             3: { triggered: false, msg: "[系統提示] 偵測到長時間連線未有動作...您是否在考慮要輸入什麼呢？或許可以前往觀察所瞧瞧", type: "system" },
             5: { triggered: false, msg: "[IDLE WARNING] 閒置 5 分鐘。你是不是開著這個終端機當背景，然後跑去其他分頁看 VTuber 的烤肉精華了？拉斐利婭正在注視著你的瀏覽器紀錄。", type: "error" },
-            10: { triggered: false, msg: "[HEALTH CHECK] 觀測中斷已達 10 分鐘。在 2066 年，這種程度的發呆會被判定為「低頻度休眠」。系統建議碳基生物立刻補充水分，或是去一趟名為「洗手間」的實體空間。", type: "system" },
+            10: { triggered: false, msg: "[HEALTH CHECK] 觀察中斷已達 10 分鐘。在 2066 年，這種程度的發呆會被判定為「低頻度休眠」。系統建議碳基生物立刻補充水分，或是去一趟名為「洗手間」的實體空間。", type: "system" },
             20: { triggered: false, msg: "[TEMPORAL ANOMALY] 20 分鐘沒有任何操作。觀察者，你遭遇了時間膨脹嗎？還是你已經被安特羅迦的「絕對零度」給凍結了？如果還活著，請隨便敲擊一下鍵盤證明你的存在。", type: "error" },
             30: { triggered: false, msg: "[RESOURCE DRAIN] 警告：你已經盯著這個沒有任何新動態的畫面整整半小時了。你的執念很令人敬佩，但你佔用的伺服器頻寬，正在嚴重消耗運算資源。請做點什麼。", type: "error" },
             60: { triggered: false, msg: "[ACHIEVEMENT UNLOCKED: ETERNAL OBSERVER]<br>整整一個小時。60 分鐘。3600 秒。<br>你沒有關閉網頁，沒有輸入指令，也沒有任何生命徵象的數據波動。系統已徹底放棄運算你的行為邏輯。<br>恭喜你，你現在已經與背景雜訊融為一體，正式成為 PARA≠DOX 觀察站的「數位地縛靈」了。請安心駐守此地，直到宇宙熱寂。", type: "success" }
