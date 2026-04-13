@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARA≠DOX // 薛丁格的每日觀察盲盒</title>
+    <link rel="icon" href="https://i.meee.com.tw/UcseCSf.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-red: #ff003c;
+            --neon-green: #00ff66;
+            --bg-color: #050505;
+            --text-color: #e0e0e0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            padding: 40px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+        }
+
+        h1 {
+            color: var(--neon-blue);
+            font-size: 1.8rem;
+            margin-bottom: 90px;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* CSS Box */
+        .box-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 50px auto;
+            perspective: 800px;
+            z-index: 10;
+        }
+
+        .css-box {
+            width: 100%;
+            height: 100%;
+            background-color: #8b5a2b;
+            border: 2px solid var(--neon-blue);
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 15px rgba(0, 243, 255, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .css-box::before, .css-box::after {
+            content: '';
+            position: absolute;
+            width: 49%;
+            height: 30px;
+            background-color: #a06b35;
+            border: 2px solid var(--neon-blue);
+            border-bottom: none;
+            top: -32px;
+            z-index: 3;
+            transition: all 0.5s ease;
+        }
+
+        .css-box::before {
+            left: -2px;
+            transform-origin: bottom left;
+            transform: skewX(-20deg);
+        }
+
+        .css-box::after {
+            right: -2px;
+            transform-origin: bottom right;
+            transform: skewX(20deg);
+        }
+
+        .css-box .tape {
+            position: absolute;
+            width: 30px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 1px dashed var(--neon-blue);
+            border-right: 1px dashed var(--neon-blue);
+            z-index: 4;
+            transition: opacity 0.3s;
+        }
+
+        .css-box .schrodinger-logo {
+            font-size: 40px;
+            opacity: 0.5;
+            filter: grayscale(100%) sepia(100%) hue-rotate(180deg);
+        }
+
+        /* Open state */
+        .box-wrapper.open .css-box::before {
+            transform: skewX(-40deg) rotate(-20deg);
+            background-color: #7a4e25;
+        }
+        .box-wrapper.open .css-box::after {
+            transform: skewX(40deg) rotate(20deg);
+            background-color: #7a4e25;
+        }
+        .box-wrapper.open .tape {
+            opacity: 0;
+        }
+        .box-wrapper.open .item {
+            display: block;
+            animation: popUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .item {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            z-index: 5;
+            text-shadow: 0 0 20px var(--neon-purple);
+        }
+
+        @keyframes popUp {
+            0% { top: 20px; opacity: 0; transform: translateX(-50%) scale(0.5); }
+            50% { opacity: 1; }
+            100% { top: -70px; opacity: 1; transform: translateX(-50%) scale(1.2); }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-2deg); }
+            20% { transform: translate(-3px, 0px) rotate(2deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(2deg); }
+            50% { transform: translate(-1px, 2px) rotate(-2deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-2deg); }
+            80% { transform: translate(-1px, -1px) rotate(2deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-2deg); }
+        }
+
+        .shaking {
+            animation: shake 0.1s infinite;
+            box-shadow: 0 0 30px var(--neon-red) !important;
+            border-color: var(--neon-red) !important;
+        }
+        .shaking::before, .shaking::after {
+            border-color: var(--neon-red) !important;
+        }
+        .shaking .tape {
+            border-color: var(--neon-red) !important;
+        }
+
+        /* Button */
+        .btn {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            margin-top: 30px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .btn:disabled {
+            color: #555;
+            border-color: #555;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-purple {
+            color: var(--neon-purple);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .btn-purple:hover:not(:disabled) {
+            background: rgba(188, 19, 254, 0.1);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.5);
+            text-shadow: 0 0 5px var(--neon-purple);
+        }
+
+        /* Text Area */
+        .text-display {
+            min-height: 80px;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #aaa;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .text-display.blinking-red {
+            color: var(--neon-red);
+            border-color: var(--neon-red);
+            animation: blinkText 0.5s infinite alternate;
+        }
+
+        @keyframes blinkText {
+            from { text-shadow: 0 0 5px var(--neon-red); opacity: 1; }
+            to { text-shadow: 0 0 20px var(--neon-red); opacity: 0.7; }
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background-color: currentColor;
+            margin-left: 5px;
+            animation: blinkCursor 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blinkCursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Result Display */
+        .result-area {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        .result-status {
+            font-size: 1.5rem;
+            color: var(--neon-purple);
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(188, 19, 254, 0.5);
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+        }
+
+        .result-desc {
+            font-size: 0.95rem;
+            color: #ccc;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Back to terminal */
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .back-link:hover {
+            color: var(--neon-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="back-link">&lt; 返回觀察終端</a>
+
+    <div class="container">
+        <h1>薛丁格的每日觀察盲盒</h1>
+
+        <div class="box-wrapper" id="box-wrapper">
+            <div class="item" id="box-item">🗃️</div>
+            <div class="css-box" id="css-box">
+                <div class="tape"></div>
+                <div class="schrodinger-logo">?</div>
+            </div>
+        </div>
+
+        <div class="text-display" id="text-display">
+            <span id="typewriter-text"></span><span class="cursor" id="cursor"></span>
+        </div>
+
+        <div class="result-area" id="result-area">
+            <div class="result-status" id="result-status"></div>
+            <div class="result-title" id="result-title"></div>
+            <div class="result-desc" id="result-desc"></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 30px; margin-bottom: 20px;">
+            <button class="btn" id="action-btn" onclick="startObservation()" style="margin: 0; width: 280px;">[ 進行今日觀察 ]</button>
+            <a href="/" class="btn btn-purple" style="margin: 0; width: 280px;">[ 回到終端機 ]</a>
+        </div>
+    </div>
+
+    <script>
+        const fortunes = [
+            { status: "大吉", title: "絕對秩序與算力加持", desc: "今日您的拉普拉斯妖算力爆表。無論是抽卡、點外送還是猜紅綠燈，結果都會坍縮成您最想要的那個。連自動販賣機都會因為邏輯錯誤多掉一瓶飲料給您。" },
+            { status: "大吉", title: "網路延遲歸零", desc: "偵測到極致的同步率。今日您在所有競技遊戲中都處於『無敵幀』狀態，現實世界的 Bug 都會自動繞開您走。建議立刻去執行那些平時不敢嘗試的高風險操作。" },
+            { status: "中吉", title: "穩定連線的日常", desc: "系統連線品質優良。今日您的記憶體配置非常合理，不會發生『走進房間忘記要幹嘛』的硬體錯誤。適合處理瑣事，效率提升 20%。" },
+            { status: "中吉", title: "熵值異常低落", desc: "今日您的周遭環境非常整潔，安特羅迦表示做得非常棒。雖然沒什麼驚喜，但下載進度條會像上了Buff一樣加速推進。平安就是福。" },
+            { status: "小吉", title: "微小的封包同步", desc: "在巷口偶遇想見的人機率提升 15%。雖然對方的記憶可能像蕾忒一樣模糊，但至少你們今天會處於同一個通訊頻道上。" },
+            { status: "小吉", title: "完美的咖啡乳化", desc: "今日您的燃料補給（咖啡）口感極佳。雖然這對拯救宇宙沒什麼幫助，但能暫時修復您那瀕臨崩潰的精神防火牆。" },
+            { status: "末吉", title: "芝諾式的延遲好運", desc: "好運大概在 50 天後才會抵達。目前請先保持低耗能待機模式，乖乖把昨天的剩菜吃完。記住，雖然距離好運只剩一半，但那一半還有一半。" },
+            { status: "末吉", title: "記憶體緩衝中", desc: "運勢載入進度 99%。剩下的 1% 需要您自行透過『早點睡覺』來解鎖。目前狀態：勉強維持運作。" },
+            { status: "凶", title: "高熵值的混亂入侵", desc: "警告：熵值升高。今日您的隨身物品具備高度的『隨機失蹤』屬性，特別是鑰匙與手機。安特羅迦正盯著您的口袋，建議與物品建立實體繫繩。" },
+            { status: "凶", title: "CSS 樣式表崩潰", desc: "視覺版面配置錯誤。今日您的穿搭可能發生嚴重的色調排斥，或是照鏡子時發現瀏海呈現無法修復的 Bug 狀態。建議減少照鏡子的觀察行為。" },
+            { status: "小凶", title: "輸入法延遲", desc: "說話時容易咬到舌頭，或是在最尷尬的對話框中打錯關鍵字。系統建議：今日溝通請盡量使用貼圖，減少文字輸入。" },
+            { status: "小凶", title: "邊緣碰撞偵測失效", desc: "今日您的末端裝甲（腳趾）與高密度家具發生碰撞的機率大幅提升。請遠離桌角與樂高積木。" },
+            { status: "大凶", title: "系統全面熔毀", desc: "今日強烈建議進入『維修模式』。連路邊的小花都可能讓您絆倒，抽卡必保底，投幣必卡錢。請原地躺平，拒絕與任何物理規律產生交互作用。" },
+            { status: "大凶", title: "硬體物理性損毀", desc: "今日與您相關的電子設備故障率提升 500%。您的手機可能會莫名重啟，電腦會藍屏，連耳機線都會自動打死結。建議與任何精密主機保持安全距離。" },
+            { status: "蛤", title: "未定義的命運", desc: "您滿懷期待地打開箱子，發現裡面是一個更小的箱子；打開更小的箱子，裡面只有一張便條紙寫著：『再來一次』。系統研判您今天陷入了薛丁格的俄羅斯娃娃陷阱，運勢為：瞎忙一場。" },
+            { status: "疊加態", title: "拒絕坍縮", desc: "您今日的運勢是『既中大獎又破產』。在您看到銀行餘額前，請維持這個疊加態以逃避現實。不要看，就沒事。" },
+            { status: "404", title: "好運找不到", desc: "找不到今日運勢。伺服器表示您的命運過於混沌，連拉斐利婭都算不出來。請自行重開機或更換操作員試試看。" },
+            { status: "格式化", title: "空無一物", desc: "您剛剛抽到了一個超棒的結果！但因為蕾忒船長路過，您的記憶已被格式化。現在您的運勢回到了原始出廠狀態：[空白]。" },
+            { status: "活死魚", title: "腥味預警", desc: "瑟思安的魚乾誘發了時空扭曲，您的今日運勢被那條活死魚給吞了。目前箱子裡只傳出陣陣鹹魚味，建議立刻關上箱子。" },
+            { status: "紙箱", title: "隱藏的躲避", desc: "箱子裡什麼都沒有。恭喜您獲得了一個空的牛皮紙袋，可以學瑟思安套在頭上。今日最適合社交恐懼症發作，只要看不見別人，別人就看不見您。" },
+            { status: "大吉", title: "拉普拉斯的綠燈", desc: "拉斐利婭為您重新運算了整座城市的交通號誌邏輯。今日您在路上將享受『一路綠燈』的絕對秩序加持，請盡情享受這份高維度的暢通無阻。" },
+            { status: "小凶", title: "芝諾的載入中", desc: "佐霏的極限操作影響了您的網路環境。今天您下載任何檔案時，最後的 1% 將會經歷無限分割的物理延遲。請保持耐心，不要砸碎螢幕。" },
+            { status: "疊加態", title: "社交薛丁格", desc: "受瑟思安的電波影響，您今天同時處於『想出門玩』與『想賴在床上』的完美疊加態。只要沒人強迫您做決定，您就可以套著紙袋一直裝死。" },
+            { status: "末吉", title: "快取意外清空", desc: "您今天有極高的機率會發生『走進房間卻忘記要拿什麼』的錯誤。這不是初老，只是蕾忒船長不小心路過並清空了您的短期快取記憶。請退回上一個房間重新載入。" },
+            { status: "大凶", title: "高熵會議地獄", desc: "警告！安特羅迦剛剛『優化』了您的行事曆。您今天可能會遭遇各種突發的無意義討論、被插隊的工作，或是主管的臨時差遣。請準備好精神護盾。" },
+            { status: "大吉", title: "物理亂數爆擊", desc: "今日您的物理亂數表表現極其優異。無論是遠距離投擲垃圾進垃圾桶，還是隨手盲猜密碼，都有極高機率觸發『爆擊』。請享受這突如其來的高光時刻。" },
+            { status: "中吉", title: "背景無聲更新", desc: "您今天可能會覺得有點莫名疲倦。別擔心，這不是生病，而是您的碳基載體正在進行宇宙背景的靜默更新。多喝點水，讓進度條跑完就好。" },
+            { status: "小吉", title: "安全模式啟動", desc: "系統偵測到您的精神力偏低，已自動為您切換至『安全模式』。今日適合進行最低限度的維生操作，不要給自己排太多行程，適度摸魚是合法的。" },
+            { status: "凶", title: "防毒軟體焦慮", desc: "您今天會一直覺得『好像忘了做什麼事』，就像防毒軟體一直在背景狂轉卻掃不出 Bug。別想了，就算真的忘了，明天再修復這個漏洞吧。" },
+            { status: "蛤", title: "材質載入失敗", desc: "您打開盲盒，發現裡面只有一塊寫著『Error』的紫黑相間破圖方塊。系統建議您今天吃東西時不要太在意口感，因為物理引擎的味覺材質包似乎還沒下載完畢。" }
+        ];
+
+        const btn = document.getElementById('action-btn');
+        const boxWrapper = document.getElementById('box-wrapper');
+        const cssBox = document.getElementById('css-box');
+        const textDisplay = document.getElementById('text-display');
+        const typewriterText = document.getElementById('typewriter-text');
+        const resultArea = document.getElementById('result-area');
+        const resultStatus = document.getElementById('result-status');
+        const resultTitle = document.getElementById('result-title');
+        const resultDesc = document.getElementById('result-desc');
+        const boxItem = document.getElementById('box-item');
+
+        let isObserving = false;
+        let hasCollapsed = false;
+        let typeInterval;
+
+        // Typewriter effect function
+        function typeText(text, speed = 50, callback = null) {
+            clearInterval(typeInterval);
+            typewriterText.textContent = '';
+            let i = 0;
+            typeInterval = setInterval(() => {
+                if (i < text.length) {
+                    typewriterText.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typeInterval);
+                    if (callback) callback();
+                }
+            }, speed);
+        }
+
+        // Initialize state
+        function init() {
+            isObserving = false;
+            hasCollapsed = false;
+            
+            // Reset UI
+            btn.textContent = '[ 進行今日觀察 ]';
+            btn.disabled = false;
+            boxWrapper.classList.remove('open');
+            cssBox.classList.remove('shaking');
+            textDisplay.classList.remove('blinking-red');
+            textDisplay.style.display = 'block';
+            resultArea.style.display = 'none';
+            boxItem.textContent = '🗃️';
+            
+            typeText("系統待機中... 箱子內目前處於未定義的疊加態。");
+        }
+
+        // Start observation
+        function startObservation() {
+            if (isObserving) return;
+            
+            if (hasCollapsed) {
+                init();
+                return;
+            }
+
+            isObserving = true;
+            btn.disabled = true;
+            
+            // Start animation
+            cssBox.classList.add('shaking');
+            textDisplay.classList.add('blinking-red');
+            typewriterText.textContent = "波函數坍縮中... 正在運算高維度機率...";
+            clearInterval(typeInterval); // Stop any ongoing typing
+
+            // Wait for 2.5 seconds
+            setTimeout(() => {
+                collapseWaveFunction();
+            }, 2500);
+        }
+
+        // Collapse and show result
+        function collapseWaveFunction() {
+            cssBox.classList.remove('shaking');
+            textDisplay.classList.remove('blinking-red');
+            textDisplay.style.display = 'none';
+            
+            // Pick random fortune
+            const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+            
+            // Update result UI
+            resultStatus.textContent = `[ ${fortune.status} ]`;
+            resultTitle.textContent = fortune.title;
+            resultDesc.textContent = fortune.desc;
+            
+            // Custom icons based on status
+            if (fortune.status === "蛤") boxItem.textContent = "📦";
+            else if (fortune.status === "紙箱") boxItem.textContent = "🛍️";
+            else if (fortune.status === "活死魚") boxItem.textContent = "🐟";
+            else if (fortune.status === "大凶" || fortune.status === "凶") boxItem.textContent = "⚠️";
+            else boxItem.textContent = "✨";
+
+            // Open box
+            boxWrapper.classList.add('open');
+            resultArea.style.display = 'block';
+            
+            // Update button
+            btn.textContent = '[ 重新啟動觀察儀器 ]';
+            btn.disabled = false;
+            
+            isObserving = false;
+            hasCollapsed = true;
+        }
+
+        // Start initial typing
+        window.onload = init;
+
+    </script>
+</body>
+</html>
