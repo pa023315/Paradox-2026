@@ -17,6 +17,7 @@ export default defineConfig({
         captain: resolve(__dirname, 'Captain/index.html'),
         meow: resolve(__dirname, 'meow/index.html'),
         quiz: resolve(__dirname, 'quiz/index.html'),
+        drawing: resolve(__dirname, 'drawing/index.html'),
       },
     },
   },
