@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARA≠DOX 觀察站：核心機密解密進度</title>
+    <link rel="icon" href="https://i.meee.com.tw/UcseCSf.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0A0A0A;
+            --main-color: #00FFFF;
+            --success-color: #00FF00;
+            --locked-color: #333333;
+            --warning-color: #FF3333;
+            --text-color: #E0E0E0;
+            --font-mono: 'Fira Code', 'Courier New', Courier, monospace;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-mono);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow-x: hidden;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 9999;
+            position: fixed;
+            pointer-events: none;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,255,255,0.1) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.3;
+            animation: scanline 6s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { top: -100px; }
+            100% { top: 100%; }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            padding: 40px 0;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--main-color);
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--main-color);
+            font-size: 1.8rem;
+            margin: 0 0 15px 0;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-text {
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .progress-bar-bg {
+            flex-grow: 1;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--main-color);
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--main-color);
+            box-shadow: 0 0 10px var(--main-color);
+            transition: width 1s ease-in-out;
+        }
+
+        .header-desc {
+            margin-top: 25px;
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            border-left: 3px solid var(--main-color);
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .header-desc .status-line {
+            color: var(--warning-color);
+            margin-top: 10px;
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid var(--locked-color);
+            padding: 20px;
+            position: relative;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, transparent 50%, rgba(0, 255, 255, 0.05) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card.unlocked {
+            border-color: var(--main-color);
+            box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.1), 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        .card.unlocked:hover::before {
+            opacity: 1;
+        }
+
+        .card.unlocked:hover {
+            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.2), 0 0 15px rgba(0, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .card.locked {
+            border-color: var(--locked-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .card-id {
+            font-weight: bold;
+            color: #888;
+        }
+
+        .card.unlocked .card-id {
+            color: var(--main-color);
+        }
+
+        .card-status {
+            font-size: 0.9rem;
+        }
+
+        .status-success {
+            color: var(--success-color);
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .status-encrypted {
+            color: var(--warning-color);
+            animation: blink 1s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 1; text-shadow: 0 0 5px var(--warning-color); }
+            to { opacity: 0.5; text-shadow: none; }
+        }
+
+        .card-body {
+            flex-grow: 1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #CCC;
+            word-break: break-word;
+        }
+
+        .card.locked .card-body {
+            color: #666;
+        }
+
+        .glitch-text {
+            font-family: monospace;
+            color: var(--warning-color);
+            opacity: 0.8;
+            word-break: break-all;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--main-color);
+            border: 1px solid var(--main-color);
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            align-self: flex-start;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            text-shadow: 0 0 5px var(--main-color);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #050505;
+            border: 1px solid var(--main-color);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--main-color);
+            box-shadow: 0 0 10px var(--main-color);
+        }
+
+        .modal-header {
+            color: var(--main-color);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed rgba(0, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .modal-body {
+            min-height: 150px;
+            color: var(--success-color);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-bottom: 30px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: var(--success-color);
+            margin-left: 5px;
+            animation: blinkCursor 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blinkCursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .modal-close {
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+            float: right;
+            margin-top: 0;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 51, 51, 0.1);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+            text-shadow: 0 0 5px var(--warning-color);
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            right: 0;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .back-link:hover {
+            color: var(--main-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+
+    <div class="container">
+        <header>
+            <a href="/" class="back-link">[ 返回觀察終端 ]</a>
+            <h1>[SYSTEM_OVERRIDE] 核心機密碎片同步中...</h1>
+            <div class="progress-container">
+                <div class="progress-text" id="progress-text">0/9 已解鎖</div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+            
+            <div class="header-desc">
+                提取的碎片數據，並非獨立字串<br>
+                這些離散的代碼正在產生共鳴<br>
+                單一指令的算力不足以突破維度壁壘<br>
+                必須拼接重組<br>
+                <span class="status-line">- 狀態：等待終極合成指令輸入...</span>
+            </div>
+        </header>
+
+        <div class="grid" id="data-grid">
+            <!-- Cards will be injected here -->
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">TERMINAL // SECURE_CONNECTION_ESTABLISHED</div>
+            <div class="modal-body">
+                <span id="typewriter-text"></span><span class="cursor"></span>
+            </div>
+            <button class="btn modal-close" onclick="closeModal()">[ 關閉連線 ]</button>
+            <div style="clear: both;"></div>
+        </div>
+    </div>
+
+    <script>
+        const coreData = [
+            { id: 1, isUnlocked: true, title: "第一數據", hint: "掃描手冊日誌歷史紀錄。", hasDetail: false, detailText: "" },
+            { id: 2, isUnlocked: true, title: "第二數據", hint: "潛藏在宇宙的某個角落中。", hasDetail: false, detailText: "" },
+            { id: 3, isUnlocked: true, title: "第三數據", hint: "某處某人正敘述著一段話。", hasDetail: false, detailText: "" },
+            { id: 4, isUnlocked: true, title: "第四數據", hint: "攔截到 4 月 1 日的未授權音檔紀錄。", hasDetail: true, detailText: `... 警告：系統正在讀取 4 月 1 日的未授權音檔紀錄。...
+... 音檔名稱 【第四數據】 ... 
+該紀錄來自機房最底層的「第 8 號碳基除錯員（化名：阿明）」。
+
+...《阿明的最後廣播》播放中...
+
+「聽好，不管你是誰，只要你駭進了這個終端機，就代表你一定也很閒。」
+「我受夠了！我真的受夠了！」
+「今天是 4 月 1 號，也就是傳說中可以合法說謊的日子，對吧？」
+
+「那好，我要在這裡鄭重宣布：安特羅迦今天早上絕對沒有偷偷把我剛買的早餐冰奶茶加熱到沸騰！拉斐利婭也絕對沒有為了計算『機房蚊子的飛行軌跡』，把整個伺服器凍結成冰棒，害我只能包著睡袋敲鍵盤！」
+
+「這個 PARA≠DOX 觀察站簡直就是全宇宙最棒、最溫馨、充滿了愛與和平的度假勝地！我在這裡工作得開心極了！我的頭髮甚至比上個月還要多！」
+
+「為了表達我對這份工作的熱愛，我決定在今天提交辭呈。既然是愚人節，我在離職信的密碼鎖上，設定了一個連量子電腦都解不開的終極密語，也就是我這輩子說過最虛偽、最諷刺的三個字。」
+
+「畢竟，我可是即將向我們這個...偉大的系統告別了啊。」
+「祝你們愚人節快樂，再見！」
+
+[AUDIO_PLAYBACK_ENDED]
+系統備註：該除錯員並未真正離職，他目前正被卡在通風管裡試圖清理安特掉落的洋芋片碎屑。但如果您想確認他留下了什麼機密，您可以嘗試輸入他剛才提到的形容詞。` },
+            { id: 5, isUnlocked: true, title: "第五數據", hint: "系統啟動 POST 程序時，產生了無法排除的錯誤日誌：", hasDetail: true, detailText: `> 開始傾印日誌 (Log Dump)...\n\n不明來源的存取要求已遭到核心強制拒絕。\n可用記憶體區塊正發生高頻率的異常坍縮。\n質量守恆定律在此空間內已暫時失去效用。\n疑似觀察到多位高維度實體發出的干擾波。\n的確，有些絕對規則連主機板都無法推翻。\n\n[SYSTEM_HALT] 錯誤代碼：UHDG ILUVW OHWWHU` },
+            { id: 6, isUnlocked: false, title: "第六數據", hint: "等待時空座標同步...", hasDetail: false, detailText: "" },
+            { id: 7, isUnlocked: false, title: "第七數據", hint: "等待時空座標同步...", hasDetail: false, detailText: "" },
+            { id: 8, isUnlocked: false, title: "第八數據", hint: "等待時空座標同步...", hasDetail: false, detailText: "" },
+            { id: 9, isUnlocked: false, title: "第九數據", hint: "等待時空座標同步...", hasDetail: false, detailText: "" }
+        ];
+
+        const grid = document.getElementById('data-grid');
+        const progressText = document.getElementById('progress-text');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const typewriterText = document.getElementById('typewriter-text');
+
+        let typeInterval;
+        const glitchChars = '!<>-_\\\\/[]{}—=+*^?#________';
+
+        function init() {
+            let unlockedCount = 0;
+
+            coreData.forEach(data => {
+                if (data.isUnlocked) unlockedCount++;
+
+                const card = document.createElement('div');
+                card.className = `card ${data.isUnlocked ? 'unlocked' : 'locked'}`;
+
+                const header = document.createElement('div');
+                header.className = 'card-header';
+                
+                const idSpan = document.createElement('span');
+                idSpan.className = 'card-id';
+                idSpan.textContent = `Data_0${data.id}`;
+                
+                const statusSpan = document.createElement('span');
+                statusSpan.className = `card-status ${data.isUnlocked ? 'status-success' : 'status-encrypted'}`;
+                statusSpan.textContent = data.isUnlocked ? 'SUCCESS' : '[ENCRYPTED]';
+
+                header.appendChild(idSpan);
+                header.appendChild(statusSpan);
+                card.appendChild(header);
+
+                const body = document.createElement('div');
+                body.className = 'card-body';
+                
+                if (data.isUnlocked) {
+                    body.textContent = data.hint;
+                } else {
+                    const glitchSpan = document.createElement('div');
+                    glitchSpan.className = 'glitch-text';
+                    body.appendChild(glitchSpan);
+                    
+                    // Glitch effect
+                    setInterval(() => {
+                        let text = '';
+                        for(let i=0; i<15; i++) {
+                            text += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                        }
+                        glitchSpan.textContent = text;
+                    }, 100);
+
+                    const waitText = document.createElement('div');
+                    waitText.style.marginTop = '10px';
+                    waitText.textContent = data.hint;
+                    body.appendChild(waitText);
+                }
+                card.appendChild(body);
+
+                if (data.isUnlocked && data.hasDetail) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.textContent = '[ 讀取完整紀錄 ]';
+                    btn.onclick = () => openModal(data.detailText);
+                    card.appendChild(btn);
+                }
+
+                grid.appendChild(card);
+            });
+
+            // Update Progress
+            progressText.textContent = `${unlockedCount}/${coreData.length} 已解鎖`;
+            setTimeout(() => {
+                progressBarFill.style.width = `${(unlockedCount / coreData.length) * 100}%`;
+            }, 500);
+        }
+
+        function openModal(text) {
+            modalOverlay.classList.add('active');
+            typewriterText.textContent = '';
+            clearInterval(typeInterval);
+            
+            let i = 0;
+            typeInterval = setInterval(() => {
+                if (i < text.length) {
+                    typewriterText.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typeInterval);
+                }
+            }, 30);
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            clearInterval(typeInterval);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

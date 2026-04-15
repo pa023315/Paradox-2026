@@ -18,6 +18,7 @@ export default defineConfig({
         meow: resolve(__dirname, 'meow/index.html'),
         quiz: resolve(__dirname, 'quiz/index.html'),
         drawing: resolve(__dirname, 'drawing/index.html'),
+        core: resolve(__dirname, 'core/index.html'),
       },
     },
   },
