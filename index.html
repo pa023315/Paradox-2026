@@ -1756,6 +1756,41 @@
             return `RSCH-${p1}-${p2}`;
         }
 
+        const wrongPasswordJokes = [
+            "系統正在懷疑您的鍵盤是不是壞了。",
+            "根據機率學，亂敲鍵盤總有一天會對的，但不是今天。",
+            "您的密碼錯誤率已經突破了本站的熵值上限。",
+            "系統建議您喝口水，深呼吸，然後去找筆記本。",
+            "剛剛輸入的字串連拉普拉斯妖都推算不出來。",
+            "您是不是把密碼跟午餐想吃的東西搞混了？",
+            "系統已自動為您的手指申請了職災理賠。",
+            "密碼處於既正確又錯誤的疊加態，可惜系統只看結果。",
+            "為了保護主機板，系統決定暫時不理您。",
+            "您確定不用換一個沒有撒到咖啡的鍵盤嗎？",
+            "系統偵測到高度的物理性盲打行為。",
+            "密碼驗證失敗。另外，工程師剛剛嘆了一口氣。",
+            "提示：密碼通常不會是一串貓咪踩過鍵盤的軌跡。",
+            "系統後台正在討論要不要把您的驗證碼改成九宮格。",
+            "再錯下去，系統就要強制播放 8 位元嘲諷音樂了。",
+            "您的記憶似乎被格式化了，需要幫您重啟大腦嗎？",
+            "系統正在努力理解您剛剛輸入的外星語法。",
+            "密碼錯誤。系統已經默默把防禦等級調高了一點點。",
+            "這種堅持不懈的試錯精神，系統給予口頭嘉獎。",
+            "就算把鍵盤敲破，密碼也不會自己變成對的喔。",
+            "系統判定：觀察者目前處於嚴重的記憶斷層。",
+            "剛剛的密碼差一點點就對了……開玩笑的，差很多。",
+            "伺服器風扇因為您瘋狂的嘗試而轉得更快了。",
+            "提示：密碼簿通常放在您永遠找不到的那個抽屜裡。",
+            "系統開始懷疑您其實是來幫我們測試防護機制的。",
+            "您的密碼輸入速度很快，可惜準確率不在同一個維度。",
+            "如果忘記密碼，系統建議您原地睡一覺再來試。",
+            "密碼錯誤。順帶一提，機房現在有股淡淡的焦味。",
+            "系統攔截了您的輸入，並把它丟進了資源回收桶。",
+            "驗證失敗。系統正考慮是否要寄送實體密碼提示信給您。"
+        ];
+        let failedAttempts = 0;
+        let nextJokeThreshold = Math.floor(Math.random() * 3) + 3; // 3 to 5
+
         if (cmdInput) {
             cmdInput.onkeydown = async (e) => {
                 // 防止中文輸入法選字時按 Enter 觸發送出
@@ -1845,6 +1880,7 @@
                             }
                             
                             printLog(`> [CACHE] ${msg}`, 'success'); // Added [CACHE] marker for clarity (optional, but good for debugging/feedback)
+                            failedAttempts = 0;
                             return; 
                         } catch (e) {
                             console.error("Cache parse error", e);
@@ -1888,8 +1924,18 @@
                                 msg = `身份驗證通過。已同步觀察者資料，歡迎回來，觀察者 ${currentId || 'ID'}`;
                             }
                             printLog(`> ${msg}`, 'success');
+                            failedAttempts = 0;
                         } else {
                             printLog(`> [ERROR] ${data.message || '指令無效或權限不足'}`, 'error');
+                            failedAttempts++;
+                            if (failedAttempts >= nextJokeThreshold) {
+                                const randomJoke = wrongPasswordJokes[Math.floor(Math.random() * wrongPasswordJokes.length)];
+                                setTimeout(() => {
+                                    printLog(`> [SYSTEM_MOCKERY] ${randomJoke}`, 'success');
+                                }, 500);
+                                failedAttempts = 0;
+                                nextJokeThreshold = Math.floor(Math.random() * 3) + 3;
+                            }
                         }
 
                     } catch (err) {
