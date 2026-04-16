@@ -19,6 +19,7 @@ export default defineConfig({
         quiz: resolve(__dirname, 'quiz/index.html'),
         drawing: resolve(__dirname, 'drawing/index.html'),
         core: resolve(__dirname, 'core/index.html'),
+        incrediville: resolve(__dirname, 'incrediville/index.html'),
       },
     },
   },
