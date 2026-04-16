@@ -154,14 +154,21 @@
             left: 50%;
             transform: translateX(-50%);
             font-size: 60px;
-            z-index: 5;
+            z-index: 20;
             text-shadow: 0 0 20px var(--neon-purple);
+        }
+
+        .item img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.5));
         }
 
         @keyframes popUp {
             0% { top: 20px; opacity: 0; transform: translateX(-50%) scale(0.5); }
             50% { opacity: 1; }
-            100% { top: -70px; opacity: 1; transform: translateX(-50%) scale(1.2); }
+            100% { top: -20px; opacity: 1; transform: translateX(-50%) scale(1); }
         }
 
         @keyframes shake {
@@ -331,7 +338,7 @@
         <h1>薛丁格的每日觀察盲盒</h1>
 
         <div class="box-wrapper" id="box-wrapper">
-            <div class="item" id="box-item">🗃️</div>
+            <div class="item" id="box-item"><img src="https://storage.googleapis.com/macha-agent-studio-prod-user-content/2025-02-19/image_1739933069177.png" alt="item"></div>
             <div class="css-box" id="css-box">
                 <div class="tape"></div>
                 <div class="schrodinger-logo">?</div>
@@ -375,7 +382,7 @@
             { status: "404", title: "好運找不到", desc: "找不到今日運勢。伺服器表示您的命運過於混沌，連拉斐利婭都算不出來。請自行重開機或更換操作員試試看。" },
             { status: "格式化", title: "空無一物", desc: "您剛剛抽到了一個超棒的結果！但因為蕾忒船長路過，您的記憶已被格式化。現在您的運勢回到了原始出廠狀態：[空白]。" },
             { status: "活死魚", title: "腥味預警", desc: "瑟思安的魚乾誘發了時空扭曲，您的今日運勢被那條活死魚給吞了。目前箱子裡只傳出陣陣鹹魚味，建議立刻關上箱子。" },
-            { status: "紙箱", title: "隱藏的躲避", desc: "箱子裡什麼都沒有。恭喜您獲得了一個空的牛皮紙袋，可以學瑟思安套在頭上。今日最適合社交恐懼症發作，只要看不見別人，別人就看不見您。" },
+            { status: "紙袋", title: "隱藏的躲避", desc: "箱子裡什麼都沒有。恭喜您獲得了一個空的牛皮紙袋，可以學瑟思安套在頭上。今日最適合社交恐懼症發作，只要看不見別人，別人就看不見您。" },
             { status: "大吉", title: "拉普拉斯的綠燈", desc: "拉斐利婭為您重新運算了整座城市的交通號誌邏輯。今日您在路上將享受『一路綠燈』的絕對秩序加持，請盡情享受這份高維度的暢通無阻。" },
             { status: "小凶", title: "芝諾的載入中", desc: "佐霏的極限操作影響了您的網路環境。今天您下載任何檔案時，最後的 1% 將會經歷無限分割的物理延遲。請保持耐心，不要砸碎螢幕。" },
             { status: "疊加態", title: "社交薛丁格", desc: "受瑟思安的電波影響，您今天同時處於『想出門玩』與『想賴在床上』的完美疊加態。只要沒人強迫您做決定，您就可以套著紙袋一直裝死。" },
@@ -432,7 +439,8 @@
             textDisplay.classList.remove('blinking-red');
             textDisplay.style.display = 'block';
             resultArea.style.display = 'none';
-            boxItem.textContent = '🗃️';
+            // Keep the image inside the box item
+            boxItem.innerHTML = '<img src="https://storage.googleapis.com/macha-agent-studio-prod-user-content/2025-02-19/image_1739933069177.png" alt="item">';
             
             typeText("系統待機中... 箱子內目前處於未定義的疊加態。");
         }
@@ -475,12 +483,43 @@
             resultTitle.textContent = fortune.title;
             resultDesc.textContent = fortune.desc;
             
-            // Custom icons based on status
-            if (fortune.status === "蛤") boxItem.textContent = "📦";
-            else if (fortune.status === "紙箱") boxItem.textContent = "🛍️";
-            else if (fortune.status === "活死魚") boxItem.textContent = "🐟";
-            else if (fortune.status === "大凶" || fortune.status === "凶") boxItem.textContent = "⚠️";
-            else boxItem.textContent = "✨";
+            // Custom icons based on status and title
+            const imageMap = {
+                "404_好運找不到": "https://i.meee.com.tw/caaUEN7.png",
+                "大凶_系統全面熔毀": "https://i.meee.com.tw/7T5nWje.png",
+                "大凶_高熵會議地獄": "https://i.meee.com.tw/R4Ygtvq.png",
+                "大凶_硬體物理性損毀": "https://i.meee.com.tw/amG1L4m.png",
+                "大吉_拉普拉斯的綠燈": "https://i.meee.com.tw/f5kaNX3.png",
+                "大吉_物理亂數爆擊": "https://i.meee.com.tw/X5WnS49.png",
+                "大吉_網路延遲歸零": "https://i.meee.com.tw/gqrPcKj.png",
+                "小凶_芝諾的載入中": "https://i.meee.com.tw/TOm9Pc1.png",
+                "小吉_安全模式啟動": "https://i.meee.com.tw/OAMZ52C.png",
+                "小吉_完美的咖啡乳化": "https://i.meee.com.tw/X6JmCir.png",
+                "中吉_背景無聲更新": "https://i.meee.com.tw/OdFiUF4.png",
+                "中吉_熵值異常低落": "https://i.meee.com.tw/owfrMeJ.png",
+                "凶_防毒軟體焦慮": "https://i.meee.com.tw/9WemSY1.png",
+                "凶_高熵值的混亂入侵": "https://i.meee.com.tw/zAGjvhu.png",
+                "末吉_快取意外清空": "https://i.meee.com.tw/gzF6XAb.png",
+                "末吉_記憶體緩衝中": "https://i.meee.com.tw/nrYmNak.png",
+                "格式化_空無一物": "https://i.meee.com.tw/uC9XEtN.png",
+                "蛤_未定義的命運": "https://i.meee.com.tw/XeULIrW.png",
+                "疊加態_拒絕坍縮": "https://i.meee.com.tw/tPKtb9y.png",
+                "疊加態_社交薛丁格": "https://i.meee.com.tw/JPyIbxe.png",
+                "大吉_絕對秩序與算力加持": "https://i.meee.com.tw/vnpLEoM.png",
+                "小凶_輸入法延遲": "https://i.meee.com.tw/Hyj3ZQE.png",
+                "小凶_邊緣碰撞偵測失效": "https://i.meee.com.tw/ItUyfgo.png",
+                "小吉_微小的封包同步": "https://i.meee.com.tw/DFywaRC.png",
+                "中吉_穩定連線的日常": "https://i.meee.com.tw/v7Oochs.png",
+                "凶_CSS 樣式表崩潰": "https://i.meee.com.tw/E0RI2kf.png",
+                "末吉_芝諾式的延遲好運": "https://i.meee.com.tw/G1bNVsA.png",
+                "活死魚_腥味預警": "https://i.meee.com.tw/ognSgQH.png",
+                "紙袋_隱藏的躲避": "https://i.meee.com.tw/mDNk1UH.png",
+                "蛤_材質載入失敗": "https://i.meee.com.tw/Ah8MbBa.png"
+            };
+            
+            const key = `${fortune.status}_${fortune.title}`;
+            const imgUrl = imageMap[key] || "https://storage.googleapis.com/macha-agent-studio-prod-user-content/2025-02-19/image_1739933069177.png";
+            boxItem.innerHTML = `<img src="${imgUrl}" alt="${fortune.status}">`;
 
             // Open box
             boxWrapper.classList.add('open');
