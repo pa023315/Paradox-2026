@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARA≠DOX - 所長見習證</title>
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --bg-color: #050505;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            background: rgba(10, 10, 10, 0.8);
+            padding: 40px 20px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+            margin: 0;
+            word-break: keep-all;
+        }
+
+        .image-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.3);
+            border: 1px solid rgba(188, 19, 254, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .image-container img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.6);
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: rgba(57, 255, 20, 0.1);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
+            text-shadow: 0 0 5px var(--neon-green);
+        }
+
+        @media (max-width: 600px) {
+            p {
+                font-size: 1rem;
+            }
+            .btn {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <p>從今天起，你就是 Para≠dox 一員，收下這張所長見習證，跟我們一起觀察悖論吧！</p>
+        
+        <div class="image-container">
+            <img src="https://i.meee.com.tw/tTQY6Th.png" alt="所長見習證">
+        </div>
+        
+        <a href="/" class="btn">回到終端機</a>
+    </div>
+</body>
+</html>
