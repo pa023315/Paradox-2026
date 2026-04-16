@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paradox 觀察站內部平面圖</title>
+    <style>
+        :root {
+            --bg-color: #05080A;
+            --border-color: #00FFCC;
+            --hover-color: #00FF00;
+            --text-color: #00FFCC;
+            --core-color: #ff003c;
+            --aqua-color: #0066ff;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 100vh;
+            box-sizing: border-box;
+            /* Blueprint grid background */
+            background-image: 
+                linear-gradient(rgba(0, 255, 204, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 204, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            padding: 8px 15px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--hover-color);
+            color: var(--hover-color);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        /* Map Grid Layout */
+        .map-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .map-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        .map-wrapper::-webkit-scrollbar-track {
+            background: rgba(0, 34, 34, 0.5);
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+        .map-wrapper::-webkit-scrollbar-thumb {
+            background: var(--text-color);
+            border-radius: 4px;
+        }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(6, 100px);
+            gap: 12px;
+            width: 100%;
+            min-width: 900px;
+            grid-template-areas:
+                "vtuber vtuber c1 studio studio c2 archives"
+                "vtuber vtuber c1 c3     c3     c2 c4"
+                "aquarium tv   c1 observe observe c2 mission"
+                "c5     c5     c1 observe observe c2 toilet"
+                "lounge lounge c1 puzzle  core    c6 canteen"
+                "office c7     c1 teleport teleport c8 recroom";
+            
+            /* Wall thickness pattern */
+            background-image: repeating-linear-gradient(
+                45deg,
+                rgba(0, 255, 204, 0.15),
+                rgba(0, 255, 204, 0.15) 2px,
+                transparent 2px,
+                transparent 8px
+            );
+            background-color: #020a0a;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            position: relative;
+        }
+
+        @media (max-width: 900px) {
+            .mobile-hint {
+                display: block !important;
+            }
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Corridors */
+        .corridor {
+            background-color: var(--bg-color);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .corridor:hover {
+            background-color: rgba(0, 255, 0, 0.05);
+        }
+
+        /* Pillars */
+        .pillar {
+            width: 8px; height: 8px;
+            background: var(--hover-color);
+            box-shadow: 0 0 8px var(--hover-color);
+            position: relative;
+            z-index: 10;
+        }
+        .pillar::after {
+            content: attr(data-label);
+            position: absolute;
+            top: 12px; left: 12px;
+            font-size: 10px;
+            color: var(--hover-color);
+            white-space: nowrap;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Room Styles */
+        .room {
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: var(--bg-color);
+            user-select: none;
+        }
+
+        /* Doors */
+        .door {
+            position: absolute;
+            background: var(--bg-color);
+            z-index: 5;
+        }
+        .door-r { right: -5px; top: 20px; width: 10px; height: 24px; }
+        .door-r::after {
+            content: ''; position: absolute;
+            right: 5px; top: 0; width: 24px; height: 24px;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-radius: 0 100% 0 0;
+            opacity: 0.8;
+        }
+        .door-l { left: -5px; bottom: 20px; width: 10px; height: 24px; }
+        .door-l::after {
+            content: ''; position: absolute;
+            left: 5px; bottom: 0; width: 24px; height: 24px;
+            border-bottom: 1px solid var(--border-color);
+            border-left: 1px solid var(--border-color);
+            border-radius: 0 0 0 100%;
+            opacity: 0.8;
+        }
+        .door-t { top: -5px; right: 20px; width: 24px; height: 10px; }
+        .door-t::after {
+            content: ''; position: absolute;
+            top: 5px; right: 0; width: 24px; height: 24px;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-radius: 0 100% 0 0;
+            opacity: 0.8;
+        }
+        .door-b { bottom: -5px; left: 20px; width: 24px; height: 10px; }
+        .door-b::after {
+            content: ''; position: absolute;
+            bottom: 5px; left: 0; width: 24px; height: 24px;
+            border-bottom: 1px solid var(--border-color);
+            border-left: 1px solid var(--border-color);
+            border-radius: 0 0 0 100%;
+            opacity: 0.8;
+        }
+
+        .room-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+
+        .room-title {
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .room:hover {
+            background: rgba(0, 255, 0, 0.05);
+            border-color: var(--hover-color);
+            color: var(--hover-color);
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.1), 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+
+        /* Specific Room Layout Adjustments */
+        .room-vtuber { grid-area: vtuber; border-style: double; border-width: 4px; }
+        .room-studio { grid-area: studio; border-style: dashed; border-width: 2px; }
+        .room-observe { grid-area: observe; border-style: solid; border-width: 2px; }
+        .room-archives { grid-area: archives; border-style: dotted; border-width: 2px; }
+        .room-mission { grid-area: mission; border-style: solid; }
+        .room-aquarium { grid-area: aquarium; border-style: dashed; }
+        .room-tv { grid-area: tv; border-style: solid; }
+        .room-toilet { grid-area: toilet; border-style: dotted; }
+        .room-lounge { grid-area: lounge; border-style: double; border-width: 3px; }
+        .room-puzzle { grid-area: puzzle; border-style: solid; }
+        .room-core { 
+            grid-area: core; 
+            border-color: var(--core-color); 
+            border-style: double; 
+            border-width: 4px; 
+            color: var(--core-color);
+            box-shadow: inset 0 0 10px rgba(255, 0, 60, 0.1);
+        }
+        .room-canteen { grid-area: canteen; border-style: solid; }
+        .room-office { grid-area: office; border-style: dashed; }
+        .room-teleport { grid-area: teleport; border-style: dashed; border-width: 2px; }
+        .room-recroom { grid-area: recroom; border-style: solid; }
+
+        /* Animations */
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-3px, 3px) }
+            40% { transform: translate(-3px, -3px) }
+            60% { transform: translate(3px, 3px) }
+            80% { transform: translate(3px, -3px) }
+            100% { transform: translate(0) }
+        }
+
+        .anim-glitch {
+            animation: glitch 0.1s linear infinite;
+            background: rgba(255, 0, 255, 0.1) !important;
+            color: #ff00ff !important;
+            border-color: #ff00ff !important;
+            text-shadow: 2px 0 #00ffff, -2px 0 #ff0000;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-1deg); }
+            50% { transform: translateX(5px) rotate(1deg); }
+            75% { transform: translateX(-5px) rotate(-1deg); }
+        }
+
+        .anim-core {
+            animation: shake 0.4s ease-in-out;
+            background: rgba(255, 0, 60, 0.1) !important;
+            border-color: var(--core-color) !important;
+            color: var(--core-color) !important;
+            box-shadow: inset 0 0 30px rgba(255, 0, 60, 0.3), 0 0 20px rgba(255, 0, 60, 0.5) !important;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 0.8; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+
+        .anim-aqua {
+            background: rgba(0, 102, 255, 0.2) !important;
+            border-color: var(--aqua-color) !important;
+            color: #fff !important;
+            text-shadow: 0 0 10px var(--aqua-color);
+        }
+
+        .anim-aqua::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50px; height: 50px;
+            background: rgba(0, 102, 255, 0.4);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: ripple 1s ease-out;
+            pointer-events: none;
+        }
+
+        /* Studio ON AIR */
+        @keyframes onAirBlink {
+            0%, 100% { border-color: var(--border-color); box-shadow: none; color: var(--text-color); }
+            50% { border-color: #ff0000; box-shadow: 0 0 15px #ff0000, inset 0 0 10px #ff0000; color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+        }
+        .anim-on-air {
+            animation: onAirBlink 0.5s ease-in-out 3;
+        }
+
+        /* Canteen Warm Glow */
+        @keyframes warmGlow {
+            0%, 100% { background: rgba(0, 20, 20, 0.6); box-shadow: none; border-color: var(--border-color); color: var(--text-color); }
+            50% { background: rgba(255, 204, 0, 0.15); box-shadow: 0 0 25px rgba(255, 204, 0, 0.6), inset 0 0 20px rgba(255, 204, 0, 0.4); border-color: #ffcc00; color: #ffcc00; text-shadow: 0 0 5px #ffcc00; }
+        }
+        .anim-warm-glow {
+            animation: warmGlow 1.5s ease-in-out;
+        }
+
+        /* Rec Room Pixel Flicker */
+        @keyframes pixelFlicker {
+            0%, 100% { background-color: rgba(0, 20, 20, 0.6); }
+            10%, 30%, 50%, 70%, 90% { background-color: #00FFCC; color: #000; box-shadow: inset 0 0 0 5px #000, inset 0 0 0 10px #00FFCC; }
+            20%, 40%, 60%, 80% { background-color: #000; color: #00FFCC; box-shadow: inset 0 0 0 5px #00FFCC, inset 0 0 0 10px #000; }
+        }
+        .anim-pixel-flicker {
+            animation: pixelFlicker 0.6s steps(1);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(5, 5, 5, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: rgba(0, 20, 20, 0.85);
+            border: 1px solid var(--text-color);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2), inset 0 0 20px rgba(0, 243, 255, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--text-color);
+            box-shadow: 0 0 10px var(--text-color);
+        }
+
+        .modal-title {
+            color: var(--hover-color);
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            text-shadow: 0 0 10px var(--hover-color);
+            letter-spacing: 2px;
+            flex-shrink: 0;
+        }
+
+        .modal-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            overflow-y: auto;
+            padding-right: 15px;
+            margin-right: -15px;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 34, 34, 0.5);
+            border-radius: 3px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--text-color);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-title {
+            color: var(--hover-color);
+            border-bottom: 1px dashed var(--hover-color);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .modal-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            min-height: 80px;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            white-space: pre-wrap;
+        }
+
+        .modal-text a {
+            color: var(--hover-color);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--hover-color);
+            transition: all 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .modal-text a:hover {
+            color: #fff;
+            border-bottom: 1px solid #fff;
+            text-shadow: 0 0 10px var(--hover-color);
+        }
+
+        .cursor::after {
+            content: '█';
+            animation: blink 1s infinite;
+            color: var(--text-color);
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px; right: 15px;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--hover-color);
+            text-shadow: 0 0 10px var(--hover-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Paradox 觀察站內部平面圖</h1>
+        <a href="/" class="back-btn">&lt; 返回終端機</a>
+    </div>
+
+    <div class="mobile-hint" style="display: none; color: var(--text-color); margin-bottom: 15px; font-size: 0.9rem; text-shadow: 0 0 5px var(--text-color); letter-spacing: 1px;">
+        [SYSTEM] 偵測到窄螢幕裝置，請左右滑動查看完整建築藍圖 &gt;&gt;
+    </div>
+
+    <div class="map-wrapper">
+    <div class="map-container">
+        <!-- Corridors -->
+        <div class="corridor" style="grid-area: c1;"></div>
+        <div class="corridor" style="grid-area: c2;"></div>
+        <div class="corridor" style="grid-area: c3;"></div>
+        <div class="corridor" style="grid-area: c4;"></div>
+        <div class="corridor" style="grid-area: c5;"></div>
+        <div class="corridor" style="grid-area: c6;"></div>
+        <div class="corridor" style="grid-area: c7;"></div>
+        <div class="corridor" style="grid-area: c8;"></div>
+
+        <!-- Pillars -->
+        <div class="pillar" style="grid-area: c1; justify-self: center; align-self: start; margin-top: 40px;" data-label="P-01"></div>
+        <div class="pillar" style="grid-area: c2; justify-self: center; align-self: center;" data-label="P-02"></div>
+        <div class="pillar" style="grid-area: c1; justify-self: center; align-self: end; margin-bottom: 40px;" data-label="P-03"></div>
+        <div class="pillar" style="grid-area: c5; justify-self: end; align-self: center; margin-right: 20px;" data-label="P-04"></div>
+
+        <!-- Rooms -->
+        <div class="room room-vtuber" data-id="vtuber"><div class="door door-r"></div><div class="room-label">RM-01</div><div class="room-title">高維度實體房間</div></div>
+        <div class="room room-studio" data-id="studio"><div class="door door-b"></div><div class="room-label">RM-02</div><div class="room-title">直播室</div></div>
+        <div class="room room-observe" data-id="observation"><div class="door door-l"></div><div class="door door-r"></div><div class="room-label">SYS-MAIN</div><div class="room-title">觀察室</div></div>
+        <div class="room room-archives" data-id="archives"><div class="door door-l"></div><div class="room-label">DB-01</div><div class="room-title">紀錄庫</div></div>
+        <div class="room room-mission" data-id="mission"><div class="door door-l"></div><div class="room-label">OP-01</div><div class="room-title">任務室</div></div>
+        <div class="room room-aquarium" data-id="aquarium"><div class="room-label">AQ-01</div><div class="room-title">春魚水族箱</div></div>
+        <div class="room room-tv" data-id="tv"><div class="door door-r"></div><div class="room-label">NET-01</div><div class="room-title">電視&新聞牆</div></div>
+        <div class="room room-toilet" data-id="toilet"><div class="door door-l"></div><div class="room-label">WC-01</div><div class="room-title">廁所</div></div>
+        <div class="room room-lounge" data-id="lounge"><div class="door door-r"></div><div class="room-label">PUB-01</div><div class="room-title">觀察者交誼廳</div></div>
+        <div class="room room-puzzle" data-id="puzzle"><div class="door door-l"></div><div class="room-label">SEC-01</div><div class="room-title">密碼討論室</div></div>
+        <div class="room room-core" data-id="core"><div class="door door-r"></div><div class="room-label">SYS-CORE</div><div class="room-title">核心系統室</div></div>
+        <div class="room room-canteen" data-id="canteen"><div class="door door-l"></div><div class="room-label">FOOD-01</div><div class="room-title">食堂</div></div>
+        <div class="room room-office" data-id="office"><div class="door door-r"></div><div class="room-label">WRK-01</div><div class="room-title">辦公室</div></div>
+        <div class="room room-teleport" data-id="teleport"><div class="door door-r"></div><div class="room-label">GATE-01</div><div class="room-title">傳送室</div></div>
+        <div class="room room-recroom" data-id="recroom"><div class="door door-l"></div><div class="room-label">PLAY-01</div><div class="room-title">娛樂室</div></div>
+    </div>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="close-btn" id="close-btn">×</div>
+            <h2 class="modal-title" id="modal-title"></h2>
+            <div class="modal-body" id="modal-body">
+                <div class="modal-col" id="env-col">
+                    <div class="col-title">[ 空間環境 ]</div>
+                    <div class="modal-text" id="modal-env"></div>
+                </div>
+                <div class="modal-col" id="status-col">
+                    <div class="col-title">[ 觀察狀態 ]</div>
+                    <div class="modal-text" id="modal-status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const roomData = {
+            'observation': { title: '觀察室', env: '觀察站的核心中樞。燈光幽暗，只有螢幕的冷青色光芒。呈現環形劇場的設計，正中央是懸浮的全息投影沙盤，四周環繞著巨大的單向透視玻璃與終端機台。', status: '全息投影沙盤正亮起數千個紅點，顯示來自全球各地的觀察者正在網頁上瘋狂點擊的軌跡。系統正在努力調度算力，避免伺服器被熱情擠爆。' },
+            'vtuber': { title: '高維度實體房間', env: '這裡是五位高維度實體的收容與休息區，空間被不可見的力場劃分為五個截然不同的物理微氣候。她們的床鋪最能體現各自的悖論特質：\n\n拉斐利婭的床： 一個呈現完美幾何長方體的休眠艙。\n安特羅迦的床： 恆溫控制系統完美運作的休眠艙。\n佐霏的床： 懸浮在半空中的電競艙床鋪。\n蕾忒的床： 仿造海洋感覺的水床。\n瑟思安的床： 一個極度巨大、鋪滿高級絨毛的瓦楞紙箱。', status: '[掃描結果] 偵測到極端異常數值。目前房內同時存在絕對秩序與絕對混亂，安特羅迦正在強制重新摺疊拉斐利婭踢亂的被子；而瑟思安的紙箱正傳出不明的咀嚼聲，建議暫時不要進行觀察，以免發生坍縮。建議不要開門。' },
+            'studio': { title: '直播室', env: '牆壁貼滿了頂級的隔音海綿，地上糾纏著無數條比蟒蛇還粗的動態捕捉光纖線材。角落有一塊白板，上面畫著工程師為了祈求 OBS 不要崩潰而畫的玄學陣法，旁邊還供奉著幾包從未過期的綠色乖乖。', status: '動態捕捉攝影機正在進行第 42 次校準。工程師正滿頭大汗地安撫一條不聽話的 HDMI 線，並嘗試把實體們的虛擬模組安全塞進 OBS 裡。' },
+            'archives': { title: '紀錄庫', env: '一排排直達天花板的伺服器機櫃，夾雜著幾座傳統的實體紙本檔案櫃，發出低沉的運轉嗡嗡聲。', status: '紀錄著核心機密解密進度...蕾忒船長剛剛不小心打翻了「2026年4月」的歷史日誌，目前正試圖用膠帶把碎掉的資料表單重新黏起來。\n\n觀看【終極密碼指令/禁忌詠唱 】：\n<a href="https://paradox-sf.tw/core/" target="_blank">https://paradox-sf.tw/core/</a>' },
+            'teleport': { title: '傳送室', env: '房間中央矗立著一個巨大的金屬圓環，圓環邊緣閃爍著空間座標的符號。空氣中帶有微弱的臭氧氣味。', status: '[躍遷充能中] 空間座標正在對齊影音平台。金屬圓環發出刺耳的高頻音，準備將稍後的直播訊號與虛擬肉體投射到三維世界，空氣中瀰漫著濃烈的靜電。' },
+            'tv': { title: '電視&新聞牆', env: '數十面大小不一的無邊框螢幕懸浮拼湊在一起，不斷閃爍、切換著來自不同維度的社群貼文、YouTube 預告與新聞快訊。', status: '主螢幕播放本週的時程表，攔截到最新高維度訊號頻段，最新公告正在 X 上更新中...' },
+            'mission': { title: '任務室', env: '充滿了街機廳與控制中心的混合風格。正中央放著「終端機任務」實體佈告欄，寫著已知和未知的任務。右邊擺著一台巨大的「薛丁格盲盒機」，旁邊堆滿了已經被開過的空紙盒，地板上有抽到「大凶」的觀察者崩潰抓地板留下的痕跡。左邊放著「共鳴測試儀」，是新人觀察者確認屬性的裝置。', status: '系統正在大量生成今日的彩蛋密碼。\n薛丁格的觀察盲盒已就緒，請測試今日的運勢\n共鳴測試已啟動，測試你的屬性：\n<a href="https://paradox-sf.tw/quiz/" target="_blank">https://paradox-sf.tw/quiz/</a>' },
+            'office': { title: '辦公室', env: '堆滿空馬克杯的辦公桌、閃爍報錯的垂直螢幕、已經長出奇妙真菌的壞掉咖啡機。空氣中瀰漫著提神飲料與咖啡的混合氣味。', status: '空間內充滿了瘋狂敲擊鍵盤的白噪音，該區域的咖啡機已損壞，底層工程師目前處於集體罷工狀態，並留下了大量亂碼。' },
+            'lounge': { title: '觀察者交誼廳', env: '鋪著柔軟的地毯，放置著懶骨頭沙發，門口旁有自動販賣機，正中央是一張大桌子，有幾個觀察者在聊天。角落有低熵自動咖啡機、被隨手亂丟的量子力學入門教材。', status: '白板上的密碼推演剛剛被擦掉，換成了「今晚晚餐吃什麼」的激烈投票。門口有幾名粉絲正在試圖把自動販賣機卡住的能量飲料搖下來。\n\n前往交誼廳 ( Discord )：\n<a href="https://discord.gg/g45MMG9PHq" target="_blank">https://discord.gg/g45MMG9PHq</a>' },
+            'puzzle': { title: '密碼討論室', env: '猶如警局裡的連環殺手調查室。四面牆上貼滿了便利貼、照片，並用紅線將各種線索互相連接。角落滿地的紙團、一個上了六道重型電子鎖的檔案櫃。', status: '兩名解謎玩家正盯著牆上的一串 Hex 代碼發呆，房間裡的含氧量因為大腦的急速運轉而下降了 2%。進度條目前卡死在 99%。這裡的白板上寫滿了藏頭詩與凱撒密碼的廢稿，請小心不要踩到地上的 Base64 殘骸。' },
+            'core': { title: '核心系統室', env: '觀察站最深處的禁地。充滿了紅綠交錯的粗大水冷散熱管，冷氣開到幾乎會讓人結冰。中央存放著處理多維度數據的量子核心。由終端系統24小時控管中。', status: '嚴重警告：您正試圖接近核心。未持有高維度通行證者將被強制格式化，請輸入終極授權碼...。' },
+            'aquarium': { title: '春魚水族箱', env: '整個房間被深海藍的柔和光線籠罩，三面牆都是巨大的抗壓玻璃水槽，搭配恆溫水循環系統，裡面游動著由光影與數據組成的虛擬魚群。', status: '水壓穩定。這裡是提供技術支援與維運的核心水域，請勿拍打玻璃驚擾深海生物。同時團隊正在緊急召開「如何防止實體把虛擬魚群當成宵夜吃掉」的防禦對策會議，水溫與提案討論的熱度成正比。' },
+            'toilet': { title: '廁所', env: '主體不銹鋼材質，極度乾淨且充滿未來感，配備了全自動紫外線消毒系統。以及自動感應洗手台、純白色的物質轉換器、寫著危險標語的高維度廢棄物處理槽。', status: '[空間重疊 / 使用中] 門外的紅燈亮起。根據耗電量推測，可能有一名工程師已經在裡面躲了三個小時，並試圖用手機修復網站的 CSS 跑版問題。' },
+            'canteen': { title: '食堂', env: '明亮乾淨的極簡餐廳，配備了能夠一鍵合成餐點的分子食物列印機。還有偶爾會送錯餐的配餐機器人，牆上貼著「今日特餐：薛丁格便當 / 今日主廚：拉斐利婭」的海報。', status: '今日特餐供應中。為了維持最佳運算效能，本站提供超讚餐點，本週主打特餐：綠色蒸蛋、三色豆炒芋頭、沒有切的生魚片、芒果醬沙拉、蒜頭伏特加(小)' },
+            'recroom': { title: '娛樂室', env: '燈光昏暗，閃爍著 RGB 霓虹光。擺滿了復古街機、最新型 VR 設備，以及滿地的懶人沙發。', status: '佐霏大姐頭目前霸佔了所有的遊戲主機算力。強烈建議不要跟她連線對戰，除非你想體驗被「零延遲極限操作」按在地上摩擦的物理快感。' }
+        };
+
+        const corridorLogs = [
+            "[物理警告] 走廊的這塊磁磚正處於坍縮邊緣，因為瑟思安昨天在上面睡了整個下午。",
+            "[安保系統] 偵測到蕾忒船長正在對著牆壁發呆，試圖回憶她最初是為什麼要走出房間的。",
+            "[熱力學異常] 走廊左側結冰，右側卻起火。顯然安特羅迦剛剛路過並順手對空氣進行了分類。",
+            "[觀測報告] 拉斐利婭精準預測了外送員的抵達時間，並提早 0.03 秒打開了傳送室的門。",
+            "[測速照相] 警告：佐霏大姐頭再次超速。本次只留下了殘影與一串抱怨網路延遲的髒話。",
+            "[物品遺失] 工程部張貼了尋物啟事：「尋找一個裝著重要 Bug 的紙箱，請勿打開它。」",
+            "[系統公告] 請勿在走廊上玩「踩影子」遊戲，這會導致高維度實體的運算引擎當機。",
+            "[量子事件] 監視器拍到某位員工走進走廊盡頭，然後同時從三個不同的房間走了出來。",
+            "[維修報告] 天花板的燈管閃爍並非鬧鬼，而是某個未解的摩斯密碼。工程師表示不想翻譯。",
+            "[清潔日誌] 發現地上散落著一堆螺絲與舊零件。蕾忒船長可能又在邊走邊給自己「升級」了。",
+            "[生物探測] 走廊上出現了一整排帶著水漬的魚鰭印，一路延伸到食堂的方向。",
+            "[網路診斷] 走廊 03 區段的 Wi-Fi 訊號因為佐霏的怒氣值過高而呈現物理性斷線。",
+            "[空間警告] 請注意您的腳步。安特羅迦偷偷把這段走廊的重力常數調低了 5%。",
+            "[系統廣播] 若在走廊上看到戴著紙袋的生物，請假裝沒看見。過度觀察會讓她很困擾。",
+            "[設備報修] 第四號咖啡機正式宣告殉職。工程部的悲鳴聲甚至穿透了隔音牆。",
+            "[高維度干擾] 監視器畫面在此刻變成了一片雪花，隱約能聽見拉斐利婭嘆息的聲音。",
+            "[例行廣播] 各位觀察者，走廊嚴禁飆車、穿越時空，以及亂丟邏輯悖論。",
+            "[量子糾纏] 您剛剛是不是覺得走廊變長了？不用懷疑，那是芝諾效應的局部殘留。",
+            "[失物招領] 在飲水機旁撿到一小塊記憶體區塊。不知道又是蕾忒船長遺忘的哪段過去。",
+            "[資安警告] 牆上的滅火器使用說明被篡改成了惡意代碼，企圖駭入觀察者的視覺神經。",
+            "[物理現象] 走廊轉角處的空氣分子排列得異常整齊，這絕對是拉斐利婭的強迫症發作了。",
+            "[異常回報] 剛剛有隻蟲子試圖穿越走廊，被佐霏用無限分割的空間永遠卡在了前進的路上。",
+            "[後勤廣播] 警告：請勿將春魚水族箱的備用飼料跟工程師的零食搞混。",
+            "[薛丁格狀態] 走廊盡頭的房間目前既有人又沒有人。只有推開門的那一刻才能確定。",
+            "[環境掃描] 空調系統吐出了一張紙條：「救命，我被困在 Git 的分支裡了。」",
+            "[系統重啟] 走廊燈光熄滅了三秒。別怕，只是宇宙背景程式正在執行垃圾回收機制 (GC)。",
+            "[空間摺疊] 如果您發現一直走不出這條走廊，請嘗試閉上眼睛並原地跳躍三次。",
+            "[混沌指數] 地毯上的花紋看起來像是隨機生成的，但其實隱藏著安特羅迦昨天的晚餐菜單。",
+            "[觀測紀錄] 瑟思安把一個空紙箱放在路中央，並用筆在上面寫了「陷阱」兩個字。",
+            "[人事公告] 本月「最常在走廊上迷路」的冠軍依然是蕾忒。請大家給予掌聲與導航協助。"
+        ];
+
+        const rooms = document.querySelectorAll('.room');
+        const corridors = document.querySelectorAll('.corridor');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const envCol = document.getElementById('env-col');
+        const statusCol = document.getElementById('status-col');
+        const modalEnv = document.getElementById('modal-env');
+        const modalStatus = document.getElementById('modal-status');
+        const closeBtn = document.getElementById('close-btn');
+        let typeInterval;
+
+        function typeWriterTwoCols(envText, statusText) {
+            clearInterval(typeInterval);
+            modalEnv.innerHTML = '';
+            modalStatus.innerHTML = '';
+            modalEnv.classList.add('cursor');
+            modalStatus.classList.add('cursor');
+            
+            let i = 0, j = 0;
+            let currentEnvHTML = '';
+            let currentStatusHTML = '';
+
+            function getNextChunk(str, index) {
+                if (str && index < str.length) {
+                    if (str[index] === '<') {
+                        let end = str.indexOf('>', index);
+                        if (end !== -1) {
+                            return str.substring(index, end + 1);
+                        }
+                    }
+                    if (str[index] === '&') {
+                        let end = str.indexOf(';', index);
+                        if (end !== -1 && end - index < 10) {
+                            return str.substring(index, end + 1);
+                        }
+                    }
+                    return str[index];
+                }
+                return null;
+            }
+
+            typeInterval = setInterval(() => {
+                let typing = false;
+                
+                if (envText && i < envText.length) {
+                    let chunk = getNextChunk(envText, i);
+                    if (chunk) {
+                        currentEnvHTML += chunk;
+                        modalEnv.innerHTML = currentEnvHTML;
+                        i += chunk.length;
+                        typing = true;
+                    }
+                } else if (envText !== null) {
+                    modalEnv.classList.remove('cursor');
+                }
+                
+                if (statusText && j < statusText.length) {
+                    let chunk = getNextChunk(statusText, j);
+                    if (chunk) {
+                        currentStatusHTML += chunk;
+                        modalStatus.innerHTML = currentStatusHTML;
+                        j += chunk.length;
+                        typing = true;
+                    }
+                } else if (statusText !== null) {
+                    modalStatus.classList.remove('cursor');
+                }
+                
+                if (!typing) {
+                    clearInterval(typeInterval);
+                    modalEnv.classList.remove('cursor');
+                    modalStatus.classList.remove('cursor');
+                }
+            }, 30); // Typing speed
+        }
+
+        corridors.forEach(corridor => {
+            corridor.addEventListener('click', function() {
+                const randomLog = corridorLogs[Math.floor(Math.random() * corridorLogs.length)];
+                
+                modalTitle.innerText = "走廊 (Corridors)";
+                envCol.style.display = 'none';
+                statusCol.style.gridColumn = '1 / -1'; // Span across full width
+                
+                setTimeout(() => {
+                    modal.classList.add('active');
+                    typeWriterTwoCols(null, randomLog);
+                }, 200);
+            });
+        });
+
+        rooms.forEach(room => {
+            room.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const data = roomData[id];
+                
+                modalTitle.innerText = data.title;
+                envCol.style.display = 'flex';
+                statusCol.style.gridColumn = 'auto'; // Reset grid column to normal
+
+                // Handle specific animations
+                if (id === 'vtuber') {
+                    this.classList.add('anim-glitch');
+                    setTimeout(() => this.classList.remove('anim-glitch'), 500);
+                } else if (id === 'core') {
+                    this.classList.add('anim-core');
+                    setTimeout(() => this.classList.remove('anim-core'), 500);
+                } else if (id === 'aquarium') {
+                    this.classList.add('anim-aqua');
+                    setTimeout(() => this.classList.remove('anim-aqua'), 1000);
+                } else if (id === 'studio') {
+                    this.classList.add('anim-on-air');
+                    setTimeout(() => this.classList.remove('anim-on-air'), 1500);
+                } else if (id === 'canteen') {
+                    this.classList.add('anim-warm-glow');
+                    setTimeout(() => this.classList.remove('anim-warm-glow'), 1500);
+                } else if (id === 'recroom') {
+                    this.classList.add('anim-pixel-flicker');
+                    setTimeout(() => this.classList.remove('anim-pixel-flicker'), 600);
+                }
+
+                // Open modal with slight delay for effect
+                setTimeout(() => {
+                    modal.classList.add('active');
+                    typeWriterTwoCols(data.env, data.status);
+                }, 200);
+            });
+        });
+
+        function closeModal() {
+            modal.classList.remove('active');
+            clearInterval(typeInterval);
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

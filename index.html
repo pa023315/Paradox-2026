@@ -84,10 +84,10 @@
 
         .sidebar { width: 280px; height: 100%; background-color: var(--sidebar-bg); border-right: 1px solid #333; padding: 30px 20px; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; }
         .brand-title { font-size: 2rem; font-weight: bold; color: #fff; margin-bottom: 5px; text-shadow: 2px 2px 0 var(--neon-purple); }
-        .brand-sub { font-size: 0.8rem; color: #666; margin-bottom: 40px; }
+        .brand-sub { font-size: 0.8rem; color: #666; margin-bottom: 25px; }
         
-        .nav-menu { display: flex; flex-direction: column; gap: 10px; }
-        .nav-btn { background: transparent; border: none; color: #888; padding: 15px; text-align: left; font-size: 1rem; font-family: var(--font-stack); cursor: pointer; border-left: 3px solid transparent; transition: 0.3s; }
+        .nav-menu { display: flex; flex-direction: column; gap: 5px; }
+        .nav-btn { background: transparent; border: none; color: #888; padding: 10px 15px; text-align: left; font-size: 1rem; font-family: var(--font-stack); cursor: pointer; border-left: 3px solid transparent; transition: 0.3s; }
         .nav-btn:hover { color: var(--neon-blue); background: rgba(0, 243, 255, 0.05); }
         .nav-btn.active { color: var(--neon-blue); border-left-color: var(--neon-blue); background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent); }
         .nav-btn.special { color: var(--neon-green); display: none; }
@@ -1122,6 +1122,7 @@
                 <button class="nav-btn" onclick="switchTab('monitor', this)">同步監控</button>
                 <button class="nav-btn" onclick="switchTab('logs', this)">系統日誌</button>
                 <button class="nav-btn" onclick="switchTab('manual', this)">操作手冊</button>
+                <a href="/Map/" class="nav-btn" style="text-decoration: none; display: block;">研究所平面圖</a>
                 <button id="nav-id-btn" class="nav-btn special" onclick="switchTab('idcard', this)">[ 觀察者 ID ]</button>>
             </nav>
             <div class="status-footer">

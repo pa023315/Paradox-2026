@@ -20,6 +20,7 @@ export default defineConfig({
         drawing: resolve(__dirname, 'drawing/index.html'),
         core: resolve(__dirname, 'core/index.html'),
         incrediville: resolve(__dirname, 'incrediville/index.html'),
+        Map: resolve(__dirname, 'Map/index.html'),
       },
     },
   },
