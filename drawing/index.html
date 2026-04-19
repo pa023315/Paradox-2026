@@ -43,6 +43,9 @@
             border: 1px solid rgba(0, 243, 255, 0.2);
             box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
             position: relative;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         .container::before {
@@ -320,17 +323,146 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            color: #666;
+            color: rgba(255, 255, 255, 0.6);
             text-decoration: none;
             font-size: 0.9rem;
-            transition: color 0.3s;
+            transition: all 0.3s;
+            z-index: 1000;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .back-link:hover {
             color: var(--neon-blue);
+            text-shadow: 0 0 8px rgba(0, 243, 255, 0.8);
+        }
+
+        /* Decorative UI Background */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            z-index: 999;
+            opacity: 0.15;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 243, 255, 0.05) 0%, rgba(188, 19, 254, 0.02) 40%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulseGlow 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.95); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .deco-corner {
+            position: fixed;
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .deco-top-right {
+            top: 40px;
+            right: 40px;
+            border-top: 2px solid var(--neon-purple);
+            border-right: 2px solid var(--neon-purple);
+        }
+
+        .deco-bottom-left {
+            bottom: 40px;
+            left: 40px;
+            border-bottom: 2px solid var(--neon-purple);
+            border-left: 2px solid var(--neon-purple);
+        }
+
+        .tech-data {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: inherit;
+            font-size: 11px;
+            color: rgba(0, 243, 255, 0.2);
+            pointer-events: none;
+            z-index: 0;
+            line-height: 2.2;
+            letter-spacing: 1px;
+            animation: textFlicker 6s infinite alternate;
+        }
+
+        .tech-data-left {
+            left: 40px;
+            text-align: left;
+        }
+
+        .tech-data-right {
+            right: 40px;
+            text-align: right;
+        }
+
+        @keyframes textFlicker {
+            0%, 94%, 100% { opacity: 1; }
+            95%, 97% { opacity: 0.3; }
+            96%, 98% { opacity: 0.8; }
+        }
+
+        @media (max-width: 900px) {
+            .deco-corner, .tech-data {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Decorative Background Elements -->
+    <div class="scanline"></div>
+    <div class="bg-glow"></div>
+    <div class="deco-corner deco-top-right"></div>
+    <div class="deco-corner deco-bottom-left"></div>
+    
+    <div class="tech-data tech-data-left">
+        OBSERVATION_NODE_0x88<br/>
+        SEQ: 8812.A<br/>
+        STATUS: AWAITING<br/>
+        ENTROPY: LOW<br/>
+        <br/>
+        // QUANTUM FIELD<br/>
+        01010011<br/>
+        01011001<br/>
+        01001110<br/>
+        01000011
+    </div>
+    <div class="tech-data tech-data-right">
+        SYS_VER: 4.0.1<br/>
+        LINK: STABLE<br/>
+        LATENCY: 12ms<br/>
+        <br/>
+        [...]<br/>
+        MONITORING<br/>
+        WAVE_FUNC: ACTIVE<br/>
+        COLLAPSE_PROB: ??%
+    </div>
 
     <a href="/" class="back-link">&lt; 返回觀察終端</a>
 
@@ -356,6 +488,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 30px; margin-bottom: 20px;">
+            <a href="#" id="share-x-btn" target="_blank" class="btn" style="margin: 0; width: 280px; display: none; background: transparent; border-color: #fff; color: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); text-decoration: none; box-sizing: border-box; text-align: center;">[ 分享到 X ]</a>
             <button class="btn" id="action-btn" onclick="startObservation()" style="margin: 0; width: 280px;">[ 進行今日觀察 ]</button>
             <a href="/" class="btn btn-purple" style="margin: 0; width: 280px;">[ 回到終端機 ]</a>
         </div>
@@ -434,6 +567,7 @@
             // Reset UI
             btn.textContent = '[ 進行今日觀察 ]';
             btn.disabled = false;
+            document.getElementById('share-x-btn').style.display = 'none';
             boxWrapper.classList.remove('open');
             cssBox.classList.remove('shaking');
             textDisplay.classList.remove('blinking-red');
@@ -528,6 +662,12 @@
             // Update button
             btn.textContent = '[ 重新啟動觀察儀器 ]';
             btn.disabled = false;
+            
+            // Update and show Share to X button
+            const shareBtn = document.getElementById('share-x-btn');
+            const tweetText = `我的今日運勢坍縮為：【${fortune.status} - ${fortune.title}】！\n「${fortune.desc}」\n你的實體狀態今天還穩定嗎？快來打開你的薛丁格盲盒 \n\n#paradox5th\n\nhttps://paradox-sf.tw/drawing/`;
+            shareBtn.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+            shareBtn.style.display = 'inline-block';
             
             isObserving = false;
             hasCollapsed = true;
