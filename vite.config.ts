@@ -21,6 +21,8 @@ export default defineConfig({
         core: resolve(__dirname, 'core/index.html'),
         incrediville: resolve(__dirname, 'incrediville/index.html'),
         Map: resolve(__dirname, 'Map/index.html'),
+        word: resolve(__dirname, 'word/index.html'),
+        Resign: resolve(__dirname, 'Resign/index.html'),
       },
     },
   },
