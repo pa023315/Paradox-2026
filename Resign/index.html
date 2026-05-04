@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resign</title>
+    <style>
+        :root {
+            --term-green: #39ff14;
+            --term-bg: #0d1117;
+        }
+        body {
+            background-color: var(--term-bg);
+            color: var(--term-green);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+
+        .img-container {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 2rem;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--term-green);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+            border-radius: 8px;
+        }
+
+        .btn {
+            background-color: transparent;
+            color: var(--term-green);
+            border: 1px solid var(--term-green);
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--term-green);
+            color: var(--term-bg);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <h1>一起來洗香香吧～</h1>
+    <div class="img-container">
+        <img src="https://i.meee.com.tw/A8tFhyp.png" alt="洗香香" />
+    </div>
+    <a href="/" class="btn">回到終端機</a>
+</body>
+</html>

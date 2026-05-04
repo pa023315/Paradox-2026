@@ -441,7 +441,7 @@
 只差一點點就能及格。
 二進位制中，代表「無」或「關閉」的那個數字。
 國際標準音高（A4）的赫茲數，取前兩位數（在華人文化中常被視為不吉利的諧音數字）。` },
-            { id: 7, isUnlocked: false, title: "第七數據", hint: "等待時空座標同步...", hasDetail: false, detailText: "" },
+            { id: 7, isUnlocked: true, title: "第七數據", hint: "系統偵測到未知的互動節點，必須透過人工驗證。", hasDetail: true, detailText: "" },
             { id: 8, isUnlocked: false, title: "第八數據", hint: "等待時空座標同步...", hasDetail: false, detailText: "" },
             { id: 9, isUnlocked: false, title: "第九數據", hint: "等待時空座標同步...", hasDetail: false, detailText: "" }
         ];
@@ -505,12 +505,20 @@
                 }
                 card.appendChild(body);
 
-                if (data.isUnlocked && data.hasDetail) {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn';
-                    btn.textContent = '[ 讀取完整紀錄 ]';
-                    btn.onclick = () => openModal(data.detailText);
-                    card.appendChild(btn);
+                if (data.isUnlocked) {
+                    if (data.id === 7) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn';
+                        btn.textContent = '[ 讀取完整紀錄 ]';
+                        btn.onclick = () => window.location.href = '/word/';
+                        card.appendChild(btn);
+                    } else if (data.hasDetail) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn';
+                        btn.textContent = '[ 讀取完整紀錄 ]';
+                        btn.onclick = () => openModal(data.detailText);
+                        card.appendChild(btn);
+                    }
                 }
 
                 grid.appendChild(card);

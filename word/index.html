@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM_OVERRIDE // CLUES</title>
+    <style>
+        :root {
+            --term-green: #39ff14;
+            --term-bg: #0d1117;
+            --term-border: #1f3a1f;
+            --term-error: #ff3333;
+            --term-highlight: #00e5ff;
+        }
+
+        body {
+            background-color: var(--term-bg);
+            color: var(--term-green);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        @media (min-width: 900px) {
+            .container {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+            }
+        }
+
+        .grid-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .crossword-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            grid-template-rows: repeat(12, 30px);
+            gap: 2px;
+            background-color: var(--term-bg);
+            padding: 10px;
+            border: 1px solid var(--term-border);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.1);
+        }
+
+        @media (min-width: 600px) {
+            .crossword-grid {
+                grid-template-columns: repeat(10, 40px);
+                grid-template-rows: repeat(12, 40px);
+                gap: 4px;
+            }
+        }
+        
+        @media (min-width: 900px) {
+            .crossword-grid {
+                grid-template-columns: repeat(10, 50px);
+                grid-template-rows: repeat(12, 50px);
+                gap: 5px;
+            }
+        }
+
+        .cell {
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cell.active {
+            border: 1px solid var(--term-green);
+            background-color: rgba(57, 255, 20, 0.05);
+            position: relative;
+        }
+
+        .cell.active input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            color: var(--term-green);
+            font-size: 1.2rem;
+            text-align: center;
+            font-family: inherit;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .cell.active input:focus {
+            background-color: rgba(57, 255, 20, 0.2);
+        }
+
+        .cell.active input.error {
+            border: 1px solid var(--term-error);
+            color: var(--term-error);
+            box-shadow: inset 0 0 5px rgba(255, 51, 51, 0.5);
+            animation: shake 0.3s;
+        }
+
+        .cell.active input.success {
+            color: var(--term-highlight);
+            text-shadow: 0 0 8px var(--term-highlight);
+            border: 1px solid var(--term-highlight);
+        }
+
+        .clue-number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 0.6rem;
+            color: rgba(57, 255, 20, 0.7);
+            pointer-events: none;
+        }
+
+        .clues-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: rgba(57, 255, 20, 0.02);
+            padding: 20px;
+            border: 1px solid var(--term-border);
+            height: fit-content;
+        }
+
+        .clue-section h3 {
+            border-bottom: 1px solid var(--term-green);
+            padding-bottom: 5px;
+            margin-top: 0;
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+        }
+
+        .clue-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .clue-list li {
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .clue-list li:hover {
+            color: var(--term-highlight);
+            text-shadow: 0 0 5px var(--term-highlight);
+        }
+
+        .button-group {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            background-color: transparent;
+            color: var(--term-green);
+            border: 1px solid var(--term-green);
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background-color: var(--term-green);
+            color: var(--term-bg);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.6);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+
+        /* Override Overlay */
+        .override-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(13, 17, 23, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .override-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            animation: overlayGlitch 0.2s 3;
+        }
+
+        .override-content {
+            border: 2px solid var(--term-highlight);
+            padding: 40px;
+            max-width: 80%;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.4);
+        }
+
+        .override-title {
+            color: var(--term-error);
+            font-size: 2rem;
+            margin-bottom: 20px;
+            animation: textFlicker 1.5s infinite alternate;
+        }
+
+        .override-message {
+            color: var(--term-highlight);
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .override-special {
+            font-size: 2.5rem;
+            color: var(--term-green);
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px var(--term-green);
+        }
+
+        @keyframes overlayGlitch {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-10px, 5px); }
+            40% { transform: translate(10px, -5px); }
+            60% { transform: translate(-5px, 10px); }
+            80% { transform: translate(5px, -10px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes textFlicker {
+            0%, 94%, 100% { opacity: 1; }
+            95%, 97% { opacity: 0.2; }
+            96%, 98% { opacity: 0.8; }
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--term-green);
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+            text-shadow: 0 0 8px var(--term-green);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/core/" class="back-link">&lt; 終止檢索並返回</a>
+
+    <h1>SYSTEM_LOG // DATA_RECOVERY</h1>
+
+    <div class="container">
+        <div class="grid-container">
+            <div class="crossword-grid" id="crossword-grid"></div>
+            
+            <div class="button-group">
+                <button class="btn" id="check-btn">[ 驗證系統 ]</button>
+            </div>
+        </div>
+
+        <div class="clues-container">
+            <div class="clue-section">
+                <h3>橫向數據流 (Across)</h3>
+                <ul class="clue-list">
+                    <li>1. 比喻力量所達到的地方，一切障礙全被掃除。 (4字)</li>
+                    <li>2. 撰寫電腦系統的代碼總稱，構成這個模擬宇宙的基礎法則。 (4字)</li>
+                    <li>3. 地球大氣層以外的空間。 (3字)</li>
+                    <li>4. 模擬宇宙中的實體覺醒後，產生了對自身存在的主觀認知。 (4字)</li>
+                    <li>5. 當終端機發生異常或有新進度時，螢幕上彈出的警告文字。 (4字)</li>
+                    <li>6. 形容事情流傳極廣。 (4字)</li>
+                </ul>
+            </div>
+
+            <div class="clue-section">
+                <h3>直向數據流 (Down)</h3>
+                <ul class="clue-list">
+                    <li>7. 透過拆解已完成的系統，反推其底層邏輯與原始設計的技術。 (4字)</li>
+                    <li>8. 被陰陽師所役使的靈體。 (2字)</li>
+                    <li>9. 表面文字沒有明說，但卻隱含在背後的深層含義。 (4字)</li>
+                    <li>10. 比喻心胸開闊。 (4字)</li>
+                    <li>11. 哲學家笛卡兒的經典名言。 (5字)</li>
+                    <li>12. 觀察站用來判斷登入者身分、攔截未授權入侵的安全機制。 (4字)</li>
+                    <li>13. 在倒數計時結束前，提早將隱藏的真相或最終答案公開於世。 (4字)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Override Screen -->
+    <div class="override-overlay" id="override-overlay">
+        <div class="override-content">
+            <div class="override-title">[SYSTEM_OVERRIDE]</div>
+            <div class="override-message">
+                宇宙底層協議已解鎖。<br/>
+                高維度實體回應了您的呼喚。<br/>
+                <br/>
+                終極密碼：<br/>
+                <span class="override-special">【向我揭示】</span>
+            </div>
+            <div class="override-actions" style="display: flex; gap: 20px; justify-content: center; margin-top: 30px;">
+                <button class="btn" onclick="document.getElementById('override-overlay').classList.remove('active')">[ 關閉 ]</button>
+                <button class="btn" onclick="window.location.href = '/'">[ 前往終端機 ]</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gridData = [
+            // Col 0 to 9
+            [null, "逆", null, null, null, null, null, null, null, null], // Row 0
+            ["所", "向", "披", "靡", null, null, "海", null, null, null], // Row 1
+            [null, "工", null, null, null, null, "闊", null, null, null], // Row 2
+            [null, "程", "式", "語", "言", null, "天", null, null, null], // Row 3
+            [null, null, "神", null, "外", "太", "空", null, null, null], // Row 4
+            [null, null, null, null, "之", null, null, null, null, null], // Row 5
+            [null, null, "自", "我", "意", "識", null, null, null, null], // Row 6
+            [null, null, null, "思", null, "別", null, null, null, null], // Row 7
+            [null, null, null, "故", null, "系", "統", "提", "示", null], // Row 8
+            [null, null, null, "我", null, "統", null, "前", null, null], // Row 9
+            [null, null, null, "在", null, null, null, "揭", null, null], // Row 10
+            [null, null, null, null, "家", "喻", "戶", "曉", null, null]  // Row 11
+        ];
+
+        // Specific cells that trigger the ultimate password
+        const passwordCells = [
+            { r: 1, c: 1, char: "向" },
+            { r: 6, c: 3, char: "我" },
+            { r: 10, c: 7, char: "揭" },
+            { r: 8, c: 8, char: "示" }
+        ];
+
+        // Clue numbers to display in the grid
+        const clueNumbers = [
+            { r: 0, c: 1, num: 7 },
+            { r: 1, c: 0, num: 1 },
+            { r: 1, c: 6, num: 10 },
+            { r: 3, c: 1, num: 2 },
+            { r: 3, c: 2, num: 8 },
+            { r: 3, c: 4, num: 9 },
+            { r: 4, c: 4, num: 3 },
+            { r: 6, c: 2, num: 4 },
+            { r: 6, c: 3, num: 11 },
+            { r: 6, c: 5, num: 12 },
+            { r: 8, c: 5, num: 5 },
+            { r: 8, c: 7, num: 13 },
+            { r: 11, c: 4, num: 6 }
+        ];
+
+        const gridContainer = document.getElementById('crossword-grid');
+        const inputs = [];
+
+        function initGrid() {
+            for (let r = 0; r < 12; r++) {
+                for (let c = 0; c < 10; c++) {
+                    const cellData = gridData[r][c];
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = 'cell';
+
+                    if (cellData !== null) {
+                        cellDiv.classList.add('active');
+                        
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.dataset.row = r;
+                        input.dataset.col = c;
+                        
+                        // Handle input events
+                        input.addEventListener('input', handleInput);
+                        input.addEventListener('keydown', handleKeyDown);
+
+                        inputs.push(input);
+                        cellDiv.appendChild(input);
+
+                        // Check for clue numbers
+                        const clueNum = clueNumbers.find(cl => cl.r === r && cl.c === c);
+                        if (clueNum) {
+                            const numSpan = document.createElement('span');
+                            numSpan.className = 'clue-number';
+                            numSpan.textContent = clueNum.num;
+                            cellDiv.appendChild(numSpan);
+                        }
+                    }
+
+                    gridContainer.appendChild(cellDiv);
+                }
+            }
+        }
+
+        function handleInput(e) {
+            const input = e.target;
+            input.classList.remove('error', 'success');
+        }
+
+        function handleKeyDown(e) {
+            const currentIdx = inputs.indexOf(e.target);
+            
+            if (e.key === 'Backspace' && !e.target.value && currentIdx > 0) {
+                inputs[currentIdx - 1].focus();
+            } else if (e.key === 'ArrowRight' && currentIdx < inputs.length - 1) {
+                inputs[currentIdx + 1].focus();
+            } else if (e.key === 'ArrowLeft' && currentIdx > 0) {
+                inputs[currentIdx - 1].focus();
+            } else if (e.key === 'ArrowDown') {
+                const row = parseInt(e.target.dataset.row);
+                const col = parseInt(e.target.dataset.col);
+                const nextInput = inputs.find(i => parseInt(i.dataset.row) > row && parseInt(i.dataset.col) === col);
+                if (nextInput) nextInput.focus();
+            } else if (e.key === 'ArrowUp') {
+                const row = parseInt(e.target.dataset.row);
+                const col = parseInt(e.target.dataset.col);
+                // search backwards
+                const prevInput = [...inputs].reverse().find(i => parseInt(i.dataset.row) < row && parseInt(i.dataset.col) === col);
+                if (prevInput) prevInput.focus();
+            }
+        }
+
+        function checkAnswers() {
+            inputs.forEach(input => {
+                const r = parseInt(input.dataset.row);
+                const c = parseInt(input.dataset.col);
+                const expected = gridData[r][c];
+
+                input.classList.remove('error', 'success');
+
+                if (input.value) {
+                    if (input.value === expected) {
+                        input.classList.add('success');
+                    } else {
+                        input.classList.add('error');
+                    }
+                }
+            });
+            
+            // Check if ultimate password triggered after validating
+            checkUltimatePassword();
+        }
+
+        function checkUltimatePassword() {
+            let triggered = true;
+            for (const pc of passwordCells) {
+                const input = inputs.find(i => parseInt(i.dataset.row) === pc.r && parseInt(i.dataset.col) === pc.c);
+                if (!input || input.value !== pc.char) {
+                    triggered = false;
+                    break;
+                }
+            }
+
+            if (triggered) {
+                document.getElementById('override-overlay').classList.add('active');
+            }
+        }
+
+        document.getElementById('check-btn').addEventListener('click', checkAnswers);
+
+        // Initialize grid on load
+        initGrid();
+    </script>
+</body>
+</html>
