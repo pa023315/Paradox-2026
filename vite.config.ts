@@ -22,7 +22,7 @@ export default defineConfig({
         incrediville: resolve(__dirname, 'incrediville/index.html'),
         Map: resolve(__dirname, 'Map/index.html'),
         word: resolve(__dirname, 'word/index.html'),
-        Resign: resolve(__dirname, 'Resign/index.html'),
+        Resign: resolve(__dirname, 'Resign.html'),
       },
     },
   },
