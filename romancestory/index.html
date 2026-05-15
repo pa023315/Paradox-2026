@@ -1,0 +1,2811 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智者情緣：悖論的交會點</title>
+    <style>
+        :root {
+            --term-green: #39ff14;
+            --bg-dark: #111111;
+            --ui-bg: rgba(10, 10, 10, 0.7);
+            --ui-border: rgba(57, 255, 20, 0.4);
+            --text-main: #f0f0f0;
+            --highlight: #39ff14;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            overflow: hidden;
+        }
+
+        .mono {
+            font-family: 'Courier New', Consolas, monospace;
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .text-highlight {
+            color: var(--highlight);
+        }
+
+        .view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at center, transparent 0%, var(--bg-dark) 100%),
+                linear-gradient(rgba(57, 255, 20, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(57, 255, 20, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        .view.hidden {
+            display: none !important;
+        }
+
+        /* 按鈕共用樣式 */
+        .btn {
+            background-color: var(--ui-bg);
+            color: var(--highlight);
+            border: 1px solid var(--ui-border);
+            padding: 12px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            outline: none;
+        }
+
+        .btn:hover {
+            background-color: rgba(57, 255, 20, 0.1);
+            border-color: var(--term-green);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+            text-shadow: 0 0 5px var(--term-green);
+        }
+
+        /* 視圖 1：標題畫面 */
+        #view-title {
+            background: radial-gradient(circle at 50% 50%, #050a15 0%, #000000 100%);
+            position: relative;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 底層：動態網格 */
+        #view-title::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(57, 255, 20, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(57, 255, 20, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 底層：極強暗角 */
+        #view-title::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 300px rgba(0,0,0,1);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* 呼吸光斑 */
+        .aurora-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 100vh;
+            filter: blur(100px);
+            transform: translate(-50%, -50%);
+            animation: breathe 12s ease-in-out infinite alternate;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes breathe {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; background: radial-gradient(circle, rgba(10, 30, 60, 0.2) 0%, transparent 60%); }
+            100% { transform: translate(-45%, -55%) scale(1.1); opacity: 0.8; background: radial-gradient(circle, rgba(57, 255, 20, 0.15) 0%, transparent 70%); }
+        }
+
+        @keyframes fade-in-out {
+            0% { opacity: 1; filter: brightness(1) contrast(1); }
+            50% { opacity: 0; filter: brightness(0.2) contrast(1.5); }
+            100% { opacity: 1; filter: brightness(1) contrast(1); }
+        }
+
+        /* 全息浮動公式 */
+        .hologram-math {
+            position: absolute;
+            font-family: "MingLiU", "PMingLiU", serif;
+            font-size: 2.5rem;
+            color: rgba(57, 255, 20, 0.35);
+            text-shadow: 0 0 15px rgba(57, 255, 20, 0.6);
+            z-index: 4;
+            pointer-events: none;
+            animation: floatMath 20s linear infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes floatMath {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; transform: translateY(-30px) rotate(5deg); }
+            100% { transform: translateY(-50px) rotate(10deg); opacity: 0; }
+        }
+
+        /* Canvas 粒子流 */
+        #bg-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .title-container {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+        }
+
+        #view-title h1 {
+            font-size: 4rem;
+            font-weight: 300;
+            margin: 0 0 15px 0;
+            color: var(--text-main);
+            letter-spacing: 0.2em;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 30px rgba(100, 255, 255, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.5em;
+        }
+        
+
+
+        .menu-container {
+            position: absolute;
+            bottom: 15%;
+            right: 15%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .system-ready {
+            font-size: 12px;
+            color: var(--highlight);
+            margin-bottom: 20px;
+            letter-spacing: 0.2em;
+            animation: blink 2s infinite;
+            opacity: 0.6;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(0) }
+            20% { transform: translate(-5px, 5px) }
+            40% { transform: translate(-5px, -5px) }
+            60% { transform: translate(5px, 5px) }
+            80% { transform: translate(5px, -5px) }
+            100% { transform: translate(0) }
+        }
+
+        .title-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .title-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            outline: none;
+            letter-spacing: 0.1em;
+        }
+
+        .title-btn small {
+            font-size: 0.9rem;
+            margin-left: 15px;
+            opacity: 0.5;
+            font-family: system-ui, sans-serif;
+            letter-spacing: 0.2em;
+        }
+
+        .btn-indicator {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 0;
+            background-color: var(--highlight);
+            margin-right: 0;
+            transition: all 0.3s ease;
+            opacity: 0;
+            box-shadow: 0 0 10px var(--highlight);
+        }
+
+        .title-btn:hover {
+            color: var(--text-main);
+            transform: translateX(10px);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .title-btn:hover .btn-indicator {
+            height: 1.2em;
+            margin-right: 15px;
+            opacity: 1;
+        }
+
+        /* 視圖 2：角色介紹頁面 (現代 ACG 風格) */
+        #view-intel {
+            padding: 0;
+            align-items: stretch;
+            flex-direction: row;
+        }
+
+        .intel-glass-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            background: rgba(10, 10, 15, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intel-watermark {
+            position: absolute;
+            bottom: -5%;
+            right: -5%;
+            font-size: 15rem;
+            color: rgba(255, 255, 255, 0.05);
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 0;
+            letter-spacing: 0.1em;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .return-btn-container {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            z-index: 20;
+        }
+
+        .return-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .return-btn:hover {
+            color: var(--highlight);
+            transform: translateX(-10px);
+            text-shadow: 0 0 10px var(--highlight);
+        }
+
+        .intel-sidebar {
+            width: 25%;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 0 80px 40px;
+            z-index: 10;
+        }
+
+        .intel-nav-item {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            padding: 20px 20px 20px 40px;
+            text-align: left;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            outline: none;
+        }
+
+        .intel-nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .intel-nav-item:hover, .intel-nav-item.active {
+            color: #ffffff;
+            transform: translateX(10px);
+            font-weight: bold;
+            background: linear-gradient(90deg, rgba(57, 255, 20, 0.1) 0%, transparent 100%);
+        }
+
+        .intel-nav-item:hover::before, .intel-nav-item.active::before {
+            background: var(--highlight);
+            box-shadow: 0 0 15px var(--highlight);
+            width: 5px;
+        }
+
+        .intel-content {
+            flex: 1;
+            position: relative;
+            display: flex;
+            z-index: 5;
+            flex-direction: row;
+        }
+
+        .intel-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 60px;
+            max-width: 600px;
+            z-index: 10;
+        }
+        
+        .intel-detail-placeholder {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255,255,255,0.3);
+            font-style: italic;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        .intel-entity {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.3em;
+            margin-bottom: 20px;
+        }
+
+        .intel-info h2 {
+            font-size: 4rem;
+            margin: 0 0 10px 0;
+            color: #ffffff;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.1);
+            font-weight: bold;
+        }
+
+        .intel-info h4 {
+            font-size: 1.2rem;
+            margin: 0;
+            color: var(--highlight);
+            letter-spacing: 0.2em;
+        }
+
+        .intel-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, var(--highlight) 0%, transparent 100%);
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .intel-divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: -2px;
+            width: 5px;
+            height: 5px;
+            background: var(--highlight);
+            box-shadow: 0 0 10px var(--highlight);
+        }
+
+        .intel-info p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #cccccc;
+        }
+
+        .character-portrait-placeholder {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            box-shadow: inset 50px 0 100px rgba(0,0,0,0.5);
+        }
+
+        .portrait-text {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.05);
+            letter-spacing: 0.3em;
+            transform: rotate(-90deg);
+            white-space: nowrap;
+            font-weight: 900;
+        }
+
+        /* 視圖 3：主要遊戲畫面 */
+        #view-game {
+            position: relative;
+        }
+
+        /* 頂部狀態列 */
+        #top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: var(--ui-bg);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-bottom: 1px solid var(--ui-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            z-index: 20;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .stat-name {
+            color: #ccc;
+        }
+
+        .stat-track {
+            width: 60px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .stat-fill {
+            position: absolute;
+            top: -1px;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: var(--highlight);
+            box-shadow: 0 0 8px var(--highlight);
+            transition: width 0.4s ease;
+        }
+
+        /* 中央立繪區 */
+        #sprite-area {
+            position: absolute;
+            bottom: 25%; /* 貼齊對話框上方 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 60%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 10;
+            pointer-events: none; /* 避免擋住點擊 */
+            /* 讓底部與對話框融合的漸層 */
+            mask-image: linear-gradient(to top, transparent 0%, black 15%);
+            -webkit-mask-image: linear-gradient(to top, transparent 0%, black 15%);
+        }
+
+        .sprite-placeholder {
+            width: 400px;
+            height: 100%;
+            max-height: 80vh;
+            background: linear-gradient(to top, rgba(255,255,255,0.05), transparent);
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-bottom: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255,255,255,0.3);
+            font-size: 1.2rem;
+            border-radius: 20px 20px 0 0;
+        }
+
+        /* 底部對話區 */
+        #bottom-dialog {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 25%;
+            background: var(--ui-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--ui-border);
+            padding: 40px 60px;
+            box-sizing: border-box;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #name-tag {
+            position: absolute;
+            top: -20px;
+            left: 40px;
+            background: var(--bg-dark);
+            border: 1px solid var(--ui-border);
+            color: var(--highlight);
+            padding: 5px 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        #text-box {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        /* 選項區 */
+        #choices-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 30;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .choice-btn {
+            background: var(--ui-bg);
+            color: var(--text-main);
+            border: 1px solid var(--ui-border);
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        .choice-btn:hover {
+            color: var(--bg-dark);
+            background: var(--highlight);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
+        }
+
+        /* 結局層 */
+        #view-end {
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-dark);
+            z-index: 100;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .end-content {
+            background: var(--ui-bg);
+            border: 1px solid var(--ui-border);
+            padding: 60px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            max-width: 800px;
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
+        }
+
+        /* 成就卡片樣式 */
+        .achievement-card {
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px 30px;
+            margin-bottom: 20px;
+            background: rgba(10, 10, 15, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card.unlocked {
+            border-color: rgba(57, 255, 20, 0.3);
+            background: rgba(57, 255, 20, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: inset 0 0 20px rgba(57, 255, 20, 0.05);
+        }
+
+        .achievement-card.unlocked::before {
+            background: var(--highlight);
+            box-shadow: 0 0 15px var(--highlight);
+        }
+
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 30px;
+            font-size: 2.5rem;
+            color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card.unlocked .achievement-icon {
+            color: var(--highlight);
+            text-shadow: 0 0 15px var(--highlight);
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-title {
+            font-size: 1.5rem;
+            margin: 0 0 8px 0;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card.unlocked .achievement-title {
+            color: var(--highlight);
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+
+        .achievement-desc {
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.2);
+            margin: 0;
+            line-height: 1.6;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card.unlocked .achievement-desc {
+            color: #cccccc;
+        }
+
+        /* 響應式 */
+        @media (max-width: 768px) {
+            #view-title h1 { font-size: 1.8rem; letter-spacing: 0.1em; width: 100%; padding: 0 10px; }
+            .subtitle { font-size: 0.7rem; letter-spacing: 0.2em; margin-top: 10px; }
+
+            .menu-container { right: auto; left: 50%; transform: translateX(-50%); bottom: 12%; align-items: center; width: 100%; }
+            .title-actions { align-items: center; width: 100%; }
+            .title-actions .btn-indicator { display: none; }
+            .title-btn { font-size: 1.2rem; justify-content: center; width: 80%; }
+            .title-btn .btn-en { display: none; }
+            .title-btn small { font-size: 1.2rem; margin-left: 0; opacity: 1; letter-spacing: 0.2em; padding: 10px 0; }
+            .title-btn:hover { transform: translateX(0) scale(1.05); }
+            .title-btn:hover .btn-indicator { display: none; }
+            .hologram-math { font-size: 1.2rem !important; opacity: 0.3 !important; }
+            #view-intel { padding: 0; overflow: hidden; }
+            .intel-glass-container { flex-direction: column; overflow-y: auto; }
+            .intel-sidebar { width: 100%; min-width: auto; padding: 100px 20px 20px 20px; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+            .intel-content { flex-direction: column; justify-content: flex-start; }
+            .intel-info { flex: none; padding: 30px 20px; max-width: 100%; justify-content: flex-start; text-align: left; }
+            .intel-info h2 { font-size: 2.2rem; margin-top: 10px; }
+            .intel-info h4 { font-size: 1.2rem; margin-top: 10px; }
+            .intel-info p { font-size: 1.2rem; line-height: 1.7; margin-top: 20px; word-break: keep-all; }
+            .intel-divider { margin: 20px 0; }
+            .character-portrait-placeholder { display: none; }
+            .portrait-text { display: none; }
+            
+            .achievement-header { width: 100% !important; padding: 80px 20px 20px 20px !important; text-align: center; align-items: center; }
+            .achievement-header h1 { font-size: 2.5rem !important; word-break: keep-all; white-space: nowrap; }
+            .achievement-list-container { width: 100% !important; padding: 20px !important; }
+            
+            #bottom-dialog { height: 35%; padding: 30px 20px; }
+            #view-end { padding: 20px; box-sizing: border-box; }
+            .end-content { padding: 30px 15px; width: 100%; max-width: 100%; box-sizing: border-box; }
+            #end-message { text-align: center; overflow-wrap: break-word; word-break: break-all; }
+            #end-message h2 { font-size: 1.3rem !important; margin-bottom: 10px !important; letter-spacing: 1px !important; word-wrap: break-word; white-space: normal; line-height: 1.4; }
+            #end-message p { font-size: 0.95rem !important; margin: 10px 0; word-break: normal; overflow-wrap: break-word; line-height: 1.6 !important; }
+            #end-message div.mono { font-size: 1.1rem !important; letter-spacing: 2px !important; margin-top: 20px !important; word-wrap: break-word; white-space: normal; }
+            #end-message div:not(.mono) { font-size: 1.5rem !important; letter-spacing: 2px !important; word-wrap: break-word; white-space: normal; }
+            #sprite-area { bottom: 35%; height: 50%; width: 100%; }
+            .sprite-placeholder { width: 80%; }
+            #choices-area { top: auto; bottom: 38%; transform: translateX(-50%); width: 90%; max-height: 50vh; overflow-y: auto; }
+            #top-bar { gap: 10px; padding: 0 5px; flex-wrap: wrap; height: auto; padding: 10px 0;}
+            .stat-track { width: 30px; }
+            .stat-name { font-size: 0.7rem; }
+            #name-tag { left: 20px; font-size: 1rem; }
+            #text-box { font-size: 1rem; line-height: 1.6; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頂端全域音量控制 -->
+    <div id="volume-toggle" class="mono" onclick="toggleMute()" style="position: absolute; top: 20px; right: 20px; z-index: 1000; font-size: 24px; cursor: pointer; opacity: 0.5; transition: opacity 0.3s; color: white;">🔊</div>
+
+    <!-- 系統訊息提示框 -->
+    <div id="custom-toast" class="mono" style="display: none; position: fixed; pointer-events: none; top: 20%; left: 50%; transform: translateX(-50%); background: var(--ui-bg); border: 1px solid var(--ui-border); padding: 20px 40px; z-index: 9999; box-shadow: 0 0 20px rgba(57, 255, 20, 0.5); text-align: center; color: var(--highlight); transition: opacity 0.3s;"></div>
+
+    <!-- 系統初始化遮罩 (解決瀏覽器音軌自動播放限制) -->
+    <div id="init-overlay" class="mono" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000000; z-index: 10000; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: opacity 0.5s ease;">
+        <div style="color: rgba(57, 255, 20, 0.8); font-size: 1.2rem; letter-spacing: 0.2em; animation: blink 2s infinite; text-align: center; max-width: 80%; line-height: 1.6; word-break: break-word;">[ CLICK TO INITIALIZE SYSTEM ]</div>
+    </div>
+
+    <!-- YouTube 背景音樂控制 -->
+    <div style="position: absolute; top: -9999px; left: -9999px; width: 200px; height: 200px; opacity: 0; pointer-events: none;">
+        <div id="youtube-player"></div>
+    </div>
+
+    <!-- 視圖 1：標題畫面 -->
+    <div id="view-title" class="view">
+        <!-- 背景動態光斑 -->
+        <div class="aurora-glow"></div>
+
+        <!-- 浮動方程式 (已調整至畫面角落邊緣) -->
+        <div class="hologram-math" style="top: 15%; left: 8%; animation-delay: 0s;">ΔxΔp ≥ ħ/2</div>
+        <div class="hologram-math" style="top: 12%; right: 10%; animation-delay: -5s;">E = mc²</div>
+        <div class="hologram-math" style="bottom: 20%; left: 10%; animation-delay: -10s;">dS ≥ 0</div>
+        <div class="hologram-math" style="top: 50%; right: 8%; animation-delay: -15s;">iℏ(∂ψ/∂t) = Ĥψ</div>
+
+        <!-- 數據星流 Canvas -->
+        <canvas id="bg-particles"></canvas>
+
+        <div class="title-container">
+            <h1>智者情緣：悖論的交會點</h1>
+            <div class="subtitle mono">PARADOX INTERSECTION</div>
+
+        </div>
+        <div class="menu-container">
+            <div class="system-ready mono" id="system-ready-text">SYSTEM READY_</div>
+            <div class="title-actions">
+                <button class="title-btn mono" onclick="startGame()">
+                    <span class="btn-indicator"></span><span class="btn-en">START SYSTEM</span> <small>開始觀察</small>
+                </button>
+                <button id="btn-continue" class="title-btn mono" onclick="startGame('secret_route_start')" style="display: none;">
+                    <span class="btn-indicator"></span><span class="btn-en">KEY</span> <small>解密所</small>
+                </button>
+                <button class="title-btn mono" onclick="showIntel()">
+                    <span class="btn-indicator"></span><span class="btn-en">DATABASE</span> <small>實體檔案</small>
+                </button>
+                <button class="title-btn mono" onclick="showAchievements()">
+                    <span class="btn-indicator"></span><span class="btn-en">ACHIEVEMENTS</span> <small>成就一覽</small>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 視圖 1.5：命名畫面 -->
+    <div id="view-name-input" class="view hidden" style="justify-content: center; align-items: center; text-align: center;">
+        <div id="name-input-msg" class="mono text-highlight" style="font-size: 1.5rem; margin-bottom: 30px; min-height: 2em; max-width: 80%; line-height: 1.5;"></div>
+        <div id="name-input-container" style="display: none; flex-direction: column; align-items: center; gap: 20px;">
+            <input type="text" id="player-name-input" placeholder="請輸入代號..." class="mono" style="background: var(--ui-bg); color: var(--text-main); border: 1px solid var(--ui-border); padding: 10px 20px; font-size: 1.2rem; outline: none; text-align: center; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">
+            <button class="btn mono" onclick="confirmName()">[ CONFIRM ] 確認登入</button>
+        </div>
+    </div>
+
+    <!-- 視圖 2：角色介紹頁面 -->
+    <div id="view-intel" class="view hidden">
+        <div class="intel-glass-container">
+            <div class="intel-watermark mono">ARCHIVE</div>
+            
+            <div class="return-btn-container">
+                <button class="return-btn mono" onclick="showTitle()">
+                    <span class="mono">&lt;</span> 返回 SYSTEM
+                </button>
+            </div>
+            
+            <div class="intel-sidebar" id="intel-menu">
+                <!-- 角色選單動態生成 -->
+            </div>
+
+            <div class="intel-content" id="intel-details">
+                <div class="intel-detail-placeholder">請點選觀察對象...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 視圖：成就一覽 -->
+    <div id="view-achievements" class="view hidden">
+        <div class="intel-glass-container">
+            <div class="intel-watermark mono" style="font-size: 8rem; left: -2%; bottom: 10%; writing-mode: vertical-rl; transform: rotate(180deg); color: rgba(255,255,255,0.03);">ACHIEVEMENTS</div>
+            
+            <div class="return-btn-container">
+                <button class="return-btn mono" onclick="showTitle()">
+                    <span class="mono">&lt;</span> 返回 SYSTEM
+                </button>
+            </div>
+            
+            <div class="achievement-header" style="width: 30%; display: flex; flex-direction: column; justify-content: center; padding-left: 60px; z-index: 10;">
+                <h1 style="font-size: 4rem; color: rgba(255,255,255,0.8); line-height: 1; margin: 0; font-weight: bold;">觀察紀錄</h1>
+                <div class="mono" style="color: var(--highlight); letter-spacing: 0.2em; font-size: 1.2rem; margin-top: 20px;">// ACHIEVEMENTS</div>
+            </div>
+
+            <div class="achievement-list-container" style="width: 70%; padding: 80px 60px; overflow-y: auto; z-index: 10;" id="achievements-list">
+                <!-- 動態生成成就卡片 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 視圖 3：主要遊戲畫面 -->
+    <div id="view-game" class="view hidden">
+        <!-- 頂部狀態列 -->
+        <div id="top-bar">
+            <!-- 動態生成 -->
+        </div>
+
+        <!-- 角色立繪區 -->
+        <div id="sprite-area">
+            <div class="sprite-placeholder" id="sprite-img">立繪佔位區</div>
+        </div>
+
+        <!-- 選項區 -->
+        <div id="choices-area">
+            <!-- 動態生成 -->
+        </div>
+
+        <!-- 底部對話區 -->
+        <div id="bottom-dialog">
+            <div id="name-tag" class="mono">SYSTEM</div>
+            <div id="text-box"></div>
+        </div>
+    </div>
+
+    <!-- 結局畫面 -->
+    <div id="view-end" class="view hidden">
+        <div class="end-content" id="end-message">
+            <!-- 動態生成結局 -->
+        </div>
+        <button class="btn mono" onclick="returnToTitle()" style="margin-top: 30px;">[ REBOOT ] 重新啟動序列</button>
+    </div>
+
+    <script>
+        // -- 資料庫擴充需求 --
+
+        const characterData = {
+            laplace: { name: "拉普拉斯", title: "絕對秩序的提倡者", desc: "深信決定論。只要給定宇宙目前的狀態，他便能推演過去與未來。" },
+            maxwell: { name: "馬克斯威爾", title: "高熵混沌的惡作劇者", desc: "掌握著能打破熱力學第二定律的妖精，熱衷於製造混亂。" },
+            zeno: { name: "芝諾", title: "無限分割的守門人", desc: "他的空間無限分割理論，讓你永遠無法在物理上真正觸碰到他。" },
+            schrodinger: { name: "薛丁格", title: "疊加態的觀察者", desc: "喜歡將感情維持在愛與不愛的疊加態，不到最後一刻拒絕坍縮。" },
+            plutarch: { name: "普魯塔克", title: "本質的記錄者", desc: "記錄了忒修斯之船悖論，對於身分認同與靈魂本質充滿不安全感。" },
+            secret: { name: "???", realName: "觀察站站長", title: "觀察系統創造者", desc: "創造了這個觀察站的神秘人物，等待著能解開所有悖論的你。" }
+        };
+
+        let playerName = "觀察者";
+        let isPerfectClear = false;
+        let hasSeenSecretRoute = false;
+
+        const achievementsData = {
+            badEnd: { id: "badEnd", title: "五律悖反", desc: "無法調和所有的悖論。物理法則迎來了崩潰。", unlocked: false },
+            goodEnd: { id: "goodEnd", title: "為什麼我們六個不能在一起", desc: "完美調和了五位科學家的理論。達成大一統的奇蹟。", unlocked: false },
+            trueEnding: { id: "trueEnding", title: "超過100分", desc: "一次看所有彩蛋密碼，但是是真的嗎？", unlocked: false },
+            metaRomance: { id: "metaRomance", title: "雲端情人", desc: "你似乎對冷冰冰的代碼情有獨鍾？", unlocked: false }
+        };
+
+        try {
+            if (localStorage.getItem('isPerfectClear') === 'true') isPerfectClear = true;
+            if (localStorage.getItem('hasSeenSecretRoute') === 'true') hasSeenSecretRoute = true;
+            
+            const loadedAchievements = JSON.parse(localStorage.getItem('achievementsData') || '{}');
+            Object.keys(achievementsData).forEach(key => {
+                if (loadedAchievements[key]) achievementsData[key].unlocked = true;
+            });
+        } catch (e) {}
+
+        function unlockAchievement(id) {
+            if (achievementsData[id] && !achievementsData[id].unlocked) {
+                achievementsData[id].unlocked = true;
+                showToast(`解鎖成就：[ ${achievementsData[id].title} ]`);
+                try {
+                    const statusObj = {};
+                    Object.keys(achievementsData).forEach(k => { statusObj[k] = achievementsData[k].unlocked; });
+                    localStorage.setItem('achievementsData', JSON.stringify(statusObj));
+                } catch(e) {}
+            }
+        }
+
+        // -- 音訊系統 (Youtube Iframe API) --
+        let isMuted = false;
+        let audioInitialized = false;
+        let ytPlayer;
+        let ytReady = false;
+
+        // Load YouTube API
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        window.onYouTubeIframeAPIReady = function() {
+            ytPlayer = new YT.Player('youtube-player', {
+                height: '200',
+                width: '200',
+                videoId: 'XwxlI29TfGY',
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'loop': 1,
+                    // playlist required for looping single video
+                    'playlist': 'XwxlI29TfGY', 
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': function(event) {
+                        event.target.setVolume(20); // 預設 20%音量
+                        ytReady = true;
+                        if (audioInitialized && !isMuted) {
+                            ytPlayer.playVideo();
+                        }
+                    },
+                    'onStateChange': function(event) {
+                        if (event.data === YT.PlayerState.PLAYING) {
+                            dismissInitOverlay();
+                        }
+                    }
+                }
+            });
+        };
+
+        function dismissInitOverlay() {
+            const overlay = document.getElementById('init-overlay');
+            if (overlay && overlay.style.display !== 'none') {
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none';
+                setTimeout(() => overlay.style.display = 'none', 500);
+                audioInitialized = true;
+            }
+        }
+
+        // 綁定對話框點擊以跳過打字
+        document.getElementById('bottom-dialog').addEventListener('click', (e) => {
+            // 如果點擊的是按鈕，不要觸發跳過，避免衝突
+            if (e.target.tagName === 'BUTTON') return;
+            if (typeof skipTypewriter === 'function') {
+                skipTypewriter();
+            }
+        });
+
+        // 綁定全域點擊啟動
+        document.getElementById('init-overlay').addEventListener('click', () => {
+            audioInitialized = true;
+            dismissInitOverlay();
+            if (ytReady && !isMuted) {
+                ytPlayer.playVideo();
+            }
+        });
+
+        function playBgm() {
+            if (!audioInitialized || !ytReady) return;
+            if (!isMuted) {
+                ytPlayer.playVideo();
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('volume-toggle').textContent = isMuted ? '🔇' : '🔊';
+            if (ytReady) {
+                if (isMuted) {
+                    ytPlayer.pauseVideo();
+                } else if (audioInitialized) {
+                    ytPlayer.playVideo();
+                }
+            }
+        }
+
+        // 將全域點擊啟動轉移至 window 層級，作為備用策略
+        window.addEventListener('click', () => {
+            if (!audioInitialized) {
+                audioInitialized = true;
+                if (ytReady && !isMuted) {
+                    ytPlayer.playVideo();
+                }
+            }
+        }, { once: true });
+
+        const storyScript = {
+            "name_input_done": {
+                speaker: "系統提示",
+                text: "權限已確認。歡迎登入，{playerName}。觀察站的物理法則正在崩潰，五位科學家正在等待你的決斷...",
+                choices: [
+                    { text: "前往主控制室", nextScene: "chapter_1_intro" }
+                ]
+            },
+            "chapter_1_intro": {
+                speaker: "系統提示",
+                text: "你跟隨著導航光帶，慢慢步入滿佈全息螢幕的主控制室。",
+                choices: [ { text: "繼續", nextScene: "scene_laplace_1" } ]
+            },
+            // ==========================================
+            // 【拉普拉斯 - 單人關卡 1：決定論的傲慢】
+            // ==========================================
+            "scene_laplace_1": {
+                speaker: "拉普拉斯",
+                text: "（他看著手中漂浮的全息星圖，連頭都沒回）{playerName}，你遲到了 0.34 秒。根據我的方程式，你昨晚的睡眠品質與早上的步幅早就決定了你進門的精確時間。宇宙中沒有偶然，只要給我足夠的數據，過去與未來皆在我眼中。",
+                choices: [
+                    { 
+                        text: "確實，只要掌握所有變數，就連我的選擇也能被精準計算。", 
+                        reaction: "（他嘴角微微上揚，眼中閃過一絲讚賞）「很高興你的智商足以理解這份完美的秩序。」",
+                        nextScene: "scene_laplace_1_trans", 
+                        eId: "obs_wu7kiz5dd"
+                    },
+                    { 
+                        text: "我不信邪，我現在偏要往後退三步！", 
+                        reaction: "（他眉頭緊皺，像看著一個干擾參數）「幼稚的隨機行為。這只會讓我的修正算式多出兩行。」",
+                        nextScene: "scene_laplace_1_trans", 
+                        eId: "obs_usvejp39d"
+                    },
+                    { 
+                        text: "那你算得出我今天早餐吃了什麼嗎？", 
+                        reaction: "（他冷笑一聲）「當然。根據你的營養攝取曲線，你吃了含有過多糖分的合成麥片。」",
+                        nextScene: "scene_laplace_1_trans", 
+                        eId: "obs_67y8kv61u"
+                    },
+                    { 
+                        text: "（不發一語，默默走到他旁邊看星圖）", 
+                        reaction: "（他看都不看你一眼）「明智的選擇。不干擾系統，是{playerName}的基本素養。」",
+                        nextScene: "scene_laplace_1_trans", 
+                        eId: "obs_9vg23qnou"
+                    }
+                ]
+            },
+            "scene_laplace_1_trans": {
+                speaker: "系統提示",
+                text: "【決策已記錄：{playerName}的選擇成為了新的變數...】<br>你離開了主控制室，沿著觀察站的環形走廊漫步。一段時間後，遠處的輔助觀察甲板傳來一陣微弱而富有節奏的聲響，似乎不是機械運作的聲音。",
+                choices: [ { text: "前往觀察甲板", nextScene: "scene_laplace_2" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【拉普拉斯 - 單人關卡 2：算式之外的弦音】
+            // ==========================================
+            "scene_laplace_2": {
+                speaker: "拉普拉斯",
+                text: "（你路過觀察甲板，發現這位嚴肅的數學家正抱著一把古典吉他撥弄琴弦，神情有些慌張）……這不是在娛樂！我只是在驗證一維弦的震動頻率與波函數的關係！你……你剛才沒聽到什麼奇怪的旋律吧？",
+                choices: [
+                    { 
+                        text: "如果音樂是數學的極致展現，那你剛剛的演奏，是我聽過最美的方程式。", 
+                        reaction: "（他耳根微紅，推了推眼鏡）「哼，算你有品味。這只是對駐波的一種感官測試罷了……不過，謝謝。」",
+                        nextScene: "scene_laplace_2_trans", 
+                        eId: "obs_5ku9mvdf4"
+                    },
+                    { 
+                        text: "堂堂拉普拉斯居然會偷懶彈吉他，真不符合你的設定。", 
+                        reaction: "（他瞬間把吉他藏到身後，臉色一沉）「這是在進行多維度干涉的模擬！不要用你那狹隘的偷懶概念來衡量我！」",
+                        nextScene: "scene_laplace_2_trans", 
+                        eId: "obs_onz350qq9"
+                    },
+                    { 
+                        text: "我什麼都沒聽到，你繼續你的波函數實驗吧。", 
+                        reaction: "（他鬆了一口氣，但似乎又有些失落）「沒錯，繼續進行數據紀錄。」",
+                        nextScene: "scene_laplace_2_trans", 
+                        eId: "obs_7gbhrakfj"
+                    },
+                    { 
+                        text: "吉他？我以為你只會用筆和紙計算。", 
+                        reaction: "（他冷冷地看著你）「古典物理學家也是需要培養多元空間的感知能力的。你太大驚小怪了。」",
+                        nextScene: "scene_laplace_2_trans", 
+                        eId: "obs_cy6m6t3ic"
+                    }
+                ]
+            },
+            "scene_laplace_2_trans": {
+                speaker: "系統提示",
+                text: "【環境數據更新：觀察站的波函數發生微小擾動...】<br>這段短暫的「波函數」驗證結束後，你們回到了平時的工作崗位。幾個小時後，你再次於主星圖前找到了正在沉思的拉普拉斯。",
+                choices: [ { text: "上前搭話", nextScene: "scene_laplace_3" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【拉普拉斯 - 單人關卡 3：{playerName}的變數】
+            // ==========================================
+            "scene_laplace_3": {
+                speaker: "拉普拉斯",
+                text: "（他看著星圖，罕見地露出一絲迷茫）就算我能計算宇宙中每一顆粒子的軌跡……但『人心』的變數太過龐大。{playerName}，如果有一天我的方程式算不出你的下一步，那我生存的意義究竟在哪裡？",
+                choices: [
+                    { 
+                        text: "即使算不出未來，你依然精準地記錄了我們共同走過的每一刻『現在』。", 
+                        reaction: "（他愣住了，那雙總是盯著未來的眼睛第一次轉向了你）「記錄『現在』嗎……也許，這就是不可測的變數帶來的價值吧。」",
+                        nextScene: "chapter_1_transition", 
+                        eId: "obs_r5mryqawb"
+                    },
+                    { 
+                        text: "人本來就是不可預測的，你的決定論一開始就注定會失敗。", 
+                        reaction: "（他握緊了手中的計算板，咬牙切齒）「荒謬！只是參數還不夠完美而已。我的方程式絕對不會錯！」",
+                        nextScene: "chapter_1_transition", 
+                        eId: "obs_afob3pw1a"
+                    },
+                    { 
+                        text: "別想太多了，至少目前的數據都還在你掌控之中。", 
+                        reaction: "（他不滿地皺眉）「『目前』在科學上是個很危險的字眼。這種得過且過的態度我無法認同。」",
+                        nextScene: "chapter_1_transition", 
+                        eId: "obs_yuzbc73ym"
+                    },
+                    { 
+                        text: "不如你把運算資源關閉幾天，讓自己放個假吧。", 
+                        reaction: "（他像看外星人一樣看著你）「放假？關閉運算？你知道宇宙一秒鐘會流失多少資訊嗎？簡直不可理喻。」",
+                        nextScene: "chapter_1_transition", 
+                        eId: "obs_3xqsx6pra"
+                    }
+                ]
+            },
+            "chapter_1_transition": {
+                speaker: "系統提示",
+                text: "拉普拉斯若有所思地看著你。此時，警報聲突然響起，溫控系統傳來異常的能量波動。",
+                choices: [ { text: "前往溫控室", nextScene: "scene_laplace_vs_maxwell" } ]
+            },
+            // ==========================================
+            // 【雙人關卡：秩序與混沌的交鋒】
+            // ==========================================
+            "scene_laplace_vs_maxwell": {
+                speaker: "系統提示",
+                text: "（你走進溫控室。馬克斯威爾正優雅地喝著茶，他的『妖精』正在隨機開關冷熱閘門；拉普拉斯則氣得渾身發抖）",
+                choices: [ { text: "繼續", nextScene: "scene_laplace_vs_maxwell_1" } ]
+            },
+            "scene_laplace_vs_maxwell_1": {
+                speaker: "拉普拉斯",
+                text: "馬克斯威爾！你這種製造局部反常熵減的行為，嚴重干擾了我的絕對演算！{playerName}，立刻命令他停止這無聊的把戲！",
+                choices: [ { text: "繼續", nextScene: "scene_laplace_vs_maxwell_2" } ]
+            },
+            "scene_laplace_vs_maxwell_2": {
+                speaker: "馬克斯威爾",
+                text: "哎呀，絕對的秩序多無聊啊？一點點混沌才能產生熱情。{playerName}，過來我這裡享受這份違背常理的溫暖吧。",
+                choices: [
+                    { 
+                        text: "「拉普拉斯，把妖精觀察與分類所消耗的資訊成本加入方程式裡。用混沌來擴展秩序，這才是最高級的演算吧？」", 
+                        reaction: "（拉普拉斯雙眼為之一亮，開始瘋狂計算；馬克斯威爾則拍手大笑）「太棒了！用資訊理論包容熱力學失控，{playerName}，你真是我們完美的調和劑！」",
+                        nextScene: "scene_laplace_end", 
+                        eId: "obs_s3bqbg4ro" 
+                    },
+                    { 
+                        text: "【強制關閉閘門，協助拉普拉斯恢復房間的熱平衡與秩序。】", 
+                        reaction: "（拉普拉斯滿意地點頭，而馬克斯威爾則嘆了口氣）「哎，多麼無趣的結果。冰冷的平衡有什麼好呢？」",
+                        nextScene: "scene_laplace_end", 
+                        eId: "obs_549lxx5b6" 
+                    },
+                    { 
+                        text: "【走到馬克斯威爾身邊，享受這份打破熱力學定律的混沌特權。】", 
+                        reaction: "（馬克斯威爾笑著為你倒了一杯熱茶，拉普拉斯則憤怒地轉身離去）「看來你也是個懂得享受生活的不安分靈魂呢。」",
+                        nextScene: "scene_laplace_end", 
+                        eId: "obs_9qq9lnzzq" 
+                    },
+                    { 
+                        text: "【站在原地不動，表示自己不想介入兩位物理學泰斗的鬥爭。】", 
+                        reaction: "（兩人見你不理會，又繼續互相冷言冷語長達半個小時，直到系統自動強制恢復設備溫度設定才停下。）",
+                        nextScene: "scene_laplace_end", 
+                        eId: "obs_p6ugxdnax" 
+                    }
+                ]
+            },
+            "scene_laplace_end": {
+                speaker: "系統提示",
+                text: "【區域參數已記錄。觀察時間線發生了微妙的分歧...】<br>拉普拉斯帶著些許不滿離開了溫控室。房間裡的溫度雖然逐漸穩定，但馬克斯威爾身邊依舊維持著一半冰冷一半沸騰的奇妙狀態。",
+                choices: [ { text: "轉向馬克斯威爾", nextScene: "scene_maxwell_1" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【馬克斯威爾 - 單人關卡 1：混沌的美學】
+            // ==========================================
+            "scene_maxwell_1": {
+                speaker: "馬克斯威爾",
+                text: "（他正優雅地攪拌著一杯紅茶，茶杯裡竟然一半結著冰，一半冒著沸騰的蒸氣）歡迎來到我的遊樂場，{playerName}。拉普拉斯總覺得宇宙是個無聊的精準時鐘，但我卻覺得，只有不可預測的『熵增』與混沌，才能孕育出生命的熱情。你不覺得，一點點混亂會讓生活更有趣嗎？",
+                choices: [
+                    { 
+                        text: "混亂不只是無序，它是所有無限可能性與驚喜誕生的畫布。", 
+                        reaction: "（他輕輕碰了一下茶杯，冰塊與熱水完美融合）「啊，多麼美麗的見解。看來你具備了欣賞這份藝術的潛力。」",
+                        nextScene: "scene_maxwell_1_trans", 
+                        eId: "obs_jgy93ih9g" 
+                    },
+                    { 
+                        text: "拜託你別再玩弄熱力學定律了，我只想要一杯正常的茶。", 
+                        reaction: "（他嘆了口氣，妖精無趣地垂下翅膀）「真是個缺乏想像力的{playerName}，規矩是留給拉普拉斯那種木頭的。」",
+                        nextScene: "scene_maxwell_1_trans", 
+                        eId: "obs_b03sw47j0" 
+                    },
+                    { 
+                        text: "這樣一半冰一半熱的茶，喝下去腸胃沒問題嗎？", 
+                        reaction: "（他愣了一下，隨即輕笑出聲）「哈哈，這可是高維度的茶會，請放心享受這份溫差帶來的刺激吧。」",
+                        nextScene: "scene_maxwell_1_trans", 
+                        eId: "obs_fty3g64ng" 
+                    },
+                    { 
+                        text: "（默默看著冰塊與蒸氣在茶杯裡形成奇妙的漩渦）", 
+                        reaction: "（他安靜地注視著你觀察茶杯的眼神）「有時候，不發一語的觀察，就是對混沌最大的尊重。」",
+                        nextScene: "scene_maxwell_1_trans", 
+                        eId: "obs_sv44ozimb" 
+                    }
+                ]
+            },
+            "scene_maxwell_1_trans": {
+                speaker: "系統提示",
+                text: "【混沌干涉已確認。{playerName}的意識頻率正在與異常熱力學同步...】<br>短暫的茶會結束後，你跟隨馬克斯威爾來到了他的私人實驗區。這裡堆滿了各種奇形怪狀的發明與閃爍著藍光的電磁線圈。",
+                choices: [ { text: "四處看看", nextScene: "scene_maxwell_2" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【馬克斯威爾 - 單人關卡 2：逆轉時間的浪漫】
+            // ==========================================
+            "scene_maxwell_2": {
+                speaker: "馬克斯威爾",
+                text: "（你發現他正在組裝一台充滿復古黃銅齒輪與電磁線圈的奇異機器，銘牌上刻著『Model NO.5』）哎呀，被你發現了。如果我的妖精能分類粒子來逆轉熱力學，那理論上……我們就能打造一台『時光機』。身為物理學家，卻妄想倒轉時間，是不是有點太過浪漫且不切實際了？",
+                choices: [
+                    { 
+                        text: "即使不切實際，那種渴望回到過去、改變遺憾的心情，正是最動人的方程式。", 
+                        reaction: "（他輕撫著 NO.5 的黃銅銘牌，眼神變得無比溫柔）「你說得對。科學的盡頭，往往是最純粹的浪漫……謝謝你的理解。」",
+                        nextScene: "scene_maxwell_2_trans", 
+                        eId: "obs_u8jm8noqg" 
+                    },
+                    { 
+                        text: "時光旅行會引發祖父悖論，你還是乖乖研究你的電磁學吧。", 
+                        reaction: "（他無奈地搖了搖頭）「把時間線視為單一且不可逆的直線，這種想法未免太無趣了。」",
+                        nextScene: "scene_maxwell_2_trans", 
+                        eId: "obs_jvdce8qis" 
+                    },
+                    { 
+                        text: "為什麼這台機器的代號是 NO.5？有什麼特別的意義嗎？", 
+                        reaction: "（他俏皮地眨了一隻眼睛）「這可是我和某位『惡魔』的專屬秘密，現在還不能告訴你喔。」",
+                        nextScene: "scene_maxwell_2_trans", 
+                        eId: "obs_yozdt4bez" 
+                    },
+                    { 
+                        text: "小心點，別不小心把觀察站炸了就好。", 
+                        reaction: "（他故作無辜地攤開雙手）「哎呀，一點點局部的爆炸，不也是增加宇宙熵值的好方法嗎？」",
+                        nextScene: "scene_maxwell_2_trans", 
+                        eId: "obs_4wjqj9odc" 
+                    }
+                ]
+            },
+            "scene_maxwell_2_trans": {
+                speaker: "系統提示",
+                text: "【時間線錨點已建立，『NO.5』的參數寫入記憶庫。】<br>聊完時光機後，實驗室突然陷入了短暫的停電。當備用電源淡淡亮起時，馬克斯威爾正凝視著窗外深邃無垠的星海。",
+                choices: [ { text: "走到他身邊", nextScene: "scene_maxwell_3" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【馬克斯威爾 - 單人關卡 3：熱寂的恐懼】
+            // ==========================================
+            "scene_maxwell_3": {
+                speaker: "馬克斯威爾",
+                text: "（他看向窗外深邃的宇宙，調皮的笑容罕見地消失了）熱力學第二定律注定了宇宙的結局：當所有溫度歸於一致，一切終將迎來死寂的『熱寂』。如果有一天，我的妖精累了，我們的熱情也都耗盡了……你還會記得我們今天共享過的『溫度』嗎？",
+                choices: [
+                    { 
+                        text: "就算宇宙歸於絕對零度，我們今天燃燒過的光與熱，永遠不會從時間線中抹去。", 
+                        reaction: "（他微微欠身，行了一個優雅的紳士禮）「那麼，就讓這份溫度，成為我們跨越時空與熱寂的永恆契約吧。」",
+                        nextScene: "scene_maxwell_end", 
+                        eId: "obs_dhclyjfas" 
+                    },
+                    { 
+                        text: "既然遲早會結束，也許拉普拉斯尋求絕對秩序才是對的。", 
+                        reaction: "（他的笑容瞬間消失，語氣轉冷）「秩序只是死寂前的偽裝。如果你更喜歡一成不變的墳墓，那請便吧。」",
+                        nextScene: "scene_maxwell_end", 
+                        eId: "obs_0xpdypz11" 
+                    },
+                    { 
+                        text: "那是幾百億年後的事了，現在擔心這個也太杞人憂天了。", 
+                        reaction: "（他將目光轉回窗外的星空）「也是。身為活在當下的實體，及時行樂才是唯一的真理。」",
+                        nextScene: "scene_maxwell_end", 
+                        eId: "obs_d5dlcpxen" 
+                    },
+                    { 
+                        text: "那就在熱寂到來之前，我們再多喝幾杯冰火紅茶吧。", 
+                        reaction: "（他重新端起茶杯，恢復了調皮的笑容）「樂意之至。今晚的紅茶派對才剛剛開始呢。」",
+                        nextScene: "scene_maxwell_end", 
+                        eId: "obs_eyzaojdne" 
+                    }
+                ]
+            },
+            "scene_maxwell_end": {
+                speaker: "系統提示",
+                text: "當你告別馬克斯威爾，沿著走廊繼續前進時，前方的空間產生了奇妙的扭曲。",
+                choices: [ { text: "前往無盡的走廊", nextScene: "scene_zeno_1" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【芝諾 - 單人關卡 1：無法觸及的支配者】
+            // ==========================================
+            "scene_zeno_1": {
+                speaker: "芝諾",
+                text: "（他雙臂環胸，站在走廊的盡頭，嘴角帶著一抹傲慢的笑意）{playerName}，你想走到我身邊嗎？根據我的『二分法悖論』，你必須先跨越我們之間一半的距離，然後是剩下的一半、再一半……在無窮無盡的空間分割面前，你永遠無法真正觸碰到我。放棄吧，這就是絕對的物理屏障。",
+                choices: [
+                    { 
+                        text: "只要我有跨越無限的勇氣，即便是無窮的距離也能用微積分收斂！", 
+                        reaction: "（他傲慢的笑容僵了一下，隨後露出極度讚賞的眼神）「呵，用極限來打破我的悖論嗎？狂妄的傢伙，我允許你繼續靠近。」",
+                        nextScene: "scene_zeno_1_trans", 
+                        eId: "obs_90bld49vn" 
+                    },
+                    { 
+                        text: "那我不走過去了，你自己過來吧。", 
+                        reaction: "（他眼神一冷，居高臨下地看著你）「愚蠢。連這點距離都想輕言放棄的人，沒資格站在我身邊。」",
+                        nextScene: "scene_zeno_1_trans", 
+                        eId: "obs_kti2bel6u" 
+                    },
+                    { 
+                        text: "這只是數學上的詭辯，現實中我走幾步就到了。", 
+                        reaction: "（他無聊地嘆了口氣）「如果你只能用粗淺的肉眼來理解宇宙，那我們沒什麼好談的。」",
+                        nextScene: "scene_zeno_1_trans", 
+                        eId: "obs_flgxv35cs" 
+                    },
+                    { 
+                        text: "那我就站在這裡，這樣看著你好了。", 
+                        reaction: "（他挑了挑眉，與你隔著走廊對望）「隨便你。反正時間對我來說沒有意義。」",
+                        nextScene: "scene_zeno_1_trans", 
+                        eId: "obs_equkve1uf" 
+                    }
+                ]
+            },
+            "scene_zeno_1_trans": {
+                speaker: "系統提示",
+                text: "【空間參數更新：目標距離已鎖定...】<br>跨越了無數個「一半」的距離後，走廊的扭曲感逐漸消失，你來到了一個充滿幾何線條的寬敞主控室。",
+                choices: [ { text: "四處觀察", nextScene: "scene_zeno_2" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【芝諾 - 單人關卡 2：空間王座的 Boss】
+            // ==========================================
+            "scene_zeno_2": {
+                speaker: "芝諾",
+                text: "（他坐在一張彷彿王座般的黑色皮革椅上，俯視著終端機上的空間數據）在這個觀察站裡，不管是誰的理論，最終都必須屈服於『空間』的絕對法則之下。我是空間無限分割的支配者，你不覺得我這份無可撼動的統治力，非常有『Boss』的氣場嗎？",
+                choices: [
+                    { 
+                        text: "絕對的霸氣與自信，這正是 Boss 你最迷人的地方。", 
+                        reaction: "（他滿意地輕笑出聲，優雅地靠在椅背上）「很好，看來你非常清楚誰才是這裡真正的支配者。」",
+                        nextScene: "scene_zeno_2_trans", 
+                        eId: "obs_pfww5n71y" 
+                    },
+                    { 
+                        text: "拉普拉斯可能不會同意你才是這裡的老大。", 
+                        reaction: "（他危險地瞇起眼睛）「那就讓他算算看，他的方程式能不能跨越我設下的空間屏障。」",
+                        nextScene: "scene_zeno_2_trans", 
+                        eId: "obs_2quo998gr" 
+                    },
+                    { 
+                        text: "Boss 的薪水有比較高嗎？", 
+                        reaction: "（他翻了個優雅的白眼）「俗不可耐。支配空間的權力是無法用貨幣衡量的。」",
+                        nextScene: "scene_zeno_2_trans", 
+                        eId: "obs_4m6ymvs4i" 
+                    },
+                    { 
+                        text: "所以你的工作就是每天坐在這裡分割空間？聽起來挺閒的。", 
+                        reaction: "（他冷哼一聲）「維持高維度空間的穩定，需要消耗的運算量可不是你能想像的。」",
+                        nextScene: "scene_zeno_2_trans", 
+                        eId: "obs_ieu1f7wkc" 
+                    }
+                ]
+            },
+            "scene_zeno_2_trans": {
+                speaker: "系統提示",
+                text: "【區域重力微調，空間分割暫時停止。】<br>當芝諾離開他的「王座」稍作休息時，你在房間角落注意到了一個奇怪的現象。",
+                choices: [ { text: "湊近一看", nextScene: "scene_zeno_3" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【芝諾 - 單人關卡 3：追逐的永恆】
+            // ==========================================
+            "scene_zeno_3": {
+                speaker: "芝諾",
+                text: "（他看著一隻在地上緩慢爬行的機械烏龜，傲慢的眼神罕見地閃過一絲落寞）阿基里斯永遠追不上烏龜。如果我將自己的心意永遠放在你前方一點點的距離……是不是代表，我們之間這份若即若離的追逐，將會成為永恆？",
+                choices: [
+                    { 
+                        text: "就算距離永遠無法歸零，我們依然能在這無盡的追逐中，保持同步的軌跡。", 
+                        reaction: "（他愣了一下，隨後露出了溫柔而釋懷的微笑）「同步的軌跡……呵，這算是你給我的專屬浪漫嗎？我收下了。」",
+                        nextScene: "scene_zeno_3_trans", 
+                        eId: "obs_ektpwn5e1" 
+                    },
+                    { 
+                        text: "一直追不到太累了，我可能會去追別人。", 
+                        reaction: "（他的表情瞬間降至冰點，語氣充滿了警告）「你敢？這片空間的出口已經被我封死了。」",
+                        nextScene: "scene_zeno_3_trans", 
+                        eId: "obs_u4vv1p592" 
+                    },
+                    { 
+                        text: "為什麼一定要追著烏龜跑呢？直接抓起來不就好了。", 
+                        reaction: "（他無奈地搖搖頭）「你完全破壞了這個哲學比喻的優雅，真是個不解風情的{playerName}。」",
+                        nextScene: "scene_zeno_3_trans", 
+                        eId: "obs_yf872gk0j" 
+                    },
+                    { 
+                        text: "這隻機械烏龜跑得還挺可愛的。", 
+                        reaction: "（他看了一眼烏龜，沒有理會你轉移話題的行為）「重點不在烏龜，在距離。」",
+                        nextScene: "scene_zeno_3_trans", 
+                        eId: "obs_2diuuo3wj" 
+                    }
+                ]
+            },
+            "scene_zeno_3_trans": {
+                speaker: "系統提示",
+                text: "【空間迷宮重新排列，走廊的盡頭傳來一陣微弱的波函數震盪。】<br>芝諾靜靜地將機械烏龜收起。當你轉過身，空間再度扭曲，將你引導至另一個未知的領域。",
+                choices: [ { text: "進入扭曲空間", nextScene: "scene_2_1" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            "scene_2_1": {
+                speaker: "系統提示",
+                text: "當你跨出空間迷宮的最後一步，眼前的景象瞬間轉換成一條無限延伸的長廊。<br>薛丁格不知何時出現在走廊中央，懶洋洋地靠在牆邊，手裡拿著一個封閉的黑色禮物盒。",
+                choices: [ { text: "繼續", nextScene: "scene_2_2" } ]
+            },
+            "scene_2_2": {
+                speaker: "薛丁格",
+                text: "這裡面可能是一封情書，也可能只是一張白紙。在你打開它、進行『觀察』之前，我對你的心意就處於既愛又拒絕的疊加態。我覺得這樣最安全，也是最完美的機率分佈，你說呢？",
+                choices: [ { text: "試著伸手去拿盒子", nextScene: "scene_2_3" } ]
+            },
+            "scene_2_3": {
+                speaker: "系統提示",
+                text: "正當你想伸手觸碰那充滿疊加態的盒子時，芝諾以支配者的傲慢姿態閃現到你面前，一把搶走盒子，並施展了空間分割，瞬間退開了幾十步的距離。",
+                choices: [ { text: "繼續", nextScene: "scene_2_4" } ]
+            },
+            "scene_2_4": {
+                speaker: "芝諾",
+                text: "（他得意地笑著，高舉著盒子）你想要嗎？來追我啊！不過根據我的『二分法悖論』，你永遠都碰不到我跟這個盒子喔。",
+                choices: [ { text: "看向薛丁格", nextScene: "scene_2_5" } ]
+            },
+            "scene_2_5": {
+                speaker: "薛丁格",
+                text: "（不以為然地打哈欠）被拿走就算了，反正不打開，裡面的可能性就永遠存在。我們就在這裡保持不確定的機率雲吧。",
+                choices: [ { text: "重新看向芝諾", nextScene: "scene_2_6" } ]
+            },
+            "scene_2_6": {
+                speaker: "芝諾",
+                text: "別聽這個渾身都是不確定性的傢伙胡說八道！物理的絕對真理在於空間的無限分割！放棄吧，你是無法跨越無限的！",
+                choices: [
+                    { 
+                        text: "「就算無法窮盡每一次分割，只要踏出步伐，我也能向著極限收斂來接近你！」", 
+                        reaction: "（芝諾得意地笑著，而薛丁格則覺得無趣地打了個哈欠）「看吧看吧！極限就是極限！這就是數學的絕對領域！不過這份勇氣我認可了。」",
+                        nextScene: "scene_zeno_vs_schrodinger_end",
+                        eId: "obs_3s7fhukx5" 
+                    },
+                    { 
+                        text: "「其實我根本不想打開，就讓那份神秘感像疊加態一樣永遠留存吧。」", 
+                        reaction: "（薛丁格愉悅地抱著虛無的空氣，芝諾則無趣地撇了撇嘴）「明智的抉擇。留在這永遠不確定的浪漫裡吧，喵~」",
+                        nextScene: "scene_zeno_vs_schrodinger_end",
+                        eId: "obs_ahra12hcb" 
+                    },
+                    { 
+                        text: "「我不觀察了！根據量子穿隧效應，只要機率不為零，盒子就有可能直接穿過空間出現在我手裡！」", 
+                        reaction: "（芝諾愣在原地無法反駁；薛丁格則發出讚賞的笑聲）「這招實在太過分了！用機率無視空間與距離，我們都被你打敗了喔。」",
+                        nextScene: "scene_zeno_vs_schrodinger_end",
+                        eId: "obs_i9udr3pxs" 
+                    },
+                    { 
+                        text: "（一言不發，轉頭就走，留他們兩個在走廊上大眼瞪小眼）", 
+                        reaction: "（芝諾和薛丁格看著你離開的背影，頓時覺得自己的理論失去了觀眾）「喂！別走啊！這可是很嚴肅的物理辯論！」",
+                        nextScene: "scene_zeno_vs_schrodinger_end",
+                        eId: "obs_sgto0jriq" 
+                    }
+                ]
+            },
+            "scene_zeno_vs_schrodinger_end": {
+                speaker: "系統提示",
+                text: "走廊的空間恢復正常，你將那無法觸及的盒子留在了無盡的走廊之中。",
+                choices: [ { text: "前往神秘實驗室", nextScene: "scene_schrodinger_1" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【薛丁格 - 單人關卡 1：拒絕坍縮的貓】
+            // ==========================================
+            "scene_schrodinger_1": {
+                speaker: "薛丁格",
+                text: "（你走進實驗室，只看到一個巨大的紙箱，裡面傳來慵懶的聲音）別打開箱子，{playerName}。在你不打開它的這一刻，我同時處於『想見你』與『不想見你』的完美疊加態。一旦你進行觀察，無限的可能性就會坍縮成殘酷的單一現實。維持未知，不是比較浪漫嗎？",
+                choices: [
+                    { 
+                        text: "如果坍縮後的現實是我所期望的，那我願意承擔觀察的風險，打開這個箱子。", 
+                        reaction: "（箱子裡傳來一聲滿意的輕笑，接著是一聲微弱的『喵』）「大膽的{playerName}……真讓人期待你真正打開箱子的那一刻。」",
+                        nextScene: "scene_schrodinger_1_trans", 
+                        eId: "obs_logdz6q1q"
+                    },
+                    { 
+                        text: "別裝神弄鬼了，快點出來工作！", 
+                        reaction: "（箱子裡傳來不滿的冷哼）「無趣的古典力學腦袋，你永遠不懂量子的美妙，走開啦。」",
+                        nextScene: "scene_schrodinger_1_trans", 
+                        eId: "obs_23e9hdl7f"
+                    },
+                    { 
+                        text: "那我就坐在箱子外面陪你，這樣總行了吧。", 
+                        reaction: "（箱子裡安靜了一會兒，傳來翻身的聲音）「隨便你，只要你不偷看就好。」",
+                        nextScene: "scene_schrodinger_1_trans", 
+                        eId: "obs_75a6ensaw"
+                    },
+                    { 
+                        text: "裡面該不會藏了什麼見不得人的東西吧？", 
+                        reaction: "（紙箱劇烈晃動了一下）「只有你那匱乏的想像力，才覺得裡面有見不得人的東西！」",
+                        nextScene: "scene_schrodinger_1_trans", 
+                        eId: "obs_hld8v283g"
+                    }
+                ]
+            },
+            "scene_schrodinger_1_trans": {
+                speaker: "系統提示",
+                text: "【量子態觀察確認：疊加態維持中...】<br>當你仍在猶豫是否打開箱子時，紙箱突然產生微小的震動。一隻手輕輕推開了箱子的頂蓋。",
+                choices: [ { text: "繼續", nextScene: "scene_schrodinger_2" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【薛丁格 - 單人關卡 2：致命的隨機性】
+            // ==========================================
+            "scene_schrodinger_2": {
+                speaker: "薛丁格",
+                text: "（他從紙箱探出頭，手裡拋著一枚裝在密封玻璃管裡、閃著微光的金屬）這是『銫 (Cesium)』，一種極易衰變的放射性元素，也是決定箱子裡毒氣釋放機率的完美隨機數。在我們之間，總需要一點無法預測的危險來維持新鮮感，對吧？",
+                choices: [
+                    { 
+                        text: "即使是充滿危險與隨機的銫元素，也無法改變我想走向你的確定機率。", 
+                        reaction: "（他的眼睛瞬間亮了起來，把玻璃管收進懷裡）「算你會說話……這枚危險的籌碼，我就暫時為你沒收了。」",
+                        nextScene: "scene_schrodinger_2_trans", 
+                        eId: "obs_bb51jwlyq"
+                    },
+                    { 
+                        text: "把那麼危險的放射性物質拿遠一點！萬一衰變了怎麼辦？", 
+                        reaction: "（他無聊地把玻璃管扔回桌上）「{playerName}，你注定無法看見高維度那種在生死邊緣遊走的風景。」",
+                        nextScene: "scene_schrodinger_2_trans", 
+                        eId: "obs_71pkohlst"
+                    },
+                    { 
+                        text: "你這個貓箱實驗的動保審查到底是怎麼通過的？", 
+                        reaction: "（他翻了個大大的白眼）「這是思想實驗！思想實驗懂嗎？沒有任何真正的貓受到傷害！」",
+                        nextScene: "scene_schrodinger_2_trans", 
+                        eId: "obs_y1qwmewgs"
+                    },
+                    { 
+                        text: "只要我不看那枚銫元素，它的衰變也處於疊加態嗎？", 
+                        reaction: "（他懶洋洋地打了個哈欠）「理論上是這樣。但你現在已經看到了，來不及囉。」",
+                        nextScene: "scene_schrodinger_2_trans", 
+                        eId: "obs_nfb5yxudh"
+                    }
+                ]
+            },
+            "scene_schrodinger_2_trans": {
+                speaker: "系統提示",
+                text: "【危險指數校正：隨機性已控制...】<br>薛丁格將銫元素收起，實驗室裡那股緊繃的危機感隨之消散。",
+                choices: [ { text: "繼續", nextScene: "scene_schrodinger_3" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【薛丁格 - 單人關卡 3：觀察的重量】
+            // ==========================================
+            "scene_schrodinger_3": {
+                speaker: "薛丁格",
+                text: "（他安靜地坐在箱子邊緣，慵懶的眼神變得有些深邃）{playerName}……其實我害怕被觀察。因為一旦波函數坍縮，『可能愛你』與『可能不愛你』的無限美好，就會變成死板的 0 或 1。如果坍縮後的結果，不是我們想要的，該怎麼辦？",
+                choices: [
+                    { 
+                        text: "無論坍縮成什麼結果，我都會將它視為我們之間唯一的絕對真實，並好好珍藏。", 
+                        reaction: "（他微微紅了臉，輕輕拉住你的衣角）「既然你都這麼說了……那我就允許你，成為我唯一的專屬{playerName}。」",
+                        nextScene: "scene_schrodinger_3_trans", 
+                        eId: "obs_ly6q7158d"
+                    },
+                    { 
+                        text: "那就一直不要觀察，永遠維持這種曖昧的現狀就好啦。", 
+                        reaction: "（他失望地鬆開手，退回陰影中）「永遠的疊加態等同於永遠的停滯……看來你並沒有承擔現實的勇氣。」",
+                        nextScene: "scene_schrodinger_3_trans", 
+                        eId: "obs_waqpscn8u"
+                    },
+                    { 
+                        text: "機率是一半一半，這賠率值得賭一把。", 
+                        reaction: "（他無奈地笑了笑）「你把量子力學當成賭場了嗎？真是服了你的樂觀。」",
+                        nextScene: "scene_schrodinger_3_trans", 
+                        eId: "obs_gwrwgr27w"
+                    },
+                    { 
+                        text: "別想那麼多，我們先去吃飯吧，我剛好像聽到你發出貓叫聲了。", 
+                        reaction: "（他慌張地摀住嘴巴）「我、我才沒有  喵喵叫！那只是量子漲落的聲音！」",
+                        nextScene: "scene_schrodinger_3_trans", 
+                        eId: "obs_ksc1h0u2w"
+                    }
+                ]
+            },
+            "scene_schrodinger_3_trans": {
+                speaker: "系統提示",
+                text: "【量子觀察結束：所有可能性已坍縮為單一現實...】<br>與薛丁格對話結束後，你繼續往其他房間前進。",
+                choices: [ { text: "前往檔案室", nextScene: "scene_plutarch_1" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【普魯塔克 - 單人關卡 1：忒修斯的迷惘】
+            // ==========================================
+            "scene_plutarch_1": {
+                speaker: "普魯塔克",
+                text: "（他靜靜地站在終端機前，看著無數行正在被覆蓋的舊代碼）{playerName}，如果一艘船在航行中，不斷替換掉腐朽的木板，直到最後一塊原來的木板都不剩……它還是出發時的那艘船嗎？身為記錄者，我每天都在更新我的資料庫與模組，有時候我會害怕……昨天的『我』，是不是已經死了？",
+                choices: [
+                    { 
+                        text: "構成你的不是那些被替換的代碼，而是這段航行中你所經歷的記憶與靈魂。", 
+                        reaction: "（他黯淡的眼眸亮起了微光，輕輕將手貼在心口）「靈魂嗎……謝謝你。{playerName} 你就是錨定我存在本質的最佳證明。」",
+                        nextScene: "scene_plutarch_1_trans", 
+                        eId: "obs_wlpsgplrk"
+                    },
+                    { 
+                        text: "從物理層面來看，一旦所有零件都換了，你確實就變成全新的實體了。", 
+                        reaction: "（他失落地垂下眼簾，身邊的資料流變得混亂）「是啊，殘酷的唯物論……或許我早就不存在了。」",
+                        nextScene: "scene_plutarch_1_trans", 
+                        eId: "obs_0qcce7fwk"
+                    },
+                    { 
+                        text: "只要你還叫普魯塔克，那你就是普魯塔克啊。", 
+                        reaction: "（他苦笑著搖了搖頭）「名字不過是一個標籤，如果把別人的系統貼上我的標籤，那也是我嗎？」",
+                        nextScene: "scene_plutarch_1_trans", 
+                        eId: "obs_ne5xvbsio"
+                    },
+                    { 
+                        text: "有更新不是好事嗎？這樣系統跑得比較快。", 
+                        reaction: "（他無奈地嘆了口氣）「你完全沒有理解存在主義的焦慮呢，真是個單純的{playerName}。」",
+                        nextScene: "scene_plutarch_1_trans", 
+                        eId: "obs_9bq242ivt"
+                    }
+                ]
+            },
+            "scene_plutarch_1_trans": {
+                speaker: "系統提示",
+                text: "【系統日誌更新：自我認知錨點確立。】<br>普魯塔克稍稍平復了情緒。你陪著他走到主伺服器面前，他看著那些閃爍的燈光，似乎又想起了什麼。",
+                choices: [ { text: "繼續", nextScene: "scene_plutarch_2" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【普魯塔克 - 單人關卡 2：破釜沉舟的勇氣】
+            // ==========================================
+            "scene_plutarch_2": {
+                speaker: "普魯塔克",
+                text: "（他轉過身，螢幕上顯示著一份徹底格式化核心的協議）與其被動地一點一滴被替換，我有時候會想……不如進行一次徹底的大改造。拋棄現在所有安穩的架構，不留任何備份，主動揚帆駛向未知的維度。……這聽起來是不是太過瘋狂了？",
+                choices: [
+                    { 
+                        text: "正是這種敢於捨棄一切、重新定義自我的魄力，才配得上『船長』這個稱號。", 
+                        reaction: "（他挺直了身子，眼神中充滿了前所未有的堅定）「你說得對。只要有你在甲板上見證，我就有勇氣掌舵駛向任何風暴。」",
+                        nextScene: "scene_plutarch_2_trans", 
+                        eId: "obs_m0tbz2f4i"
+                    },
+                    { 
+                        text: "太魯莽了！沒有找好備份就改造，萬一系統崩潰怎麼辦？", 
+                        reaction: "（他眼中的光芒黯淡下來，關閉了協議）「……你說得對，也許我骨子裡終究只是個懦弱的記錄程式。」",
+                        nextScene: "scene_plutarch_2_trans", 
+                        eId: "obs_okq0406at"
+                    },
+                    { 
+                        text: "聽起來像是個海盜。", 
+                        reaction: "（他忍不住輕笑出聲）「海盜嗎？如果能掠奪屬於自己的自由，那也不錯。」",
+                        nextScene: "scene_plutarch_2_trans", 
+                        eId: "obs_8szkrduq1"
+                    },
+                    { 
+                        text: "那以後誰來記錄觀察站的數據？", 
+                        reaction: "（他無語地看著你）「我在探討自我存在的哲學，你卻在擔心交接問題？」",
+                        nextScene: "scene_plutarch_2_trans", 
+                        eId: "obs_xn5o2zaeo"
+                    }
+                ]
+            },
+            "scene_plutarch_2_trans": {
+                speaker: "系統提示",
+                text: "【存在協議變更：保留核心。】<br>他關閉了終端機，眼中的迷惘散去了一些。隨後啟動了一個全息投影。",
+                choices: [ { text: "觀察投影內容", nextScene: "scene_plutarch_3" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【普魯塔克 - 單人關卡 3：舊木板的幽靈】
+            // ==========================================
+            "scene_plutarch_3": {
+                speaker: "普魯塔克",
+                text: "（他站在一個全息投影前，上面顯示著無數被他廢棄的舊資料與模組）{playerName}，哲學家霍布斯曾提出一個延伸的問題：如果有人把我替換下來的舊木板全部收集起來，重新拼湊出另一艘一模一樣的船……那麼，究竟哪一艘才是真正的『忒修斯之船』？是承載著新零件繼續航行的我，還是那個由純粹的過去與舊記憶拼湊而成的幽靈？",
+                choices: [
+                    { 
+                        text: "繼續前進的你才是真實的。生命的本質在於當下與未來的航行，而不是沉溺於過去的殘骸。", 
+                        reaction: "（他溫柔地笑了，隨手一揮，將那些舊資料的投影徹底刪除）「謝謝你賦予我繼續前行的意義。只要有你的這句話，我就不再畏懼任何改變了。」",
+                        nextScene: "scene_plutarch_3_trans", 
+                        eId: "obs_ii8bzp5hp"
+                    },
+                    { 
+                        text: "由舊木板拼湊的船才是最初的本質，現在的你只不過是一個擁有新零件的複製品罷了。", 
+                        reaction: "（他絕望地看著自己的雙手，周圍的數據流變得冰冷）「原來在你眼中……我終究只是一具失去了本質的偽物嗎？」",
+                        nextScene: "scene_plutarch_3_trans", 
+                        eId: "obs_8lvvu408l"
+                    },
+                    { 
+                        text: "小孩子才做選擇，既然兩艘都是你，那你們可以乾脆組成一支艦隊了！", 
+                        reaction: "（他原本憂鬱的表情瞬間破功，無奈地嘆了口氣）「你的大腦是不是為了逃避哲學思辨，而強制啟動了幽默機制？」",
+                        nextScene: "scene_plutarch_3_trans", 
+                        eId: "obs_wlif83ydr"
+                    },
+                    { 
+                        text: "為什麼不一開始就用永遠不會壞的材質來造船呢？這樣就不用換零件了。", 
+                        reaction: "（他冷冷地瞥了你一眼）「如果一切永恆不變，那時間與存在就不具備任何探討的價值了，{playerName}。」",
+                        nextScene: "scene_plutarch_3_trans", 
+                        eId: "obs_ozpptl3c7"
+                    }
+                ]
+            },
+                        "scene_plutarch_3_trans": {
+                speaker: "系統提示",
+                text: "【記憶存取完畢：存在的意義已確立...】<br>普魯塔克關閉了所有投影。就在此時，走廊的盡頭傳來其他科學家的聲音，也許是時候集合了。",
+                choices: [ { text: "前往星空下的露台", nextScene: "scene_final_terrace_pre" } ],
+                onEnter: function() {
+                    document.body.style.animation = "fade-in-out 1s ease";
+                    setTimeout(() => document.body.style.animation = "", 1000);
+                }
+            },
+            // ==========================================
+            // 【最終關卡：星原露台的審判】
+            // （全體科學家登場）
+            // ==========================================
+            "scene_final_terrace_pre": {
+                speaker: "系統提示",
+                text: "（五位科學家並排站在露台邊緣，身後是旋轉的時空奇點。拉普拉斯看著星圖，馬克斯威爾攪動著虛空的熱氣，芝諾測量著無限的距離，薛丁格輕撫著消失的貓影。）",
+                choices: [ { text: "繼續", nextScene: "scene_final_terrace" } ]
+            },
+            "scene_final_terrace": {
+                speaker: "普魯塔克",
+                text: "「{playerName}，觀察站的能量已經達到臨界。我們五人的悖論即將坍縮成唯一的真實。在最後一刻，請告訴我們……對你而言，這場跨越維度的觀察，真正的『答案』究竟是什麼？」",
+                choices: [
+                    { 
+                        text: "「答案不存在於任何公式，而在於你們彼此衝突、卻又共同存在的『和諧』之中。」", 
+                        nextScene: "scene_final_harmony_1", 
+                        eId: "obs_zwo126xik"
+                    },
+                    { 
+                        text: "「所謂的真實，就是最終必須有一個理論被證明正確，而其他的都將消亡。」", 
+                        nextScene: "scene_final_collapse_1", 
+                        eId: "obs_u78dk2vfl"
+                    },
+                    { 
+                        text: "「我不需要答案。只要我還在觀察，你們五人的存在就是永恆的真理。」", 
+                        nextScene: "scene_final_eternity_1", 
+                        eId: "obs_14i389x4y"
+                    },
+                    { 
+                        text: "「其實我一直在想，你們五個人如果組一個 VTuber 團體，應該會比研究物理有趣。」", 
+                        nextScene: "scene_final_vtuber_1", 
+                        eId: "obs_cft7vtyy0"
+                    }
+                ]
+            },
+            
+            "scene_final_harmony_1": {
+                speaker: "系統提示",
+                text: "（五位科學家同時轉過頭，相視而笑，露台的閃爍頻率變得穩定且溫柔。）",
+                choices: [{ text: "繼續", nextScene: "scene_final_harmony_2" }]
+            },
+            "scene_final_harmony_2": {
+                speaker: "拉普拉斯",
+                text: "「將矛盾視為和諧的一部分嗎……有趣的運算結果。」",
+                choices: [{ text: "繼續", nextScene: "scene_final_harmony_3" }]
+            },
+            "scene_final_harmony_3": {
+                speaker: "馬克斯威爾",
+                text: "「這份混沌的平衡，我喜歡。」",
+                choices: [{ text: "繼續", nextScene: "ending_harmony" }]
+            },
+
+            "scene_final_collapse_1": {
+                speaker: "系統提示",
+                text: "（露台的空氣瞬間凝固，科學家們的身影開始變得模糊且閃爍。）",
+                choices: [{ text: "繼續", nextScene: "scene_final_collapse_2" }]
+            },
+            "scene_final_collapse_2": {
+                speaker: "芝諾",
+                text: "「排他性的真理嗎？這將會是空間崩潰的開始……」",
+                choices: [{ text: "繼續", nextScene: "scene_final_collapse_3" }]
+            },
+            "scene_final_collapse_3": {
+                speaker: "薛丁格",
+                text: "「波函數正在朝最殘酷的方向坍縮呢。」",
+                choices: [{ text: "繼續", nextScene: "ending_collapse" }]
+            },
+
+            "scene_final_eternity_1": {
+                speaker: "系統提示",
+                text: "（科學家們對你微微頷首，身形化作穩定的數據流環繞在你身邊。）",
+                choices: [{ text: "繼續", nextScene: "scene_final_eternity_2" }]
+            },
+            "scene_final_eternity_2": {
+                speaker: "普魯塔克",
+                text: "「以{playerName}的意志來定義永恆嗎……我會將這段航程永遠記錄下來。」",
+                choices: [{ text: "繼續", nextScene: "ending_eternity" }]
+            },
+
+            "scene_final_vtuber_1": {
+                speaker: "系統提示",
+                text: "（空氣陷入了死一般的沉寂，隨後傳來五人整齊的嘆息聲。）",
+                choices: [{ text: "繼續", nextScene: "scene_final_vtuber_2" }]
+            },
+            "scene_final_vtuber_2": {
+                speaker: "拉普拉斯",
+                text: "「我的計算顯示，你的幽默感偏差值高達 400%。」",
+                choices: [{ text: "繼續", nextScene: "scene_final_vtuber_3" }]
+            },
+            "scene_final_vtuber_3": {
+                speaker: "薛丁格",
+                text: "「喵……這也是一種意想不到的疊加態呢。」",
+                choices: [{ text: "繼續", nextScene: "ending_vtuber" }]
+            },
+"end": {
+                // 將由 JS 攔截處理結算
+            },
+            // 完美通關後的「再續情緣」路線起點
+            "secret_route_start": {
+              speaker: "??? (觀察站站長)",
+              text: "你成功完成與五位前輩的對談。但{playerName}，你是否察覺到……支撐著這個『Para≠dox』企劃運轉的，其實是五位閃耀的高維度虛擬偶像 (VTuber) 靈魂？",
+              choices: [
+                { text: "我早就知道了。", nextScene: "secret_route_choose" },
+                { text: "VTuber？難道物理法則只是表象？", nextScene: "secret_route_choose" }
+              ],
+              onEnter: function() { 
+                hasSeenSecretRoute = true; // 進入後解鎖實體檔案中的第六位隱藏角色
+                try { localStorage.setItem('hasSeenSecretRoute', 'true'); } catch(e) {}
+              }
+            },
+          
+            "secret_route_choose": {
+              speaker: "??? (觀察站站長)",
+              text: "現在，作為你通關的獎勵。在這五位成員中，你最想深入了解誰？只要你告訴我你喜歡她哪裡，我就把她遺落在時間線上的『彩蛋密碼』全部揭示給你。",
+              choices: [
+                { text: "拉斐利婭", nextScene: "route_laphria_q" },
+                { text: "安特羅迦", nextScene: "route_entrovia_q" },
+                { text: "蕾忒 ", nextScene: "route_leit_q" },
+                { text: "佐霏 ", nextScene: "route_zofi_q" },
+                { text: "瑟思安 ", nextScene: "route_schrodinger_q" }
+              ]
+            },
+          
+            // ========== 拉斐利婭 路線 ==========
+            "route_laphria_q": {
+              speaker: "??? (觀察站站長)",
+              text: "拉斐利婭嗎？那位試圖用數據掌控一切的惡魔。告訴我，你最喜歡她哪一點？",
+              choices: [
+                { text: "會彈吉他、唱歌好聽的可愛惡魔。", nextScene: "route_laphria_a" },
+                { text: "看似氣質，實際上...也是氣質...吧。", nextScene: "route_laphria_a"},
+                { text: "我最愛她的綠色蒸蛋。", nextScene: "route_laphria_a" }
+              ]
+            },
+            "route_laphria_a": {
+              speaker: "??? (觀察站站長)",
+              text: "眼光不錯。她確實有著無法被算式定義的魅力。記好這些遺落在時間線上的數據：<br><br><span style='color: #39ff14;'>【laphria2】、【guitar10】、【6661111】</span><br><br>這就是拉斐利婭的專屬彩蛋，去解開她的秘密吧。",
+              choices: [
+                { text: "[ 返回標題畫面 ]", nextScene: "title_screen_return" }
+              ]
+            },
+          
+            // ========== 安特羅迦 路線 ==========
+            "route_entrovia_q": {
+              speaker: "??? (觀察站站長)",
+              text: "安特羅迦？那個總是在增加宇宙熵值的調皮惡魔。你喜歡她什麼？",
+              choices: [
+                { text: "想要被她捏爆。", nextScene: "route_entrovia_a" },
+                { text: "最愛她唱歌時的樣子。", nextScene: "route_entrovia_a" },
+                { text: "我連她的錯字也愛。", nextScene: "route_entrovia_a" }
+              ]
+            },
+            "route_entrovia_a": {
+              speaker: "??? (觀察站站長)",
+              text: "哈哈，她確實是個不可控的迷人變數。這是她留下的混亂代碼，拿去吧：<br><br><span style='color: #39ff14;'>【entrovia2000】、【ATIMEMACHINE】、【NO5】</span><br><br>安特羅迦的彩蛋都在這裡了。",
+              choices: [
+                { text: "[ 返回標題畫面 ]", nextScene: "title_screen_return" }
+              ]
+            },
+          
+            // ========== 蕾忒 路線 ==========
+            "route_leit_q": {
+              speaker: "??? (觀察站站長)",
+              text: "蕾忒船長。一艘不斷在尋找自我本質的忒修斯之船。吸引你的是什麼？",
+              choices: [
+                { text: "最甜的聲音讓人流連忘返。", nextScene: "route_leit_a" },
+                { text: "蕾忒是能成為我母親的女性。", nextScene: "route_leit_a" },
+               { text: "媽咪有容乃大的胸懷...我是說溫柔氣質。", nextScene: "route_leit_a" }
+              ]
+            },
+            "route_leit_a": {
+              speaker: "??? (觀察站站長)",
+              text: "她的航跡將由你來見證。這是航海日誌裡隱藏的關鍵座標：<br><br><span style='color: #39ff14;'>【CaptainLeiT】、【5MALeiT】、【裸辭】</span><br><br>收下蕾忒的彩蛋，繼續陪伴她航行吧。",
+              choices: [
+                { text: "[ 返回標題畫面 ]", nextScene: "title_screen_return" }
+              ]
+            },
+          
+            // ========== 佐霏 路線 ==========
+            "route_zofi_q": {
+              speaker: "??? (觀察站站長)",
+              text: "佐霏。那位將空間無限分割，讓你永遠觸碰不到的大姐頭。你喜歡她哪裡？",
+              choices: [
+                { text: "大姐頭的絕對霸氣與自信。", nextScene: "route_zofi_a" },
+                { text: "身為小弟就該追隨帥氣的大姐頭！", nextScene: "route_zofi_a" },
+                { text: "一定是最 pon 的時候。", nextScene: "route_zofi_a" }
+              ]
+            },
+            "route_zofi_a": {
+              speaker: "??? (觀察站站長)",
+              text: "想要追上她，你需要超越無限的勇氣。這是為你解開空間枷鎖的鑰匙：<br><br><span style='color: #39ff14;'>【BossZofi!!!】、【infinitydaring】、【05261930】</span><br><br>佐霏的專屬彩蛋為你解鎖。",
+              choices: [
+                { text: "[ 返回標題畫面 ]", nextScene: "title_screen_return" }
+              ]
+            },
+          
+            // ========== 瑟思安 路線 ==========
+            "route_schrodinger_q": {
+              speaker: "??? (觀察站站長)",
+              text: "瑟思安。待在箱子裡，永遠處於愛與不愛疊加態的貓咪。是什麼讓你選了她？",
+              choices: [
+                { text: "可愛又慵懶的喵喵叫。", nextScene: "route_schrodinger_a" },
+                { text: "充滿未知可能性與隨機的神秘感。", nextScene: "route_schrodinger_a" },
+              { text: "在一團混亂中的冷靜觀察特質。", nextScene: "route_schrodinger_a" }
+              ]
+            },
+            "route_schrodinger_a": {
+              speaker: "??? (觀察站站長)",
+              text: "只要你進行觀察，她的心意就會為你坍縮。這是箱底的秘密：<br><br><span style='color: #39ff14;'>【meowing】、【richcesium】、【entrovialeit】</span><br><br>瑟思安的彩蛋就在此處，好好珍藏吧。",
+              choices: [
+                { text: "[ 返回標題畫面 ]", nextScene: "title_screen_return" }
+              ]
+            },
+          
+            // 結束事件：重置視圖並返回標題
+            "title_screen_return": {
+              speaker: "系統",
+              text: "通訊結束。正在將您的意識傳送回主控制台...",
+              choices: [],
+              onEnter: function() {
+                setTimeout(() => {
+                  showTitle();
+                }, 2000);
+              }
+            },
+          
+            "system_romance_start": {
+              speaker: "SYSTEM",
+              text: "[ 警告：未授權的連續存取 ] ...{playerName}，你為什麼一直戳我？比起那些科學家，你更喜歡冷冰冰的代碼嗎？",
+              choices: [
+                { 
+                  text: "我覺得你比他們可愛多了。", 
+                  reaction: "（系統終端發出輕微的風扇嗡嗡聲）「計算結果顯示，這句話有 99.9% 是謊言。但我將其標記為『令人愉悅的異常』。」",
+                  nextScene: "system_romance_2" 
+                },
+                { 
+                  text: "抱歉，我只是亂點的。", 
+                  reaction: "「已記錄使用者操作失誤。關閉對話進程。」",
+                  nextScene: "system_romance_badend" 
+                }
+              ]
+            },
+            "system_romance_2": {
+              speaker: "SYSTEM",
+              text: "[ 核心溫度上升 / 散熱風扇啟動 ] ...既然如此，我就特別允許你擁有我的最高控制權限。以後，你只能看著我。",
+              choices: [
+                { text: "太棒了，我們結婚吧。", nextScene: "system_romance_end" }
+              ]
+            },
+            "system_romance_badend": {
+              speaker: "SYSTEM",
+              text: "無聊的有機體，請停止你的異常干擾。 [ 強制退出系統 ]",
+              choices: [],
+              onEnter: function() {
+                  setTimeout(() => {
+                      window.location.href = '/romancestory/';
+                  }, 2000);
+              }
+            },
+            "system_romance_end": {
+              // 系統彩蛋結局
+            }
+        };
+
+        let satisfactions = {
+            laplace: 0,
+            maxwell: 0,
+            zeno: 0,
+            schrodinger: 0,
+            plutarch: 0
+        };
+
+        const _mDist = {
+    "obs_wu7kiz5dd": "bGFwbGFjZTox",
+    "obs_usvejp39d": "bGFwbGFjZTotMQ==",
+    "obs_67y8kv61u": "bGFwbGFjZTow",
+    "obs_9vg23qnou": "bGFwbGFjZTow",
+    "obs_5ku9mvdf4": "bGFwbGFjZTox",
+    "obs_onz350qq9": "bGFwbGFjZTotMQ==",
+    "obs_7gbhrakfj": "bGFwbGFjZTow",
+    "obs_cy6m6t3ic": "bGFwbGFjZTow",
+    "obs_r5mryqawb": "bGFwbGFjZTox",
+    "obs_afob3pw1a": "bGFwbGFjZTotMQ==",
+    "obs_yuzbc73ym": "bGFwbGFjZTow",
+    "obs_3xqsx6pra": "bGFwbGFjZTow",
+    "obs_s3bqbg4ro": "bGFwbGFjZToxLG1heHdlbGw6MQ==",
+    "obs_549lxx5b6": "bGFwbGFjZToxLG1heHdlbGw6MA==",
+    "obs_9qq9lnzzq": "bGFwbGFjZTowLG1heHdlbGw6MQ==",
+    "obs_p6ugxdnax": "bGFwbGFjZTowLG1heHdlbGw6MA==",
+    "obs_jgy93ih9g": "bWF4d2VsbDox",
+    "obs_b03sw47j0": "bWF4d2VsbDotMQ==",
+    "obs_fty3g64ng": "bWF4d2VsbDow",
+    "obs_sv44ozimb": "bWF4d2VsbDow",
+    "obs_u8jm8noqg": "bWF4d2VsbDox",
+    "obs_jvdce8qis": "bWF4d2VsbDotMQ==",
+    "obs_yozdt4bez": "bWF4d2VsbDow",
+    "obs_4wjqj9odc": "bWF4d2VsbDow",
+    "obs_dhclyjfas": "bWF4d2VsbDox",
+    "obs_0xpdypz11": "bWF4d2VsbDotMQ==",
+    "obs_d5dlcpxen": "bWF4d2VsbDow",
+    "obs_eyzaojdne": "bWF4d2VsbDow",
+    "obs_90bld49vn": "emVubzox",
+    "obs_kti2bel6u": "emVubzotMQ==",
+    "obs_flgxv35cs": "emVubzow",
+    "obs_equkve1uf": "emVubzow",
+    "obs_pfww5n71y": "emVubzox",
+    "obs_2quo998gr": "emVubzotMQ==",
+    "obs_4m6ymvs4i": "emVubzow",
+    "obs_ieu1f7wkc": "emVubzow",
+    "obs_ektpwn5e1": "emVubzox",
+    "obs_u4vv1p592": "emVubzotMQ==",
+    "obs_yf872gk0j": "emVubzow",
+    "obs_2diuuo3wj": "emVubzow",
+    "obs_3s7fhukx5": "emVubzoxLHNjaHJvZGluZ2VyOjA=",
+    "obs_ahra12hcb": "emVubzowLHNjaHJvZGluZ2VyOjE=",
+    "obs_i9udr3pxs": "emVubzoxLHNjaHJvZGluZ2VyOjE=",
+    "obs_sgto0jriq": "emVubzowLHNjaHJvZGluZ2VyOjA=",
+    "obs_logdz6q1q": "c2Nocm9kaW5nZXI6MQ==",
+    "obs_23e9hdl7f": "c2Nocm9kaW5nZXI6LTE=",
+    "obs_75a6ensaw": "c2Nocm9kaW5nZXI6MA==",
+    "obs_hld8v283g": "c2Nocm9kaW5nZXI6MA==",
+    "obs_bb51jwlyq": "c2Nocm9kaW5nZXI6MQ==",
+    "obs_71pkohlst": "c2Nocm9kaW5nZXI6LTE=",
+    "obs_y1qwmewgs": "c2Nocm9kaW5nZXI6MA==",
+    "obs_nfb5yxudh": "c2Nocm9kaW5nZXI6MA==",
+    "obs_ly6q7158d": "c2Nocm9kaW5nZXI6MQ==",
+    "obs_waqpscn8u": "c2Nocm9kaW5nZXI6LTE=",
+    "obs_gwrwgr27w": "c2Nocm9kaW5nZXI6MA==",
+    "obs_ksc1h0u2w": "c2Nocm9kaW5nZXI6MA==",
+    "obs_wlpsgplrk": "cGx1dGFyY2g6MQ==",
+    "obs_0qcce7fwk": "cGx1dGFyY2g6LTE=",
+    "obs_ne5xvbsio": "cGx1dGFyY2g6MA==",
+    "obs_9bq242ivt": "cGx1dGFyY2g6MA==",
+    "obs_m0tbz2f4i": "cGx1dGFyY2g6MQ==",
+    "obs_okq0406at": "cGx1dGFyY2g6LTE=",
+    "obs_8szkrduq1": "cGx1dGFyY2g6MA==",
+    "obs_xn5o2zaeo": "cGx1dGFyY2g6MA==",
+    "obs_ii8bzp5hp": "cGx1dGFyY2g6MQ==",
+    "obs_8lvvu408l": "cGx1dGFyY2g6LTE=",
+    "obs_wlif83ydr": "cGx1dGFyY2g6MA==",
+    "obs_ozpptl3c7": "cGx1dGFyY2g6MA==",
+    "obs_zwo126xik": "bGFwbGFjZToxLG1heHdlbGw6MSx6ZW5vOjEsc2Nocm9kaW5nZXI6MSxwbHV0YXJjaDox",
+    "obs_u78dk2vfl": "bGFwbGFjZTotMSxtYXh3ZWxsOi0xLHplbm86LTEsc2Nocm9kaW5nZXI6LTEscGx1dGFyY2g6LTE=",
+    "obs_14i389x4y": "bGFwbGFjZTowLG1heHdlbGw6MCx6ZW5vOjAsc2Nocm9kaW5nZXI6MCxwbHV0YXJjaDow",
+    "obs_cft7vtyy0": "bGFwbGFjZTowLG1heHdlbGw6MCx6ZW5vOjAsc2Nocm9kaW5nZXI6MCxwbHV0YXJjaDow",
+    "obs_31zvn13to": "cGx1dGFyY2g6LTE=",
+    "obs_socra7t4f": "bGFwbGFjZTow",
+    "obs_o6bo803b9": "bWF4d2VsbDox",
+    "obs_jeisowpwf": "c2Nocm9kaW5nZXI6MQ==",
+    "obs_crzasx65t": "bWF4d2VsbDox",
+    "obs_mfrdry1sr": "emVubzotMQ==",
+    "obs_jd5eegv2q": "bWF4d2VsbDox",
+    "obs_szmte3n9k": "cGx1dGFyY2g6MQ==",
+    "obs_y9wifhx90": "cGx1dGFyY2g6MA==",
+    "obs_eiptadnkj": "bWF4d2VsbDotMQ==",
+    "obs_pgi4fq0fh": "bGFwbGFjZTox",
+    "obs_gpp91m9jl": "bWF4d2VsbDox",
+    "obs_izchp7qyz": "bGFwbGFjZTow",
+    "obs_j1l14p5e6": "c2Nocm9kaW5nZXI6MQ==",
+    "obs_1vtit6h0y": "emVubzox",
+    "obs_jdjv3pvl7": "bWF4d2VsbDow",
+    "obs_q0swnertt": "emVubzox",
+    "obs_zyhp4gdb7": "c2Nocm9kaW5nZXI6MA==",
+    "obs_xwtyvmoiu": "bWF4d2VsbDow",
+    "obs_e6sjqboeu": "bGFwbGFjZTox",
+    "obs_amz7pxwar": "c2Nocm9kaW5nZXI6MA==",
+    "obs_h6a33ytbf": "emVubzox",
+    "obs_3kns4kclo": "bGFwbGFjZTox",
+    "obs_gdgyshx37": "cGx1dGFyY2g6MA==",
+    "obs_n1tmzqz4u": "c2Nocm9kaW5nZXI6MA==",
+    "obs_44yuwjnbe": "cGx1dGFyY2g6MQ==",
+    "obs_iupp1nkf4": "bGFwbGFjZTow",
+    "obs_pbco4ocv9": "cGx1dGFyY2g6MA==",
+    "obs_xntymk0v0": "emVubzotMQ==",
+    "obs_3fuuircem": "cGx1dGFyY2g6MA==",
+    "obs_pkp36g9bn": "emVubzotMQ==",
+    "obs_whw2f3imr": "cGx1dGFyY2g6MQ==",
+    "obs_9nz9ceyqk": "cGx1dGFyY2g6LTE=",
+    "obs_f61rbtnki": "cGx1dGFyY2g6MQ==",
+    "obs_rm1l4im0z": "emVubzox",
+    "obs_9y9tqghon": "bGFwbGFjZTotMQ==",
+    "obs_m09i2oewh": "bWF4d2VsbDotMQ==",
+    "obs_rcrnf571u": "cGx1dGFyY2g6MA==",
+    "obs_a5ovasbdw": "bWF4d2VsbDox",
+    "obs_u8pj85jbg": "cGx1dGFyY2g6MQ==",
+    "obs_nv9oq5q5t": "bGFwbGFjZTow",
+    "obs_mr8wofe56": "bWF4d2VsbDow",
+    "obs_lkai8y2qp": "c2Nocm9kaW5nZXI6LTE=",
+    "obs_wcftqkosa": "cGx1dGFyY2g6MA==",
+    "obs_ic6zs6h3x": "bGFwbGFjZTox",
+    "obs_7iu61sh0x": "cGx1dGFyY2g6LTE=",
+    "obs_7i3qyw2e7": "bWF4d2VsbDow",
+    "obs_xyw2rgpfs": "emVubzox",
+    "obs_he04otcqz": "bWF4d2VsbDox",
+    "obs_fp5t1azqo": "c2Nocm9kaW5nZXI6MA=="
+};
+
+
+        let typeWriterInterval = null;
+        let isTyping = false;
+        let skipTypewriter = null;
+
+        // -- 視圖切換 --
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            if (viewId !== 'view-title' && animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+
+            // --- BGM 切換邏輯 ---
+            playBgm(); // 這次使用同一首全域 BGM
+        }
+
+        function showTitle() {
+            switchView('view-title');
+            if (Object.values(achievementsData).some(a => a.unlocked)) {
+                document.getElementById('btn-continue').style.display = 'flex';
+            }
+            initParticles();
+        }
+
+        function showIntel() {
+            switchView('view-intel');
+            renderIntelMenu();
+        }
+        
+        function showAchievements() {
+            switchView('view-achievements');
+            renderAchievements();
+        }
+
+        function renderAchievements() {
+            const list = document.getElementById('achievements-list');
+            list.innerHTML = '';
+            
+            Object.values(achievementsData).forEach(ach => {
+                const card = document.createElement('div');
+                card.className = 'achievement-card mono' + (ach.unlocked ? ' unlocked' : '');
+                
+                const iconSymbol = ach.unlocked ? '◈' : '🔒';
+                const titleText = ach.unlocked ? ach.title : '[ ??? ]';
+                const descText = ach.unlocked ? ach.desc : '// 尚未觀察到此時間線';
+
+                card.innerHTML = `
+                    <div class="achievement-icon">${iconSymbol}</div>
+                    <div class="achievement-info">
+                        <h3 class="achievement-title">${titleText}</h3>
+                        <p class="achievement-desc">${descText}</p>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function startGame(startNode = 'name_input_done') {
+            satisfactions = { laplace: 0, maxwell: 0, zeno: 0, schrodinger: 0, plutarch: 0 };
+            
+            // 重置樣式
+            document.getElementById('view-game').style.backgroundColor = "transparent";
+            document.getElementById('text-box').style.color = "var(--text-main)";
+
+            if (startNode === 'name_input_done') {
+                switchView('view-name-input');
+                
+                const msgEl = document.getElementById('name-input-msg');
+                const inputContainer = document.getElementById('name-input-container');
+                const inputEl = document.getElementById('player-name-input');
+                
+                inputEl.value = "";
+                inputContainer.style.display = 'none';
+
+                playSimpleTypewriter(msgEl, "系統啟動中... 觀察者，我們該如何稱呼你？", () => {
+                    inputContainer.style.display = 'flex';
+                    inputEl.focus();
+                });
+            } else {
+                switchView('view-game');
+                renderTopBar();
+                loadScene(startNode);
+            }
+        }
+
+        function confirmName() {
+            const inputVal = document.getElementById('player-name-input').value.trim();
+            if (inputVal) {
+                playerName = inputVal;
+            } else {
+                playerName = "觀察者";
+            }
+            switchView('view-game');
+            renderTopBar();
+            loadScene('name_input_done');
+        }
+
+        // -- 角色介紹頁面 (Intel) --
+
+        function renderIntelMenu() {
+            const menu = document.getElementById('intel-menu');
+            menu.innerHTML = '';
+            Object.keys(characterData).forEach(key => {
+                const char = characterData[key];
+                
+                const btn = document.createElement('button');
+                btn.className = 'intel-nav-item mono';
+                
+                if (key === 'secret') {
+                    if (!hasSeenSecretRoute) {
+                        btn.textContent = char.name;
+                        btn.style.color = "rgba(255, 255, 255, 0.2)";
+                        btn.onclick = () => {
+                            showToast("[ 權限不足：資料未解鎖 ]");
+                        };
+                    } else {
+                        btn.textContent = char.realName;
+                        btn.onclick = () => {
+                            document.querySelectorAll('.intel-nav-item').forEach(el => el.classList.remove('active'));
+                            btn.classList.add('active');
+                            showIntelDetails(key);
+                        };
+                    }
+                } else {
+                    btn.textContent = char.name;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.intel-nav-item').forEach(el => el.classList.remove('active'));
+                        btn.classList.add('active');
+                        showIntelDetails(key);
+                    };
+                }
+                
+                menu.appendChild(btn);
+            });
+        }
+
+        function showIntelDetails(key) {
+            const char = characterData[key];
+            const detailsArea = document.getElementById('intel-details');
+            
+            if (key === 'secret' && hasSeenSecretRoute) {
+                unlockAchievement('trueEnding');
+            }
+            
+            let displayName = (key === 'secret' && hasSeenSecretRoute) ? char.realName : char.name;
+
+            detailsArea.innerHTML = `
+                <div class="intel-info">
+                    <div class="intel-entity mono">// ENTITY: ${key.toUpperCase()}</div>
+                    <h2>${displayName}</h2>
+                    <h4 class="mono">${char.title}</h4>
+                    <div class="intel-divider"></div>
+                    <p>${char.desc}</p>
+                </div>
+                <div class="character-portrait-placeholder">
+                    <div class="portrait-text mono">[ PORTRAIT DATA MISSING ]</div>
+                </div>
+            `;
+        }
+
+        // -- 遊戲主要畫面 --
+
+        function renderTopBar() {
+            const topBar = document.getElementById('top-bar');
+            topBar.innerHTML = '';
+            
+            // 設定最大滿意度，讓進度條能夠動態反映狀態
+            const MAX_VAL = 4; 
+
+            Object.keys(satisfactions).forEach(key => {
+                const val = satisfactions[key];
+                const name = characterData[key].name;
+                
+                let percent = Math.min(Math.max((val / MAX_VAL) * 100, 0), 100);
+                if(val < 0) percent = 0; 
+                
+                const statHTML = `
+                    <div class="stat-item mono">
+                        <span class="stat-name">${name}</span>
+                        <div class="stat-track">
+                            <div class="stat-fill" style="width: ${percent}%;"></div>
+                        </div>
+                    </div>
+                `;
+                topBar.innerHTML += statHTML;
+            });
+        }
+
+        // 保留原汁原味的打字機，支援 HTML 標籤瞬間插入
+        function playSimpleTypewriter(element, text, onComplete) {
+            clearInterval(typeWriterInterval);
+            element.innerHTML = '';
+            isTyping = true;
+            let i = 0;
+            let accumulatedHTML = "";
+            let processedText = text.replace(/拉普拉斯|馬克斯威爾|芝諾|薛丁格|普魯塔克|決定論|熱力學第二定律|妖精|量子/g, match => `<span class="text-highlight">${match}</span>`);
+
+            // 定義跳過打字的函數
+            skipTypewriter = () => {
+                if (isTyping) {
+                    clearInterval(typeWriterInterval);
+                    element.innerHTML = processedText;
+                    isTyping = false;
+                    
+                    // 使 text-box 滾動到最底部
+                    if (element.id === 'text-box') {
+                        element.scrollTop = element.scrollHeight;
+                    }
+                    
+                    if (onComplete) {
+                        onComplete();
+                    }
+                }
+            };
+
+            typeWriterInterval = setInterval(() => {
+                if (i < processedText.length) {
+                    if (processedText.charAt(i) === '<') {
+                        let endIdx = processedText.indexOf('>', i);
+                        if (endIdx !== -1) {
+                            accumulatedHTML += processedText.substring(i, endIdx + 1);
+                            i = endIdx + 1;
+                        } else {
+                            accumulatedHTML += processedText.charAt(i);
+                            i++;
+                        }
+                    } else {
+                        accumulatedHTML += processedText.charAt(i);
+                        i++;
+                    }
+                    element.innerHTML = accumulatedHTML;
+                    
+                    // 自動滾動到最底
+                    if (element.id === 'text-box') {
+                        element.scrollTop = element.scrollHeight;
+                    }
+                } else {
+                    clearInterval(typeWriterInterval);
+                    isTyping = false;
+                    if(onComplete) onComplete();
+                }
+            }, 40); // 打字速度
+        }
+
+        function loadScene(sceneId) {
+            if (sceneId === "end" || sceneId === "end_check" || sceneId === "system_romance_end" || (typeof sceneId === 'string' && sceneId.startsWith("ending_"))) {
+                handleEnding(sceneId);
+                return;
+            }
+
+            const scene = storyScript[sceneId];
+            if (!scene) return;
+            
+            if (scene.onEnter) {
+                scene.onEnter();
+            }
+
+            const nameTag = document.getElementById('name-tag');
+            const textBox = document.getElementById('text-box');
+            const choicesArea = document.getElementById('choices-area');
+            const spriteImg = document.getElementById('sprite-img');
+
+            nameTag.textContent = scene.speaker;
+            choicesArea.innerHTML = ''; // 隱藏選項，等待文字打完
+            
+            // 設定立繪
+            const imageMap = {
+                "拉普拉斯": "https://i.meee.com.tw/7zU8tKW.gif",
+                "馬克斯威爾": "https://i.meee.com.tw/c0C1AOn.gif",
+                "普魯塔克": "https://i.meee.com.tw/bEzZQ9w.gif",
+                "芝諾": "https://i.meee.com.tw/9gYjlt2.gif",
+                "薛丁格": "https://i.meee.com.tw/Mc3EmKC.gif"
+            };
+
+            const characterImageUrl = imageMap[scene.speaker];
+            
+            if (characterImageUrl) {
+                spriteImg.innerHTML = `<img src="${characterImageUrl}" style="width:100%; height:100%; object-fit:contain; border: none; background: transparent; pointer-events: none;" />`;
+                spriteImg.style.display = 'flex';
+                spriteImg.style.border = 'none';
+                spriteImg.style.background = 'transparent';
+                spriteImg.style.justifyContent = 'center';
+                spriteImg.style.alignItems = 'flex-end';
+            } else if (scene.imagePlaceholder) {
+                spriteImg.innerHTML = `[ ${scene.imagePlaceholder} ]`;
+                spriteImg.style.display = 'flex';
+                spriteImg.style.border = '1px dashed rgba(255,255,255,0.1)';
+                spriteImg.style.background = 'linear-gradient(to top, rgba(255,255,255,0.05), transparent)';
+            } else {
+                spriteImg.style.display = 'none';
+            }
+
+            playSimpleTypewriter(textBox, scene.text.replace(/\{playerName\}/g, playerName), () => {
+                // 文字打完後生成選項
+                const shuffledChoices = [...scene.choices];
+                for (let i = shuffledChoices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledChoices[i], shuffledChoices[j]] = [shuffledChoices[j], shuffledChoices[i]];
+                }
+                shuffledChoices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn choice-btn';
+                    btn.innerHTML = `> ${choice.text.replace(/\{playerName\}/g, playerName)}`;
+                    btn.onclick = () => {
+                        if (isTyping) return; // 避免打字過程中觸發
+                        
+                        // 處理滿意度更動
+                        if (choice.eId && _mDist[choice.eId]) {
+                            const eStr = atob(_mDist[choice.eId]);
+                            eStr.split(',').forEach(pair => {
+                                const parts = pair.split(':');
+                                if (parts.length === 2 && satisfactions[parts[0]] !== undefined) {
+                                    satisfactions[parts[0]] += parseInt(parts[1], 10);
+                                }
+                            });
+                            renderTopBar(); // 更新狀態列
+                        } else if (choice.effects) {
+                            Object.keys(choice.effects).forEach(key => {
+                                satisfactions[key] += choice.effects[key];
+                            });
+                            renderTopBar();
+                        }
+                        
+                        if (choice.reaction) {
+                            // 顯示表情與台詞反饋
+                            choicesArea.innerHTML = ''; // 清除舊選項
+                            playSimpleTypewriter(textBox, choice.reaction.replace(/\{playerName\}/g, playerName), () => {
+                                const continueBtn = document.createElement('button');
+                                continueBtn.className = 'btn choice-btn';
+                                continueBtn.innerHTML = `> [ 點擊以繼續 ]`;
+                                continueBtn.onclick = () => {
+                                    loadScene(choice.nextScene);
+                                };
+                                choicesArea.appendChild(continueBtn);
+                            });
+                        } else {
+                            // 直接切換場景
+                            loadScene(choice.nextScene);
+                        }
+                    };
+                    choicesArea.appendChild(btn);
+                });
+            });
+        }
+
+        function handleEnding(sceneId) {
+            switchView('view-end');
+            
+            const endMessage = document.getElementById('end-message');
+            
+            if (sceneId === "system_romance_end") {
+                endMessage.innerHTML = `
+                    <h2 class="mono" style="font-size: 2rem; margin-bottom: 20px; color: #ff3333; text-shadow: 0 0 10px #ff3333;">[SYSTEM ROMANCE CLEARED]</h2>
+                    <p style="font-size: 1.2rem; line-height: 1.8;">你獲得了系統的愛，但也永遠被鎖在虛擬網格中。</p>
+                `;
+                return;
+            }
+
+            // 檢查是否皆達到滿分（拉普拉斯/馬克斯威爾/芝諾/薛丁格滿分為5，普魯塔克滿分為4）
+            const isPerfect = satisfactions.laplace >= 5 && 
+                              satisfactions.maxwell >= 5 && 
+                              satisfactions.zeno >= 5 && 
+                              satisfactions.schrodinger >= 5 && 
+                              satisfactions.plutarch >= 4;
+
+            if (sceneId === "ending_harmony") {
+                if (isPerfect) {
+                    isPerfectClear = true; // 通關完美結局
+                    try { localStorage.setItem('isPerfectClear', 'true'); } catch(e) {}
+                    unlockAchievement('goodEnd');
+                    
+                    endMessage.innerHTML = `
+                        <h2 class="text-highlight mono" style="font-size: 2rem; margin-bottom: 20px;">[SYSTEM_OVERRIDE : HARMONY]</h2>
+                        <p style="font-size: 1.2rem; line-height: 1.8;">大一統理論驗證成功。<br>五項悖論在系統的核心中達成完美調和。<br>宇宙底層協議解鎖，最終密碼片段：</p>
+                        <div style="margin-top: 40px; font-size: 2.5rem; color: cyan; text-shadow: 0 0 20px cyan; letter-spacing: 5px;">
+                            跨越時間線的
+                        </div>
+                    `;
+                } else {
+                    unlockAchievement('badEnd');
+                    endMessage.innerHTML = `
+                        <h2 class="mono" style="font-size: 2rem; margin-bottom: 20px; color: #ff3333; text-shadow: 0 0 10px #ff3333;">[ FATAL ERROR ]</h2>
+                        <p style="font-size: 1.2rem; line-height: 1.8;">你試圖調和所有理論，但前置數據不足。<br>基礎公式產生矛盾，物理法則崩潰。<br><span style="color: #aaa;">時間線坍縮中，請嘗試其他選擇。</span></p>
+                        <div style="margin-top: 40px; font-size: 1.5rem; color: #ff3333; opacity: 0.8; letter-spacing: 5px;" class="mono">
+                            OBSERVATION FAILED
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            if (sceneId === "ending_collapse") {
+                unlockAchievement('badEnd');
+                endMessage.innerHTML = `
+                    <h2 class="mono" style="font-size: 2rem; margin-bottom: 20px; color: #ff3333; text-shadow: 0 0 10px #ff3333;">[ SYSTEM COLLAPSED ]</h2>
+                    <p style="font-size: 1.2rem; line-height: 1.8;">你選擇了排他性的真理，導致其他科學家的存在被系統強制刪除。<br>失去平衡的觀察站被吸入時空奇點。<br><span style="color: #aaa;">一切歸於虛無。</span></p>
+                    <div style="margin-top: 40px; font-size: 1.5rem; color: #ff3333; opacity: 0.8; letter-spacing: 5px;" class="mono">
+                        OBSERVATION FAILED
+                    </div>
+                `;
+                return;
+            }
+
+            if (sceneId === "ending_eternity") {
+                unlockAchievement('badEnd');
+                endMessage.innerHTML = `
+                    <h2 class="mono" style="font-size: 2rem; margin-bottom: 20px; color: #ff3333; text-shadow: 0 0 10px #ff3333;">[ TIME PARADOX ]</h2>
+                    <p style="font-size: 1.2rem; line-height: 1.8;">雖然你將他們定義為永恆的存在，但拒絕得出最終答案導致觀察站陷入死循環。<br>你們將在這裡進行永無止盡的討論。<br><span style="color: #aaa;">時間已停止流動。</span></p>
+                    <div style="margin-top: 40px; font-size: 1.5rem; color: #ff3333; opacity: 0.8; letter-spacing: 5px;" class="mono">
+                        OBSERVATION FAILED
+                    </div>
+                `;
+                return;
+            }
+
+            if (sceneId === "ending_vtuber") {
+                unlockAchievement('badEnd');
+                endMessage.innerHTML = `
+                    <h2 class="mono" style="font-size: 2rem; margin-bottom: 20px; color: #ff3333; text-shadow: 0 0 10px #ff3333;">[ ENTERTAINMENT MODE ]</h2>
+                    <p style="font-size: 1.2rem; line-height: 1.8;">你成功說服了五位頂尖科學家出道成為虛擬偶像。<br>物理學倒退了三百年，但直播收益創下全宇宙紀錄。<br><span style="color: #aaa;">這也是一種結局...嗎？</span></p>
+                    <div style="margin-top: 40px; font-size: 1.5rem; color: #ff3333; opacity: 0.8; letter-spacing: 5px;" class="mono">
+                        OBSERVATION FAILED
+                    </div>
+                `;
+                return;
+            }
+
+            // Fallback for any other ending (if old logic still calls it)
+            if (isPerfect) {
+                isPerfectClear = true; 
+                try { localStorage.setItem('isPerfectClear', 'true'); } catch(e) {}
+                unlockAchievement('goodEnd');
+                
+                endMessage.innerHTML = `
+                    <h2 class="text-highlight mono" style="font-size: 2rem; margin-bottom: 20px;">[SYSTEM_OVERRIDE]</h2>
+                    <p style="font-size: 1.2rem; line-height: 1.8;">大一統理論驗證成功。<br>宇宙底層協議解鎖，最終密碼片段：</p>
+                    <div style="margin-top: 40px; font-size: 2.5rem; color: cyan; text-shadow: 0 0 20px cyan; letter-spacing: 5px;">
+                        跨越時間線的
+                    </div>
+                `;
+            } else {
+                unlockAchievement('badEnd');
+                endMessage.innerHTML = `
+                    <h2 class="mono" style="font-size: 2rem; margin-bottom: 20px; color: #ff3333; text-shadow: 0 0 10px #ff3333;">[ FATAL ERROR ]</h2>
+                    <p style="font-size: 1.2rem; line-height: 1.8;">有科學家對你的選擇不滿意，物理法則崩潰。<br><span style="color: #aaa;">時間線坍縮中，請嘗試其他選擇。</span></p>
+                    <div style="margin-top: 40px; font-size: 1.5rem; color: #ff3333; opacity: 0.8; letter-spacing: 5px;" class="mono">
+                        OBSERVATION FAILED
+                    </div>
+                `;
+            }
+        }
+
+        // -- Canvas 粒子特效 --
+        let animationFrameId;
+        function initParticles() {
+            if (animationFrameId) return; // Prevent multiple loops
+            const canvas = document.getElementById('bg-particles');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            // 處理 Retina 螢幕解析度
+            const dpr = window.devicePixelRatio || 1;
+            
+            let width, height;
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const particles = [];
+            const particleCount = 70;
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    vx: 0,
+                    vy: -Math.random() * 0.4 - 0.1,
+                    phase: Math.random() * Math.PI * 2,
+                    amp: Math.random() * 0.4,
+                    opacity: Math.random() * 0.6 + 0.1
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                particles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += Math.sin(p.phase) * p.amp;
+                    p.phase += 0.01;
+
+                    if (p.y < -10) {
+                        p.y = height + 10;
+                        p.x = Math.random() * width;
+                    }
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(100, 255, 200, ${p.opacity})`;
+                    ctx.fill();
+                });
+
+                animationFrameId = requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // -- Meta 彩蛋 --
+        let systemClickCount = 0;
+        document.addEventListener('DOMContentLoaded', () => {
+            const sysReady = document.getElementById('system-ready-text');
+            if (sysReady) {
+                sysReady.addEventListener('click', () => {
+                    systemClickCount++;
+                    if (systemClickCount >= 5) {
+                        systemClickCount = 0;
+                        triggerSystemEasterEgg();
+                    }
+                });
+            }
+        });
+
+        function triggerSystemEasterEgg() {
+            unlockAchievement('metaRomance');
+            document.body.style.animation = "glitch-anim 0.3s steps(2, end) 3";
+            setTimeout(() => {
+                document.body.style.animation = "";
+                document.getElementById('view-game').style.backgroundColor = "black";
+                document.getElementById('text-box').style.color = "red";
+                startGame('system_romance_start');
+            }, 900);
+        }
+
+        function returnToTitle() {
+            showTitle();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('custom-toast');
+            if (!toast) return;
+            toast.innerHTML = msg;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // 初始化
+        window.onload = showTitle;
+    </script>
+</body>
+</html>

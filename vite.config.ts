@@ -23,6 +23,7 @@ export default defineConfig({
         Map: resolve(__dirname, 'Map/index.html'),
         word: resolve(__dirname, 'word/index.html'),
         Resign: resolve(__dirname, 'Resign.html'),
+        romancestory: resolve(__dirname, 'romancestory/index.html'),
       },
     },
   },
