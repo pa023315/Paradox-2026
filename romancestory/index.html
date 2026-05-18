@@ -345,6 +345,13 @@
             text-shadow: 0 0 10px var(--highlight);
         }
 
+        .top-left-return {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            z-index: 100;
+        }
+
         .intel-sidebar {
             width: 25%;
             min-width: 280px;
@@ -803,7 +810,9 @@
             #sprite-area { bottom: 35%; height: 50%; width: 100%; }
             .sprite-placeholder { width: 80%; }
             #choices-area { top: auto; bottom: 38%; transform: translateX(-50%); width: 90%; max-height: 50vh; overflow-y: auto; }
-            #top-bar { gap: 10px; padding: 0 5px; flex-wrap: wrap; height: auto; padding: 10px 0;}
+            #top-bar { gap: 10px; padding: 45px 5px 10px 5px; flex-wrap: wrap; height: auto; }
+            .top-left-return { top: 12px; left: 10px; font-size: 0.9rem; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 4px; }
+            .mobile-sys-text { font-size: 0.8rem; }
             .stat-track { width: 30px; }
             .stat-name { font-size: 0.7rem; }
             #name-tag { left: 20px; font-size: 1rem; }
@@ -868,7 +877,10 @@
     </div>
 
     <!-- 視圖 1.5：命名畫面 -->
-    <div id="view-name-input" class="view hidden" style="justify-content: center; align-items: center; text-align: center;">
+    <div id="view-name-input" class="view hidden" style="justify-content: center; align-items: center; text-align: center; position: relative;">
+        <button class="return-btn mono top-left-return" onclick="showTitle()">
+            <span class="mono">&lt;</span> <span class="mobile-sys-text">返回 SYSTEM</span>
+        </button>
         <div id="name-input-msg" class="mono text-highlight" style="font-size: 1.5rem; margin-bottom: 30px; min-height: 2em; max-width: 80%; line-height: 1.5;"></div>
         <div id="name-input-container" style="display: none; flex-direction: column; align-items: center; gap: 20px;">
             <input type="text" id="player-name-input" placeholder="請輸入代號..." class="mono" style="background: var(--ui-bg); color: var(--text-main); border: 1px solid var(--ui-border); padding: 10px 20px; font-size: 1.2rem; outline: none; text-align: center; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">
@@ -921,6 +933,9 @@
 
     <!-- 視圖 3：主要遊戲畫面 -->
     <div id="view-game" class="view hidden">
+        <button class="return-btn mono top-left-return" onclick="showTitle()">
+            <span class="mono">&lt;</span> <span class="mobile-sys-text">返回 SYSTEM</span>
+        </button>
         <!-- 頂部狀態列 -->
         <div id="top-bar">
             <!-- 動態生成 -->
