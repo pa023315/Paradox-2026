@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DECRYPTED_MESSAGES - 攔截信件</title>
+    <style>
+        :root {
+            --core-color: #444;
+            --laphria-color: #ffd700;
+            --entrovia-color: #00ffcc;
+            --cesium-color: #ff99cc;
+            --leit-color: #99ccff;
+            --zofi-color: #ff6666;
+            --active-color: #444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d0d12;
+            overflow-x: hidden;
+        }
+
+        /* 整體容器設定 */
+        .paradox-letter-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #0d0d12;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace, "Microsoft JhengHei";
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header-section h2 {
+            color: #00ffcc;
+            letter-spacing: 2px;
+            font-weight: normal;
+        }
+        
+        /* 扁平化按鈕設計 */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .member-btn {
+            background-color: transparent;
+            color: #888;
+            border: 1px solid #444;
+            padding: 12px 0;
+            flex: 1 1 0;
+            min-width: 110px;
+            max-width: 140px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .member-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+        
+        .member-btn.active-btn {
+            background-color: #fff;
+            color: #0d0d12;
+            border-color: #fff;
+            font-weight: bold;
+        }
+        
+        /* 信件內容展示區 - Sci-Fi HUD 風格 */
+        .letter-display-area {
+            position: relative;
+            background-color: #16161e;
+            background-image: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.02) 2px,
+                rgba(255, 255, 255, 0.02) 4px
+            );
+            padding: 40px;
+            min-height: 300px;
+            transition: all 0.4s ease;
+        }
+        
+        .letter-display-area:hover {
+            background-color: #1a1a24;
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02);
+        }
+
+        /* 角落裝飾 L型邊框 */
+        .corner-top-left, .corner-top-right, .corner-bottom-left, .corner-bottom-right {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border-color: #444;
+            border-style: solid;
+            transition: border-color 0.4s ease;
+            pointer-events: none;
+        }
+
+        .letter-display-area:hover .corner-top-left,
+        .letter-display-area:hover .corner-top-right,
+        .letter-display-area:hover .corner-bottom-left,
+        .letter-display-area:hover .corner-bottom-right {
+            border-color: var(--active-color);
+        }
+
+        .corner-top-left { top: 0; left: 0; border-width: 2px 0 0 2px; }
+        .corner-top-right { top: 0; right: 0; border-width: 2px 2px 0 0; }
+        .corner-bottom-left { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+        .corner-bottom-right { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+        
+        .letter-content {
+            display: none;
+            position: relative;
+        }
+        
+        .letter-content.active {
+            display: block; 
+        }
+        
+        .letter-content h3 {
+            margin-top: 0;
+            color: #fff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 主題與發光效果 */
+        .theme-laphria h3 { color: var(--laphria-color); text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); border-bottom-color: rgba(255, 215, 0, 0.2); }
+        .hl-laphria { color: var(--laphria-color); font-weight: bold; }
+
+        .theme-entrovia h3 { color: var(--entrovia-color); text-shadow: 0 0 8px rgba(0, 255, 204, 0.5); border-bottom-color: rgba(0, 255, 204, 0.2); }
+        .hl-entrovia { color: var(--entrovia-color); font-weight: bold; }
+
+        .theme-cesium h3 { color: var(--cesium-color); text-shadow: 0 0 8px rgba(255, 153, 204, 0.5); border-bottom-color: rgba(255, 153, 204, 0.2); }
+        .hl-cesium { color: var(--cesium-color); font-weight: bold; }
+
+        .theme-leit h3 { color: var(--leit-color); text-shadow: 0 0 8px rgba(153, 204, 255, 0.5); border-bottom-color: rgba(153, 204, 255, 0.2); }
+        .hl-leit { color: var(--leit-color); font-weight: bold; }
+
+        .theme-zofi h3 { color: var(--zofi-color); text-shadow: 0 0 8px rgba(255, 102, 102, 0.5); border-bottom-color: rgba(255, 102, 102, 0.2); }
+        .hl-zofi { color: var(--zofi-color); font-weight: bold; }
+
+        /* 浮水印圖片 */
+        .character-watermark {
+            position: absolute;
+            right: -10px;
+            bottom: -10px;
+            height: 220px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 1.5s ease 0.5s;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.05));
+        }
+
+        .letter-content.active .character-watermark {
+            opacity: 1;
+        }
+
+        /* 打字機相關 */
+        .letter-text-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hidden-raw {
+            display: none;
+        }
+
+        .typewriter-output {
+            line-height: 1.8;
+            font-size: 16px;
+            color: #d0d0d0;
+            min-height: 220px;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.1em;
+            background-color: #fff;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .return-btn-container {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .return-btn {
+            background-color: transparent;
+            color: #888;
+            border: 1px solid #444;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: 'Courier New', Courier, monospace, "Microsoft JhengHei";
+        }
+        
+        .return-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+        
+        .message-banner {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .message-banner img {
+            max-width: 100%;
+            height: auto;
+            max-height: 250px;
+            border-radius: 4px;
+            opacity: 0.85;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .letter-content.active {
+                display: flex;
+                flex-direction: column;
+            }
+            .character-watermark {
+                position: relative;
+                right: auto;
+                bottom: auto;
+                margin: 20px auto 0;
+                height: 180px;
+                order: 2;
+                opacity: 0;
+            }
+            .letter-content.active .character-watermark {
+                opacity: 1;
+            }
+            .letter-text-container {
+                order: 1;
+                width: 100%;
+            }
+            .typewriter-output {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="paradox-letter-wrapper">
+        <div class="header-section">
+            <h2>// DECRYPTED_MESSAGES</h2>
+            <p>觀察者，我們為您攔截了五段未加密的意志。請選擇您想讀取的訊號源。</p>
+        </div>
+        
+        <div class="message-banner">
+            <img src="https://i.meee.com.tw/9woPINO.png" alt="Message Banner">
+        </div>
+
+        <!-- 成員按鈕區 -->
+        <div class="button-group">
+            <button class="member-btn" data-target="entrovia">安特羅迦</button>
+            <button class="member-btn" data-target="leit">蕾忒</button>
+            <button class="member-btn" data-target="laphria">拉斐利婭</button>
+            <button class="member-btn" data-target="zofi">佐霏</button>
+            <button class="member-btn" data-target="cesium">瑟思安</button>
+        </div>
+
+        <!-- 信件內容展示區 -->
+        <div class="letter-display-area">
+            <div class="corner-top-left"></div>
+            <div class="corner-top-right"></div>
+            <div class="corner-bottom-left"></div>
+            <div class="corner-bottom-right"></div>
+
+            <div id="default-msg" class="letter-content active">
+                <p class="typewriter-output">_ 等待觀察者輸入指令<span class="typing-cursor"></span></p>
+            </div>
+
+            <!-- 拉斐利婭 -->
+            <div id="laphria" class="letter-content theme-laphria" data-color="#ffd700">
+                <img class="character-watermark" src="https://i.meee.com.tw/mcsEExs.png" alt="Laphria">
+                <div class="letter-text-container">
+                    <h3>拉斐利婭 想對你說的話</h3>
+                    <div class="hidden-raw">
+「在這個次元裡，有無數雙眼睛正在觀察。<br>
+   但對我來說，<br>
+   <span class="hl-laphria">最重要的人類</span>，就是你們。<br>
+   只要你們還在看著我，<br>
+   我就會一直存在在這個舞台上。<br>
+   所以今天，也請繼續看著我吧！<br>
+   不要把視線移開喔💛」
+                    </div>
+                    <div class="typewriter-output"></div>
+                </div>
+            </div>
+
+            <!-- 安特羅迦 -->
+            <div id="entrovia" class="letter-content theme-entrovia" data-color="#00ffcc">
+                <img class="character-watermark" src="https://i.meee.com.tw/6OMbH4g.png" alt="Entrovia">
+                <div class="letter-text-container">
+                    <h3>安特羅迦 想對你說的話</h3>
+                    <div class="hidden-raw">
+「如果你正在閱讀這段文字<br>
+   那表示你已經被安主管標記為「<span class="hl-entrovia">熵班族</span>」/ <br>
+<br>
+   這個地方已經開始慢慢留下許多紀錄 聲音、片段、<br>
+   還有時不時生成的無法解釋的事件<br>
+<br>
+   有些事情連我自己也覺得很微妙<br>
+   但既然你願意停留下來 聽我的聲音<br>
+   那我們就一起拓展<span class="hl-entrovia">安特宇宙</span>吧<br>
+<br>
+   你會比想像中能看見更多可能性<br>
+   也許<span class="hl-entrovia">熵增</span>不全然是壞事<br>
+<br>
+   謝謝你打開這封信 」
+                    </div>
+                    <div class="typewriter-output"></div>
+                </div>
+            </div>
+
+            <!-- 瑟思安 -->
+            <div id="cesium" class="letter-content theme-cesium" data-color="#ff99cc">
+                <img class="character-watermark" src="https://i.meee.com.tw/H1G1W4K.png" alt="Cesium">
+                <div class="letter-text-container">
+                    <h3>瑟思安 想對你說的話</h3>
+                    <div class="hidden-raw">
+「叮咚！紙箱裡有一隻<span class="hl-cesium">小貓咪</span>，但是她好像有點難觀測，<br>
+這究竟是隻什麼樣的小貓呢？聰明？可愛？古靈精怪？<br>
+不知道，現在可能還沒有標準答案。<br>
+<br>
+不過沒關係，我們才剛剛見面呢！<br>
+序章落幕，屬於我們的故事才正要開始～<br>
+未來的旅途還很長，<br>
+我們還有很多有趣的冒險要一起去闖、<br>
+很多美好的回憶要一起收藏<br>
+₍^·͈ 𖥦 ·͈^₎◞<br>
+<br>
+在成千上萬個紙箱與貓咪之中，<br>
+謝謝你停下腳步看見了我。<br>
+我想，我一定是世界上<span class="hl-cesium">最幸運的小貓</span>！<br>
+接下來的路，我們一起走下去吧~<br>
+這次我也幫你準備好<span class="hl-cesium">專屬的紙箱</span>囉，快進來吧！」
+                    </div>
+                    <div class="typewriter-output"></div>
+                </div>
+            </div>
+
+            <!-- 蕾忒 -->
+            <div id="leit" class="letter-content theme-leit" data-color="#99ccff">
+                <img class="character-watermark" src="https://i.meee.com.tw/Qmhgsht.png" alt="LeiT">
+                <div class="letter-text-container">
+                    <h3>蕾忒 想對你說的話</h3>
+                    <div class="hidden-raw">
+「もしもし<br>
+   各位<span class="hl-leit">觀察者</span>們，大家好啊～<br>
+   這段時間因為有你們的陪伴，讓<span class="hl-leit">忒修斯之船</span>變得熱鬧又豐富了起來，<br>
+   希望未來在船上，你們也可以陪伴船長，<br>
+   一起到更多的地方去旅游、一起見證更多的風景、創造更多的回憶，<br>
+   那剩下的，我們就留到直播上再繼續囉！」
+                    </div>
+                    <div class="typewriter-output"></div>
+                </div>
+            </div>
+
+            <!-- 佐霏 -->
+            <div id="zofi" class="letter-content theme-zofi" data-color="#ff6666">
+                <img class="character-watermark" src="https://i.meee.com.tw/6f5JOnW.png" alt="Zofi">
+                <div class="letter-text-container">
+                    <h3>佐霏 想對你說的話</h3>
+                    <div class="hidden-raw">
+「哈囉！歡迎加入<span class="hl-zofi">佐霏組</span>啦🔥<br>
+有小弟們在、我的能量直接MAX✨<br>
+記得每天都要開心一點點喔！<br>
+不然你們的<span class="hl-zofi">大姊頭</span>就要去找你囉！👊」
+                    </div>
+                    <div class="typewriter-output"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="return-btn-container">
+            <button class="return-btn" onclick="window.location.href='/'">返回 SYSTEM</button>
+        </div>
+    </div>
+
+    <script>
+        let currentTypingId = 0;
+
+        async function typeHTML(element, htmlString, speed = 30, color) {
+            currentTypingId++;
+            const typingId = currentTypingId;
+            
+            // Decrypt phase
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#&%!*?';
+            for(let j=0; j<12; j++) {
+                if (typingId !== currentTypingId) return;
+                let decryptText = Array.from({length: Math.floor(Math.random()*20)+10}).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+                element.innerHTML = `<span style="font-family: 'Courier New', Courier, monospace; color: ${color}; opacity: 0.8; filter: brightness(1.5);">${decryptText}</span><span class="typing-cursor"></span>`;
+                await new Promise(r => setTimeout(r, 40));
+            }
+
+            element.innerHTML = '';
+            let text = '';
+            let isTag = false;
+            
+            for (let i = 0; i < htmlString.length; i++) {
+                if (typingId !== currentTypingId) return; 
+                
+                let char = htmlString.charAt(i);
+                if (char === '<') isTag = true;
+                text += char;
+                if (char === '>') {
+                    isTag = false;
+                    continue;
+                }
+                
+                if (!isTag && char.trim() !== '') {
+                    element.innerHTML = text + '<span class="typing-cursor"></span>';
+                    let typeSpeed = speed + (Math.random() * 20 - 10);
+                    if (char === '。' || char === '！' || char === '？' || char === '，' || char === '、') {
+                        typeSpeed += 150; 
+                    }
+                    await new Promise(r => setTimeout(r, typeSpeed));
+                } else if (!isTag && char === ' ') {
+                     element.innerHTML = text + '<span class="typing-cursor"></span>';
+                } else if (!isTag && char === '\n') {
+                     // preserve line returns natively or skip pause
+                     element.innerHTML = text + '<span class="typing-cursor"></span>';
+                }
+            }
+            if (typingId === currentTypingId) {
+                element.innerHTML = text + '<span class="typing-cursor"></span>';
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const buttons = document.querySelectorAll(".member-btn");
+            const contents = document.querySelectorAll(".letter-content");
+            const displayArea = document.querySelector(".letter-display-area");
+            
+            buttons.forEach(button => {
+                button.addEventListener("click", function() {
+                    buttons.forEach(btn => btn.classList.remove("active-btn"));
+                    contents.forEach(content => {
+                        content.classList.remove("active");
+                        const typeOut = content.querySelector('.typewriter-output');
+                        if (typeOut) typeOut.innerHTML = '';
+                    });
+                    
+                    this.classList.add("active-btn");
+                    
+                    const targetId = this.getAttribute("data-target");
+                    const targetContent = document.getElementById(targetId);
+                    if(targetContent) {
+                        targetContent.classList.add("active");
+                        
+                        const color = targetContent.getAttribute('data-color') || '#444';
+                        displayArea.style.setProperty('--active-color', color);
+                        
+                        const rawEl = targetContent.querySelector('.hidden-raw');
+                        const targetEl = targetContent.querySelector('.typewriter-output');
+                        if (rawEl && targetEl) {
+                            typeHTML(targetEl, rawEl.innerHTML, 40, color);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

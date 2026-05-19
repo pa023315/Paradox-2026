@@ -811,8 +811,8 @@
             .sprite-placeholder { width: 80%; }
             #choices-area { top: auto; bottom: 38%; transform: translateX(-50%); width: 90%; max-height: 50vh; overflow-y: auto; }
             #top-bar { gap: 10px; padding: 45px 5px 10px 5px; flex-wrap: wrap; height: auto; }
-            .top-left-return { top: 12px; left: 10px; font-size: 0.9rem; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 4px; }
-            .mobile-sys-text { font-size: 0.8rem; }
+            .mobile-sys-text { display: none; }
+            .top-left-return { top: 10px; left: 10px; padding: 10px 15px; border-radius: 8px; font-size: 1.2rem; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); }
             .stat-track { width: 30px; }
             .stat-name { font-size: 0.7rem; }
             #name-tag { left: 20px; font-size: 1rem; }
@@ -840,6 +840,9 @@
 
     <!-- 視圖 1：標題畫面 -->
     <div id="view-title" class="view">
+        <button class="return-btn mono top-left-return" onclick="window.location.href='/'">
+            <span class="mono">&lt;</span> <span class="mobile-sys-text">返回 SYSTEM</span>
+        </button>
         <!-- 背景動態光斑 -->
         <div class="aurora-glow"></div>
 

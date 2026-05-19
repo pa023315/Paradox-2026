@@ -24,6 +24,7 @@ export default defineConfig({
         word: resolve(__dirname, 'word/index.html'),
         Resign: resolve(__dirname, 'Resign.html'),
         romancestory: resolve(__dirname, 'romancestory/index.html'),
+        message: resolve(__dirname, 'message/index.html'),
       },
     },
   },
