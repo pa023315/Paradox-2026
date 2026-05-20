@@ -25,6 +25,7 @@ export default defineConfig({
         Resign: resolve(__dirname, 'Resign.html'),
         romancestory: resolve(__dirname, 'romancestory/index.html'),
         message: resolve(__dirname, 'message/index.html'),
+        PARADOX2066: resolve(__dirname, 'PARADOX2066/index.html'),
       },
     },
   },
