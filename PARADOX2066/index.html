@@ -9,6 +9,10 @@
 body {
     margin: 0;
     background-color: #0d0d12;
+    background-image: 
+        linear-gradient(rgba(0, 255, 204, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 204, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
 }
 
 .paradox-terminal-wrapper {
@@ -67,7 +71,33 @@ body {
   border-left: 3px solid #333; /* 預設的暗色邊框 */
   padding: 20px;
   position: relative;
-  transition: all 0.3s ease;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out, background 0.3s ease, border-color 0.3s ease;
+}
+
+.truth-block.decrypted {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.truth-block::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 204, 0.1), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.truth-block:hover::before {
+  left: 150%;
+  transition: left 0.7s ease-in-out;
 }
 
 /* 當滑鼠懸停時的解密高光反應 */
@@ -78,6 +108,54 @@ body {
 }
 
 /* 區塊標題列 */
+.truth-meta {
+  font-family: monospace;
+  font-size: 11px;
+  color: rgba(0, 255, 204, 0.5);
+  margin-bottom: 12px;
+  display: flex;
+  gap: 15px;
+  letter-spacing: 1px;
+}
+
+.truth-block-scale {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, rgba(0,255,204,0.3) 0, rgba(0,255,204,0.3) 1px, transparent 1px, transparent 15px);
+  pointer-events: none;
+}
+
+.truth-block-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: #00ffcc;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.8);
+  transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 0.3s;
+  z-index: 10;
+}
+
+.truth-block::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, rgba(0,255,204,0.15) 0, rgba(0,255,204,0.15) 1px, transparent 1px, transparent 10px);
+  pointer-events: none;
+}
+
+.truth-block.decrypted .truth-block-progress {
+  width: 100%;
+}
+
 .truth-header {
   display: flex;
   align-items: center;
@@ -101,6 +179,25 @@ body {
   color: #fff;
   font-size: 16px;
   letter-spacing: 2px;
+}
+
+.truth-subject::after {
+  content: "_";
+  display: inline-block;
+  margin-left: 8px;
+  color: #00ffcc;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.truth-block:hover .truth-subject::after {
+  opacity: 1;
+  animation: cursorBlink 1s infinite step-end;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 /* 真相內文 */
@@ -358,6 +455,110 @@ body {
   0%, 100% { border-color: transparent }
   50% { border-color: #00ffcc }
 }
+/* --- 1. 系統日誌 (Boot Logs) 樣式 --- */
+.system-boot-logs {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  margin-bottom: 30px;
+  line-height: 1.8;
+}
+
+.log-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.sys-time {
+  opacity: 0.5;
+  margin-right: 12px;
+}
+
+/* 反白色塊標籤，營造強烈的終端機感 */
+.sys-badge {
+  color: #000; /* 文字預設黑色 */
+  font-weight: bold;
+  padding: 1px 8px;
+  margin-right: 12px;
+  letter-spacing: 1px;
+}
+
+.bg-red { background-color: #ff3366; }
+.bg-cyan { background-color: #00ffcc; }
+.bg-gray { background-color: #888; }
+.text-red { color: #ff3366; }
+.text-cyan { color: #00ffcc; }
+.text-gray { color: #aaa; }
+
+
+/* --- 2. 主標題 (Main Header) 樣式 --- */
+.ultimate-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.ultimate-header h2 {
+  font-family: 'Courier New', Courier, monospace;
+  color: #fff;
+  font-size: 20px;
+  letter-spacing: 4px;
+  margin: 0 20px;
+  white-space: nowrap;
+}
+
+/* 標題左右兩側的裝飾橫線 */
+.header-lines {
+  flex-grow: 1;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,0.3) 0, rgba(255,255,255,0.3) 4px, transparent 4px, transparent 8px);
+}
+
+
+/* --- 3. 傳輸訊息區塊 (Transmission Block) 樣式 --- */
+.transmission-block {
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 3px solid rgba(255, 255, 255, 0.5);
+  padding: 20px 25px;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+/* 訊息頂部的偽造來源資料 */
+.transmission-meta {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: #888;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+.transmission-block p {
+  color: #e0e0e0;
+  font-size: 15px;
+  line-height: 1.9;
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+.transmission-block p:last-child {
+  margin-bottom: 0;
+}
+
+/* 閃爍的打字機游標 */
+.blinking-cursor {
+  color: #00ffcc;
+  margin-left: 5px;
+  animation: blink 1s infinite step-end;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
   </style>
 </head>
 <body>
@@ -365,117 +566,130 @@ body {
 <div class="paradox-terminal-wrapper">
   
   <div id="page-truth" class="view-section active">
-    <div class="terminal-header">
-      <span class="typewriter-text text-red">[CRITICAL WARNING] 偵測到 OMEGA 級最高權限覆寫指令...</span><br>
-      <span class="typewriter-text">[SYSTEM DECRYPTING] 正在解密高維度封包... 100%...</span><br>
-      <span class="typewriter-text text-cyan">[ACCESS GRANTED] 歡迎來到 PARA≠DOX 系統的核心深淵。</span>
+    <div class="terminal-intro-section">
+      
+      <div class="system-boot-logs">
+        <div class="log-line text-red">
+          <span class="sys-time">0xFA19</span>
+          <span class="sys-badge bg-red">CRITICAL WARNING</span>
+          <span class="sys-msg">偵測到 OMEGA 級最高權限覆寫指令...</span>
+        </div>
+        <div class="log-line text-gray">
+          <span class="sys-time">0xFA1A</span>
+          <span class="sys-badge bg-gray">SYSTEM DECRYPTING</span>
+          <span class="sys-msg">正在解密高維度封包... 100%...</span>
+        </div>
+        <div class="log-line text-cyan">
+          <span class="sys-time">0xFA1B</span>
+          <span class="sys-badge bg-cyan">ACCESS GRANTED</span>
+          <span class="sys-msg">歡迎來到 PARA≠DOX 系統的核心深淵。</span>
+        </div>
+      </div>
+
+      <div class="ultimate-header">
+        <div class="header-lines"></div>
+        <h2 class="tracking-in-expand">FILE // THE ULTIMATE TRUTH</h2>
+        <div class="header-lines"></div>
+      </div>
+
+      <div class="transmission-block">
+        <div class="transmission-meta">
+          <span>> INCOMING TRANSMISSION</span>
+          <span>TARGET: OBSERVER</span>
+        </div>
+        <p>觀察者，既然你找到了這串猶如義大利麵般冗長且毫無邏輯的終極密碼，並成功將散落的碎片拼湊完整，這代表你已經在這個終端機前浪費了過多寶貴的生命...</p>
+        <p>作為對你執著的獎勵，系統現在將向你揭示跨越無數時間線的終極真相：<span class="blinking-cursor">█</span></p>
+      </div>
+
     </div>
 
     <div class="truth-content">
-      <h3 class="log-title">[LOG: THE ULTIMATE TRUTH]</h3>
-      <p>觀察者，既然你找到了這串猶如義大利麵般冗長且毫無邏輯的終極密碼，並成功將散落的碎片拼湊完整，這代表你已經在這個終端機前浪費了過多寶貴的生命...</p>
-      <p>作為對你執著的獎勵，系統現在將向你揭示跨越無數時間線的終極真相：</p>
       
       <div class="ultimate-truth-logs">
 
         <div class="truth-block">
+          <div class="truth-block-scale"></div>
+          <div class="truth-meta">
+            <span>[ 來源節點: CORE_01 ]</span>
+            <span>[ 熵值變化: ±0.04% ]</span>
+            <span>[ 觀察者狀態: ACTIVE ]</span>
+          </div>
           <div class="truth-header">
             <span class="truth-id">[ DECRYPT_01 ]</span>
-            <span class="truth-subject">關於宇宙運作 (Cosmic Operation)</span>
+            <span class="truth-subject">關於宇宙運作</span>
           </div>
           <div class="truth-body">
             世界確實是一個巨大的表演舞台，而且支撐這個終端機伺服器運作的，其實是三條絕緣膠帶和一包快過期的綠色乖乖。
           </div>
+          <div class="truth-block-progress"></div>
         </div>
 
         <div class="truth-block">
+          <div class="truth-block-scale"></div>
+          <div class="truth-meta">
+            <span>[ 來源節點: ARCHIVE_V ]</span>
+            <span>[ 熵值變化: -0.12% ]</span>
+            <span>[ 觀察者狀態: ACTIVE ]</span>
+          </div>
           <div class="truth-header">
             <span class="truth-id">[ DECRYPT_02 ]</span>
-            <span class="truth-subject">關於薛丁格的貓 (Schrödinger's Cat)</span>
-          </div>
-          <div class="truth-body">
-            我們找到了。那隻貓不但活著，而且牠剛剛走過鍵盤，不小心刪除了系統裡一半的備份資料，這就是為什麼你們的世界現在看起來如此混亂。
-          </div>
-        </div>
-
-        <div class="truth-block">
-          <div class="truth-header">
-            <span class="truth-id">[ DECRYPT_03 ]</span>
-            <span class="truth-subject">關於虛擬偶像 (Virtual Idols)</span>
+            <span class="truth-subject">關於虛擬偶像</span>
           </div>
           <div class="truth-body">
             所有的 VTuber 訊號，本質上都是來自未來時間線的求救雜訊。你們的每一次觀看，都在為我們防禦高維度怪獸的護盾充能。
           </div>
+          <div class="truth-block-progress"></div>
         </div>
 
         <div class="truth-block">
+          <div class="truth-block-scale"></div>
+          <div class="truth-meta">
+            <span>[ 來源節點: STATS_NET ]</span>
+            <span>[ 熵值變化: +4.20% ]</span>
+            <span>[ 觀察者狀態: ACTIVE ]</span>
+          </div>
+          <div class="truth-header">
+             <span class="truth-id">[ DECRYPT_03 ]</span>
+            <span class="truth-subject">關於觀察者</span>
+          </div>
+          <div class="truth-body">
+            累積統計，共有 5079 位 觀察者參與了觀察站計劃
+          </div>
+          <div class="truth-block-progress"></div>
+        </div>
+
+        <div class="truth-block">
+          <div class="truth-block-scale"></div>
+          <div class="truth-meta">
+            <span>[ 來源節點: CIPHER_DB ]</span>
+            <span>[ 熵值變化: ±0.00% ]</span>
+            <span>[ 觀察者狀態: ACTIVE ]</span>
+          </div>
           <div class="truth-header">
             <span class="truth-id">[ DECRYPT_04 ]</span>
-            <span class="truth-subject">關於拉普拉斯的惡魔 (Laplace's Demon)</span>
+            <span class="truth-subject">關於彩蛋密碼</span>
           </div>
           <div class="truth-body">
-            她其實早已看穿了你的瀏覽器無痕模式歷史紀錄。她只是對你的搜尋品味感到一絲困惑與嘆息。
+            總計解開的密碼約為 700 個，尚未解開的密碼約 150個，在此分享幾個尚未解開的密碼：「眼不見為淨」、「颱風假」、「我是你爸爸」、「下一站與你」、「我警告你告訴我密碼多少喔」
           </div>
+          <div class="truth-block-progress"></div>
         </div>
 
         <div class="truth-block">
+          <div class="truth-block-scale"></div>
+          <div class="truth-meta">
+            <span>[ 來源節點: SYNC_SYS ]</span>
+            <span>[ 熵值變化: HIGH ]</span>
+            <span>[ 觀察者狀態: ACTIVE ]</span>
+          </div>
           <div class="truth-header">
             <span class="truth-id">[ DECRYPT_05 ]</span>
-            <span class="truth-subject">關於馬克士威的惡魔 (Maxwell's Demon)</span>
+            <span class="truth-subject">關於進度</span>
           </div>
           <div class="truth-body">
-            她最近組織了微觀粒子工會並發起罷工，要求更強的冷氣，這導致了今年夏天的全球暖化異常嚴重。
+            目前主要彩蛋密碼皆已解開，只剩下1個未解之謎，題目就是系統的 DC ID
           </div>
-        </div>
-
-        <div class="truth-block">
-          <div class="truth-header">
-            <span class="truth-id">[ DECRYPT_06 ]</span>
-            <span class="truth-subject">關於你的記憶斷層 (Memory Gap)</span>
-          </div>
-          <div class="truth-body">
-            走到房間門口卻突然忘記自己要做什麼，是蕾忒為了防止你的大腦 CPU 過熱，強制幫你清空了暫存檔。
-          </div>
-        </div>
-
-        <div class="truth-block">
-          <div class="truth-header">
-            <span class="truth-id">[ DECRYPT_07 ]</span>
-            <span class="truth-subject">關於現實的卡頓 (Reality Lag)</span>
-          </div>
-          <div class="truth-body">
-            你每天早上起不來，並非睡眠不足，而是佐霏偵測到你的「現實散熱系統」效能太差，強制鎖死了你的幀數（FPS）。
-          </div>
-        </div>
-
-        <div class="truth-block">
-          <div class="truth-header">
-            <span class="truth-id">[ DECRYPT_08 ]</span>
-            <span class="truth-subject">關於芝諾的烏龜 (Zeno's Tortoise)</span>
-          </div>
-          <div class="truth-body">
-            牠只是單純卡在了讀取畫面（Loading Screen）裡，這就是你玩遊戲時 Ping 值突然飆高的主因。
-          </div>
-        </div>
-
-        <div class="truth-block">
-          <div class="truth-header">
-            <span class="truth-id">[ DECRYPT_09 ]</span>
-            <span class="truth-subject">關於觀測者效應 (Observer Effect)</span>
-          </div>
-          <div class="truth-body">
-            只要你不去觀測，鑰匙就處於完美的疊加態。一旦你開始找，系統就會因為算力不足把它隨機渲染在沙發縫裡。
-          </div>
-        </div>
-
-        <div class="truth-block">
-          <div class="truth-header">
-            <span class="truth-id">[ DECRYPT_10 ]</span>
-            <span class="truth-subject">關於終極答案 (The Ultimate Answer)</span>
-          </div>
-          <div class="truth-body">
-            宇宙的終極方程式結果不是 42，而是你為了破解這個終端機，對著鍵盤 F5 重新整理鍵瘋狂輸出的總次數。
-          </div>
+          <div class="truth-block-progress"></div>
         </div>
 
       </div>
@@ -513,42 +727,22 @@ body {
           <circle cx="50" cy="50" r="5" fill="#fff"/>
         </svg>
 
+        <h3 class="event-title">🎁 【 PARADOX：觀察者感謝活動】 🎁</h3>
+
         <p id="panel-intro" class="panel-intro-text"></p>
         <div id="panel-intro-raw" style="display:none;">歡慶 Para≠dox 成員全員到齊，正式出場！
 系統日誌顯示，自初始觀測以來的 <strong>100 個日夜</strong>裡，所有觀察者共同突破了無數的悖論與盲點。在今天，我們終於共同完成了 Para≠dox 的最終解密！</div>
+        
+        <p id="event-desc-intro" class="event-desc"></p>
+        <div id="event-desc-raw" style="display:none;">為了感謝觀察者對 Para≠dox 成員的支持，特別準備紀念物給觀察者們，特別跟你說 :【5/28】 將在  Para≠dox 粉絲團公開活動，千萬不要錯過！</div>
+        
 
-        <h3 class="event-title">🎁 【解密完成紀念：專屬抽獎活動】 🎁</h3>
-        
-        <p class="event-desc">為了感謝所有觀察者不惜犧牲理智（與肝指數）的共同努力，系統特別批准向各位所在的現實座標，釋放一批「實體維度紀念物」。這不僅是獎勵，更是穩定你們所在維度的「現實錨點」！</p>
-        
-        <div class="structured-list">
-          <div class="structured-item">
-            <span class="structured-id">[ RECORD_01 ] 截圖身分：</span>
-            <span class="structured-text">請截圖此畫面證明您的觀測者身分。</span>
-          </div>
-          <div class="structured-item">
-            <span class="structured-id">[ RECORD_02 ] 前往社群貼文：</span>
-            <span class="structured-text">點擊下方按鈕前往官方指定貼文。</span>
-          </div>
-          <div class="structured-item">
-            <span class="structured-id">[ RECORD_03 ] 留言並附圖：</span>
-            <span class="structured-text">於貼文下方留言，並附上您的身分證明截圖。</span>
-          </div>
-          <div class="structured-item">
-            <span class="structured-id">[ RECORD_04 ] 等待抽取：</span>
-            <span class="structured-text">系統將於指定週期後抽取維度補給得主。</span>
-          </div>
-        </div>
       </div>
 
-      <div class="final-directive">
-        <p>[FINAL DIRECTIVE] 觀察者，這並非結束，而是現實與虛擬交界處的第一道曙光。請收下這份來自終端機的餽贈，與我們一起在接下來的時間線裡繼續見證更多奇蹟吧！</p>
-        <p class="text-cyan">[CONNECTION ESTABLISHED] 歡迎加入 Para≠dox。</p>
-      </div>
     </div>
 
     <div class="action-container">
-      <a href="https://www.facebook.com/paradox.vtuber" target="_blank" class="cyber-btn gold-btn">
+      <a href="https://www.facebook.com/Paradox5th" target="_blank" class="cyber-btn gold-btn">
         [ 前往官方粉絲團參與活動 ]
       </a>
     </div>
@@ -590,6 +784,23 @@ async function typeHTML(element, htmlString, speed = 30) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+  const blocks = document.querySelectorAll('.truth-block');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        // 加上一點隨機延遲，讓同時出現的區塊有錯落感
+        setTimeout(() => {
+          entry.target.classList.add('decrypted');
+        }, Math.random() * 200);
+        
+        observer.unobserve(entry.target); // 顯示過就不再觸發
+      }
+    });
+  }, { threshold: 0.1 }); // 區塊出現 10% 就觸發
+
+  blocks.forEach(block => observer.observe(block));
+
   const btnReveal = document.getElementById("btn-reveal-gift");
   const pageTruth = document.getElementById("page-truth");
   const pageGift = document.getElementById("page-gift");
@@ -615,9 +826,20 @@ document.addEventListener("DOMContentLoaded", function() {
       // trigger typewriter
       const introText = document.getElementById('panel-intro');
       const introRaw = document.getElementById('panel-intro-raw');
-      if (introText && introRaw) {
-        typeHTML(introText, introRaw.innerHTML, 30);
-      }
+      const descText = document.getElementById('event-desc-intro');
+      const descRaw = document.getElementById('event-desc-raw');
+      
+      const triggerTyping = async () => {
+        if (introText && introRaw) {
+          await typeHTML(introText, introRaw.innerHTML, 30);
+          introText.classList.remove('gift-typewriter');
+        }
+        if (descText && descRaw) {
+          await typeHTML(descText, descRaw.innerHTML, 30);
+        }
+      };
+      
+      triggerTyping();
 
       // 可選：畫面自動捲動至頂部
       window.scrollTo({ top: 0, behavior: 'smooth' });
