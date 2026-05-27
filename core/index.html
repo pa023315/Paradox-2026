@@ -443,7 +443,7 @@
 國際標準音高（A4）的赫茲數，取前兩位數（在華人文化中常被視為不吉利的諧音數字）。` },
             { id: 7, isUnlocked: true, title: "第七數據", hint: "系統偵測到未知的互動節點，必須透過人工驗證。", hasDetail: true, detailText: "" },
             { id: 8, isUnlocked: true, title: "第八數據", hint: "智者情緣 X 與他們墜入情網，一同找出觀察站的秘密", hasDetail: false, detailText: "" },
-            { id: 9, isUnlocked: true, title: "第九數據", hint: "「智者情緣」獲得4個成就，本秘密就會於5/27揭曉", hasDetail: false, detailText: "" }
+            { id: 9, isUnlocked: true, title: "第九數據", hint: "「智者情緣」獲得4個成就，本秘密就會於5/27揭曉", hasDetail: true, detailText: "「不知道為什麼會有觀察者想跟系統結婚，順利破解了謎題，完成了四個成就。」\n\n「現在就揭示最後一段句子，將這段禁忌的咒文輸入終端機，你將會...」\n\n禁忌詠唱  第9數據\n\n>>> 最終真相 <<<" }
         ];
 
         const grid = document.getElementById('data-grid');
@@ -515,16 +515,14 @@
                     } else if (data.id === 8) {
                         const btn = document.createElement('button');
                         btn.className = 'btn';
-                        btn.textContent = '[ 前往 ]';
+                        btn.textContent = '[ 讀取完整記錄 ]';
                         btn.onclick = () => window.location.href = 'https://paradox-sf.tw/romancestory/';
                         card.appendChild(btn);
                     } else if (data.id === 9) {
                         const btn = document.createElement('button');
                         btn.className = 'btn';
-                        btn.style.opacity = '0.5';
-                        btn.style.cursor = 'not-allowed';
-                        btn.disabled = true;
-                        btn.textContent = '[ 尚未開啟 ]';
+                        btn.textContent = '[ 讀取完整記錄 ]';
+                        btn.onclick = () => openModal(data.detailText);
                         card.appendChild(btn);
                     } else if (data.hasDetail) {
                         const btn = document.createElement('button');
